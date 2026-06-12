@@ -52,6 +52,18 @@ apis:
         url: https://developer.beyondidentity.com/docs/
       - type: OpenAPI
         url: https://developer.beyondidentity.com/api/v1
+      - type: OpenAPI
+        url: openapi/beyond-identity-secure-access-api-openapi.yml
+      - type: OpenAPI
+        url: openapi/beyond-identity-secure-workforce-api-openapi.yml
+      - type: JSONSchema
+        url: json-schema/beyond-identity-identity-schema.json
+      - type: JSONSchema
+        url: json-schema/beyond-identity-credential-schema.json
+      - type: Example
+        url: examples/beyond-identity-create-identity-example.json
+      - type: Example
+        url: examples/beyond-identity-credential-binding-job-example.json
   - aid: beyond-identity-next-gen-api
     name: Beyond Identity Next Generation API
     description: >
@@ -100,6 +112,10 @@ common:
     url: rate-limits/beyond-identity-rate-limits.yml
   - type: FinOps
     url: finops/beyond-identity-finops.yml
+  - type: Vocabulary
+    url: vocabulary/beyond-identity-vocabulary.yml
+  - type: JSONLDContext
+    url: json-ld/beyond-identity-context.jsonld
 maintainers:
   - FN: Kin Lane
     email: kin@apievangelist.com

@@ -1,0 +1,120 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "schema": "https://schema.org/",
+    "beyond": "https://developer.beyondidentity.com/vocab#",
+
+    "Tenant": "beyond:Tenant",
+    "Realm": "beyond:Realm",
+    "Identity": "beyond:Identity",
+    "Credential": "beyond:Credential",
+    "CredentialBindingJob": "beyond:CredentialBindingJob",
+    "Group": "beyond:Group",
+    "Application": "beyond:Application",
+    "AuthenticatorConfig": "beyond:AuthenticatorConfig",
+    "ResourceServer": "beyond:ResourceServer",
+    "SsoConfig": "beyond:SsoConfig",
+    "Role": "beyond:Role",
+
+    "id": "@id",
+    "type": "@type",
+
+    "tenant_id": {
+      "@id": "beyond:tenantId",
+      "@type": "xsd:string"
+    },
+    "realm_id": {
+      "@id": "beyond:realmId",
+      "@type": "xsd:string"
+    },
+    "identity_id": {
+      "@id": "beyond:identityId",
+      "@type": "xsd:string"
+    },
+    "display_name": {
+      "@id": "schema:name",
+      "@type": "xsd:string"
+    },
+    "create_time": {
+      "@id": "schema:dateCreated",
+      "@type": "xsd:dateTime"
+    },
+    "update_time": {
+      "@id": "schema:dateModified",
+      "@type": "xsd:dateTime"
+    },
+    "status": {
+      "@id": "beyond:status",
+      "@type": "xsd:string"
+    },
+    "enrollment_status": {
+      "@id": "beyond:enrollmentStatus",
+      "@type": "xsd:string"
+    },
+    "traits": {
+      "@id": "beyond:traits",
+      "@type": "@json"
+    },
+    "username": {
+      "@id": "schema:identifier",
+      "@type": "xsd:string"
+    },
+    "primary_email_address": {
+      "@id": "schema:email",
+      "@type": "xsd:string"
+    },
+    "given_name": {
+      "@id": "schema:givenName",
+      "@type": "xsd:string"
+    },
+    "family_name": {
+      "@id": "schema:familyName",
+      "@type": "xsd:string"
+    },
+    "formatted_name": {
+      "@id": "schema:name",
+      "@type": "xsd:string"
+    },
+    "external_id": {
+      "@id": "beyond:externalId",
+      "@type": "xsd:string"
+    },
+    "state": {
+      "@id": "beyond:state",
+      "@type": "xsd:string"
+    },
+    "csr_type": {
+      "@id": "beyond:csrType",
+      "@type": "xsd:string"
+    },
+    "jwk_json": {
+      "@id": "beyond:jwkJson",
+      "@type": "xsd:string"
+    },
+    "jwk_thumbprint": {
+      "@id": "beyond:jwkThumbprint",
+      "@type": "xsd:string"
+    },
+    "delivery_method": {
+      "@id": "beyond:deliveryMethod",
+      "@type": "xsd:string"
+    },
+    "post_binding_redirect_uri": {
+      "@id": "beyond:postBindingRedirectUri",
+      "@type": "@id"
+    },
+    "authenticator_config_id": {
+      "@id": "beyond:authenticatorConfigId",
+      "@type": "xsd:string"
+    },
+    "expire_time": {
+      "@id": "beyond:expireTime",
+      "@type": "xsd:dateTime"
+    },
+    "classification": {
+      "@id": "beyond:classification",
+      "@type": "xsd:string"
+    }
+  }
+}

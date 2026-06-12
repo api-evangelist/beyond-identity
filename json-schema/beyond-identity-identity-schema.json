@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/beyond-identity/main/json-schema/beyond-identity-identity-schema.json",
+  "title": "Identity",
+  "description": "An identity is a unique identifier that may be used by an end-user to gain access governed by Beyond Identity.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "A unique identifier for the identity. Automatically generated on creation. Immutable and read-only. Unique within the realm.",
+      "readOnly": true,
+      "example": "e372db224c06e850"
+    },
+    "realm_id": {
+      "type": "string",
+      "description": "A unique identifier for the identity's realm. Automatically set on creation. Immutable and read-only.",
+      "readOnly": true,
+      "example": "8f5bec58229e6f29"
+    },
+    "tenant_id": {
+      "type": "string",
+      "description": "A unique identifier for the identity's tenant. Automatically set on creation. Immutable and read-only.",
+      "readOnly": true,
+      "example": "0001f1f460b1ace6"
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[^{}[\\]<>;:?\\\\/|*^%$#=~`!]*$",
+      "description": "A human-readable name for the identity used for display purposes.",
+      "example": "Test Display"
+    },
+    "create_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO8601 combined date and time representing when the identity was created. Read-only.",
+      "readOnly": true,
+      "example": "2022-04-12T05:53:07.119Z"
+    },
+    "update_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO8601 combined date and time representing when the identity was last updated. Read-only.",
+      "readOnly": true,
+      "example": "2022-06-16T14:31:03.770Z"
+    },
+    "status": {
+      "type": "string",
+      "description": "Indicator for the identity's administrative status. 'active' means the identity can generate passkeys and login; 'suspended' means it cannot.",
+      "enum": ["active", "suspended"],
+      "example": "active"
+    },
+    "traits": {
+      "type": "object",
+      "description": "A collection of properties to describe an identity. Contains a 'type' key describing the specific traits schema.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The type of the traits schema.",
+          "example": "traits_v0"
+        },
+        "username": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "description": "A required, unique, case-insensitive username for an identity in the realm.",
+          "example": "test"
+        },
+        "primary_email_address": {
+          "type": "string",
+          "format": "email",
+          "description": "Email address serving as primary contact for identity.",
+          "example": "test@example.com"
+        },
+        "secondary_email_address": {
+          "type": "string",
+          "format": "email",
+          "description": "An additional email address for the user."
+        },
+        "external_id": {
+          "type": "string",
+          "description": "An ID issued by the provisioning client. Uniqueness controlled by the client."
+        },
+        "family_name": {
+          "type": "string",
+          "description": "The family name or last name in most Western languages."
+        },
+        "given_name": {
+          "type": "string",
+          "description": "The given name or first name in most Western languages."
+        },
+        "formatted_name": {
+          "type": "string",
+          "description": "The full name, including all middle names, titles, and suffixes, formatted for display."
+        }
+      }
+    },
+    "enrollment_status": {
+      "type": "string",
+      "enum": ["ENROLLED", "PENDING", "INVITE_FAILED", "UNENROLLED"],
+      "description": "Indicator for the identity's enrollment status. ENROLLED = has active passkeys; PENDING = no active passkeys, pending enrollments exist; INVITE_FAILED = no active passkeys or pending enrollments, failed enrollments exist; UNENROLLED = not enrolled.",
+      "readOnly": true,
+      "example": "ENROLLED"
+    }
+  }
+}

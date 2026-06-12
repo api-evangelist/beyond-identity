@@ -1,0 +1,34 @@
+{
+  "description": "Example request body for creating an identity in a Beyond Identity realm",
+  "method": "POST",
+  "path": "/v1/tenants/{tenant_id}/realms/{realm_id}/identities",
+  "request": {
+    "identity": {
+      "display_name": "Jane Smith",
+      "traits": {
+        "type": "traits_v0",
+        "username": "jane.smith",
+        "primary_email_address": "jane.smith@example.com",
+        "given_name": "Jane",
+        "family_name": "Smith"
+      }
+    }
+  },
+  "response": {
+    "id": "e372db224c06e850",
+    "realm_id": "8f5bec58229e6f29",
+    "tenant_id": "0001f1f460b1ace6",
+    "display_name": "Jane Smith",
+    "status": "active",
+    "enrollment_status": "UNENROLLED",
+    "create_time": "2024-01-15T10:30:00.000Z",
+    "update_time": "2024-01-15T10:30:00.000Z",
+    "traits": {
+      "type": "traits_v0",
+      "username": "jane.smith",
+      "primary_email_address": "jane.smith@example.com",
+      "given_name": "Jane",
+      "family_name": "Smith"
+    }
+  }
+}

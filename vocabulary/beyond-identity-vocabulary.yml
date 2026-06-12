@@ -1,0 +1,115 @@
+vocabulary:
+  - term: tenant
+    definition: >
+      An organization-level container in the Beyond Identity Cloud. Tenants hold all data
+      necessary for an organization to operate passwordless authentication, including realms,
+      identities, credentials, and applications.
+    source: https://developer.beyondidentity.com/api/v1
+
+  - term: realm
+    definition: >
+      A unique administrative domain within a tenant. Realms may be used to isolate different
+      environments (e.g., development vs. production) or distinct administrative domains.
+      A tenant may contain multiple realms.
+    source: https://developer.beyondidentity.com/api/v1
+
+  - term: identity
+    definition: >
+      A unique identifier for an end-user that governs their access through Beyond Identity.
+      Identities belong to a realm and contain traits such as username and email address.
+      Identities must be enrolled with a credential (passkey) to authenticate.
+    source: https://developer.beyondidentity.com/api/v1
+
+  - term: credential
+    definition: >
+      A passkey — the public-private key pair that belongs to an identity. Credentials are
+      cryptographically bound to a physical device using platform authenticators. A credential
+      can be in ACTIVE or REVOKED state.
+    source: https://developer.beyondidentity.com/api/v1
+
+  - term: credential-binding-job
+    definition: >
+      A workflow that delivers an enrollment link to an identity so they can bind a passkey
+      to their device. Delivery methods include EMAIL and RETURN (synchronous). The job
+      tracks state across PENDING, LINK_SENT, COMPLETE, and FAILED states.
+    source: https://developer.beyondidentity.com/api/v1
+
+  - term: passkey
+    definition: >
+      Synonym for credential in Beyond Identity's terminology. A cryptographic passkey is
+      a device-bound public-private key pair that replaces passwords for authentication.
+      Passkeys cannot be phished or stolen because the private key never leaves the device.
+    source: https://developer.beyondidentity.com/api/v1
+
+  - term: group
+    definition: >
+      A logical collection of identities within a realm. Groups are used as predicates in
+      policy rules to govern access. An identity may belong to multiple groups.
+    source: https://developer.beyondidentity.com/api/v1
+
+  - term: application
+    definition: >
+      A client application registered with Beyond Identity that requires authentication.
+      Applications are configured with OAuth 2.0/OIDC parameters and point to an
+      authenticator configuration that determines the passkey experience.
+    source: https://developer.beyondidentity.com/api/v1
+
+  - term: authenticator-config
+    definition: >
+      Configuration that controls the user experience of the Beyond Identity authenticator
+      for a given application. Specifies the invocation type (MANUAL or AUTOMATIC) and
+      the redirect URI for the passkey enrollment or authentication flow.
+    source: https://developer.beyondidentity.com/api/v1
+
+  - term: resource-server
+    definition: >
+      A protected API endpoint registered with Beyond Identity. Resource servers define the
+      scopes and permissions that can be granted to applications via OAuth 2.0 tokens.
+    source: https://developer.beyondidentity.com/api/v1
+
+  - term: sso-config
+    definition: >
+      A single sign-on configuration that integrates an external identity provider or
+      application with Beyond Identity's realm. Supports SAML, OIDC, bookmark, and
+      federation protocol types.
+    source: https://developer.beyondidentity.com/api/v1
+
+  - term: role
+    definition: >
+      An administrative role that can be assigned to identities within a realm to control
+      their permissions within the Beyond Identity Admin Console and API.
+    source: https://developer.beyondidentity.com/api/v1
+
+  - term: traits
+    definition: >
+      A typed set of user profile attributes associated with an identity. The standard traits
+      schema (traits_v0) includes username, primary_email_address, given_name, family_name,
+      external_id, and other SCIM-compatible attributes.
+    source: https://developer.beyondidentity.com/api/v1
+
+  - term: enrollment-status
+    definition: >
+      The passkey enrollment state of an identity. ENROLLED = has one or more active passkeys;
+      PENDING = no active passkeys but pending enrollment exists; INVITE_FAILED = enrollments
+      failed; UNENROLLED = no enrollment attempted.
+    source: https://developer.beyondidentity.com/api/v1
+
+  - term: zero-trust
+    definition: >
+      The security model underlying Beyond Identity's platform. Zero trust authentication
+      continuously verifies device security signals and enforces policy at every access
+      request rather than relying on a perimeter-based trust model.
+    source: https://www.beyondidentity.com/
+
+  - term: SCIM
+    definition: >
+      System for Cross-domain Identity Management. Beyond Identity implements SCIM 2.0
+      endpoints (/scim/v2/Users and /scim/v2/Groups) to allow external identity providers
+      like Okta and Azure AD to provision and deprovision users automatically.
+    source: https://developer.beyondidentity.com/api/v1
+
+  - term: FedRAMP
+    definition: >
+      Federal Risk and Authorization Management Program. Beyond Identity offers a FedRAMP-
+      authorized deployment at api.us1.beyondidentity-gov.com for US government customers.
+    source: https://developer.beyondidentity.com/api/v1
