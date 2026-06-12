@@ -1,0 +1,55 @@
+specification: API Commons Rate Limits
+specificationVersion: '0.1'
+provider: Beyond Identity
+providerId: beyond-identity
+created: '2026-06-12'
+modified: '2026-06-12'
+url: https://support.beyondidentity.com/docs/scim-rate-limits
+notes: >
+  Beyond Identity applies rate limits to Workforce APIs and SCIM endpoints to
+  protect platform stability for all customers and mitigate risks from DoS
+  attacks, misconfigured clients, and excessive polling. Standard SCIM clients
+  from Okta, Azure AD, ForgeRock, and Ping Identity handle 429 responses with
+  appropriate backoff and retry logic automatically. If a higher limit is needed,
+  overrides can be requested via support with the target endpoint, requested
+  limit, and business justification. Specific per-endpoint numeric thresholds
+  are not publicly documented; contact Beyond Identity support for current values.
+throttled: 429
+retryAfter: Retry-After
+limits:
+  - scope: SCIM Endpoints
+    metric: requests
+    limit: contact-support
+    timeFrame: per-minute
+    notes: >
+      SCIM rate limits apply to /scim/v2/Users and /scim/v2/Groups endpoints.
+      Standard identity provider SCIM clients (Okta, Azure AD, ForgeRock, Ping)
+      handle 429 responses automatically with backoff and retry.
+  - scope: Workforce API
+    metric: requests
+    limit: contact-support
+    timeFrame: per-minute
+    notes: >
+      Workforce API endpoints are subject to rate limits. Most programmatic
+      clients should handle rate limit responses transparently. Contact Beyond
+      Identity support to request a rate limit override with endpoint details
+      and reasoning.
+  - scope: Authentication Endpoints
+    metric: requests
+    limit: contact-support
+    timeFrame: per-minute
+    notes: >
+      OAuth 2.0 token endpoints (auth-us.beyondidentity.com,
+      auth-eu.beyondidentity.com) are subject to rate limiting. Specific
+      thresholds are not publicly published.
+errorResponses:
+  - code: 429
+    description: Too Many Requests — rate limit exceeded
+    headers:
+      - name: Retry-After
+        description: Seconds to wait before retrying the request
+overrideProcess: >
+  To request a rate limit override, contact Beyond Identity support at
+  support.beyondidentity.com with the following details: the specific API
+  endpoint, the requested limit value, and the business justification for
+  the higher limit.

@@ -1,0 +1,111 @@
+specification: API Commons Plans
+specificationVersion: '0.1'
+provider: Beyond Identity
+providerId: beyond-identity
+created: '2026-06-12'
+modified: '2026-06-12'
+reconciled: true
+url: https://www.beyondidentity.com/pricing
+type: enterprise
+notes: >
+  Beyond Identity does not publish fixed per-user pricing. All tiers are
+  quote-based; pricing depends on organization size, deployment region, and
+  required feature set. A free trial is available without credit card. Contact
+  sales for custom quotes.
+plans:
+  - name: Authentication Essentials
+    description: >
+      Entry-level tier providing phishing-resistant MFA and single-device
+      passwordless login with Universal Passkeys. Suitable for organizations
+      beginning their passwordless journey.
+    type: paid
+    url: https://www.beyondidentity.com/pricing
+    entries:
+      - name: Phishing-Resistant MFA
+        type: boolean
+        value: true
+      - name: Single-Device Passwordless Login
+        type: boolean
+        value: true
+      - name: Universal Passkeys
+        type: boolean
+        value: true
+      - name: Platform Authenticator Support
+        type: boolean
+        value: true
+      - name: Pricing
+        type: boolean
+        value: false
+        notes: Custom quote required; contact sales
+  - name: Zero Trust Identity and Device
+    description: >
+      Mid-tier plan adding device trust enforcement, device security compliance
+      checks, and a policy engine for granular access controls beyond basic MFA.
+    type: paid
+    url: https://www.beyondidentity.com/pricing
+    entries:
+      - name: All Authentication Essentials Features
+        type: boolean
+        value: true
+      - name: Device Trust Enforcement
+        type: boolean
+        value: true
+      - name: Device Security Compliance
+        type: boolean
+        value: true
+      - name: Policy Engine
+        type: boolean
+        value: true
+      - name: Third-Party Integration
+        type: boolean
+        value: true
+      - name: Continuous Posture Checks
+        type: boolean
+        value: true
+      - name: Pricing
+        type: boolean
+        value: false
+        notes: Custom quote required; contact sales
+  - name: Secure Access Complete
+    description: >
+      Premium tier with continuous access policy enforcement, just-in-time
+      access, advanced SSO with customizable app launcher, per-application risk
+      policies, zero standing privileges, and advanced administration features.
+    type: enterprise
+    url: https://www.beyondidentity.com/pricing
+    entries:
+      - name: All Zero Trust Identity and Device Features
+        type: boolean
+        value: true
+      - name: Continuous Access Policy Enforcement
+        type: boolean
+        value: true
+      - name: Just-in-Time Access
+        type: boolean
+        value: true
+      - name: Secure SSO with Customizable App Launcher
+        type: boolean
+        value: true
+      - name: Per-Application Risk Policies
+        type: boolean
+        value: true
+      - name: Zero Standing Privileges
+        type: boolean
+        value: true
+      - name: Advanced Administration
+        type: boolean
+        value: true
+      - name: Pricing
+        type: boolean
+        value: false
+        notes: Custom enterprise quote required; contact sales
+addons:
+  - name: Device360
+    description: Device inventory and risk query capabilities
+    url: https://www.beyondidentity.com/pricing
+  - name: Secure DevOps
+    description: Git commit signing with Beyond Identity Authenticator
+    url: https://www.beyondidentity.com/pricing
+  - name: RealityCheck
+    description: Deepfake defense for identity verification
+    url: https://www.beyondidentity.com/pricing

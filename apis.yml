@@ -1,0 +1,105 @@
+aid: beyond-identity
+name: Beyond Identity
+description: >
+  Beyond Identity is a zero-trust passwordless authentication platform that eliminates
+  passwords by binding credentials to physical devices using platform authenticators
+  and cryptographic passkeys. The platform provides REST APIs for managing tenants,
+  realms, identities, and device-bound credentials across workforce and customer
+  identity use cases. Beyond Identity supports continuous risk assessment with
+  device security signals, policy enforcement, and just-in-time access controls.
+  The platform integrates with SCIM, OIDC, and OAuth 2.0 standards and offers
+  multi-region deployment including US, EU, and FedRAMP environments.
+type: Index
+image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+tags:
+  - Authentication
+  - Passwordless
+  - Zero Trust
+  - Identity
+  - Passkeys
+  - MFA
+  - Device Security
+  - OAuth 2.0
+  - OIDC
+  - SCIM
+url: https://raw.githubusercontent.com/api-evangelist/beyond-identity/refs/heads/main/apis.yml
+created: '2026-06-12'
+modified: '2026-06-12'
+specificationVersion: '0.19'
+apis:
+  - aid: beyond-identity-secure-access-api
+    name: Beyond Identity Secure Access API
+    description: >
+      The Beyond Identity Secure Access API provides resource-oriented REST endpoints
+      for managing the full lifecycle of passwordless authentication infrastructure.
+      Resources include tenants, realms, groups, identities, credentials, credential
+      binding jobs, applications, authenticator configurations, identity providers,
+      SSO configs, resource servers, roles, tokens, and SCIM user/group endpoints.
+      All endpoints require OAuth 2.0 bearer token authentication via client
+      credentials or authorization code flows.
+    humanURL: https://developer.beyondidentity.com/api/v1
+    baseURL: https://api-us.beyondidentity.com
+    tags:
+      - Authentication
+      - Identity Management
+      - Passkeys
+      - Credentials
+      - SCIM
+      - Tenants
+      - Realms
+    properties:
+      - type: Documentation
+        url: https://developer.beyondidentity.com/docs/
+      - type: OpenAPI
+        url: https://developer.beyondidentity.com/api/v1
+  - aid: beyond-identity-next-gen-api
+    name: Beyond Identity Next Generation API
+    description: >
+      The Next Generation Beyond Identity API provides the latest version of
+      the platform's REST endpoints including updated identity management,
+      credential binding, continuous risk assessment, and policy enforcement
+      capabilities. Supports the same OAuth 2.0 authentication as the Secure
+      Access API with region-specific base URLs for US and EU deployments.
+    humanURL: https://docs.beyondidentity.com/api/v1
+    baseURL: https://api-us.beyondidentity.com
+    tags:
+      - Authentication
+      - Identity
+      - Policy
+      - Risk Assessment
+      - Passkeys
+    properties:
+      - type: Documentation
+        url: https://docs.beyondidentity.com/
+      - type: ReleaseNotes
+        url: https://docs.beyondidentity.com/docs/release-notes/release-notes-changelog
+common:
+  - type: Website
+    url: https://www.beyondidentity.com/
+  - type: Documentation
+    url: https://developer.beyondidentity.com/docs/
+  - type: GitHubOrganization
+    url: https://github.com/gobeyondidentity
+  - type: LinkedIn
+    url: https://www.linkedin.com/company/beyond-identity-inc
+  - type: X
+    url: https://twitter.com/beyondidentity
+  - type: Blog
+    url: https://www.beyondidentity.com/blog
+  - type: Pricing
+    url: https://www.beyondidentity.com/pricing
+  - type: StatusPage
+    url: https://status.beyondidentity.com/
+  - type: Changelog
+    url: https://docs.beyondidentity.com/docs/release-notes/release-notes-changelog
+  - type: Support
+    url: https://support.beyondidentity.com/
+  - type: Plans
+    url: plans/beyond-identity-plans-pricing.yml
+  - type: RateLimits
+    url: rate-limits/beyond-identity-rate-limits.yml
+  - type: FinOps
+    url: finops/beyond-identity-finops.yml
+maintainers:
+  - FN: Kin Lane
+    email: kin@apievangelist.com

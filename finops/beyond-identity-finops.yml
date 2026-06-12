@@ -1,0 +1,86 @@
+specification: FinOps Framework
+specificationVersion: '1.0'
+provider: Beyond Identity
+providerId: beyond-identity
+created: '2026-06-12'
+modified: '2026-06-12'
+url: https://www.beyondidentity.com/pricing
+billingModel: per-user-per-month
+billingCycle: annual
+notes: >
+  Beyond Identity uses a custom enterprise quote model with per-user pricing
+  across three tiers (Authentication Essentials, Zero Trust Identity and Device,
+  Secure Access Complete). Optional add-ons (Device360, Secure DevOps,
+  RealityCheck) are available as separate line items. Volume discounts and
+  pay-as-you-grow plans are available. All pricing requires contacting sales
+  for a custom quote based on organization size, deployment region, and
+  feature requirements.
+focusColumns:
+  - ChargeType
+  - ServiceName
+  - ResourceType
+  - UsageQuantity
+  - UsageUnit
+  - BilledCost
+  - BillingCurrency
+  - BillingPeriodStart
+  - BillingPeriodEnd
+  - ProviderName
+  - ServiceCategory
+meters:
+  - name: AuthenticatedUsers
+    description: Number of users with active device-bound passkeys per billing period
+    unit: users
+    serviceCategory: Security / Identity
+    chargeType: Usage
+    notes: Primary billing meter; per-user per month based on negotiated tier
+  - name: DeviceBindings
+    description: Number of active credential bindings across enrolled devices
+    unit: device-bindings
+    serviceCategory: Security / Identity
+    chargeType: Usage
+    notes: Tracks total device-bound credentials in the tenant
+  - name: APITokenRequests
+    description: API requests made against the Secure Access REST API
+    unit: requests
+    serviceCategory: Security / Identity
+    chargeType: Usage
+    notes: Included in base plan; specific overage terms negotiated in contract
+  - name: SCIMProvisioningOperations
+    description: SCIM user/group provisioning and sync operations
+    unit: operations
+    serviceCategory: Security / Identity
+    chargeType: Usage
+    notes: Included in all tiers; excessive usage may require rate limit override
+  - name: Device360Queries
+    description: Device inventory and risk signal queries via Device360 add-on
+    unit: queries
+    serviceCategory: Security / Device Management
+    chargeType: Usage
+    notes: Add-on; billed separately per negotiated terms
+principles:
+  - name: Visibility
+    description: >
+      Gain full visibility into identity and device usage across the organization
+      through Beyond Identity's Admin Console dashboards, which surface active
+      users, enrolled devices, credential binding counts, and authentication
+      events. SCIM sync logs provide a detailed audit trail of provisioning
+      operations.
+    actions:
+      - Review Admin Console dashboards for active user and device counts monthly
+      - Audit SCIM provisioning logs to track user lifecycle costs
+      - Monitor authentication event volumes to forecast API usage
+      - Use Device360 (if licensed) to inventory enrolled devices and associated costs
+  - name: Optimization
+    description: >
+      Optimize Beyond Identity spend by right-sizing tier selection to actual
+      feature usage, deprovisioning inactive users promptly via SCIM automation,
+      and negotiating volume discounts as headcount grows. Evaluate add-ons
+      (Device360, Secure DevOps, RealityCheck) against actual usage to avoid
+      paying for unused capabilities.
+    actions:
+      - Automate user deprovisioning via SCIM to eliminate costs for departed employees
+      - Audit enrolled devices and revoke stale credentials to reduce active binding counts
+      - Evaluate tier upgrade vs. add-on costs when additional features are needed
+      - Negotiate multi-year or volume pricing as deployment scales
+      - Review add-on utilization quarterly to validate ROI
