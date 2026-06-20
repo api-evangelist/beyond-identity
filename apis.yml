@@ -10,7 +10,7 @@ description: >
   The platform integrates with SCIM, OIDC, and OAuth 2.0 standards and offers
   multi-region deployment including US, EU, and FedRAMP environments.
 type: Index
-image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
 tags:
   - Authentication
   - Passwordless
