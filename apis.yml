@@ -60,9 +60,9 @@ apis:
         url: json-schema/beyond-identity-identity-schema.json
       - type: JSONSchema
         url: json-schema/beyond-identity-credential-schema.json
-      - type: Example
+      - type: Examples
         url: examples/beyond-identity-create-identity-example.json
-      - type: Example
+      - type: Examples
         url: examples/beyond-identity-credential-binding-job-example.json
   - aid: beyond-identity-next-gen-api
     name: Beyond Identity Next Generation API
@@ -102,7 +102,7 @@ common:
     url: https://www.beyondidentity.com/pricing
   - type: StatusPage
     url: https://status.beyondidentity.com/
-  - type: Changelog
+  - type: ChangeLog
     url: https://docs.beyondidentity.com/docs/release-notes/release-notes-changelog
   - type: Support
     url: https://support.beyondidentity.com/

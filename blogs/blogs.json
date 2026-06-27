@@ -2,13 +2,13 @@
   "repo": "beyond-identity",
   "feeds": [
     {
-      "source": "https://twitter.com/beyondidentity",
-      "feed_url": "https://twitter.com/beyondidentity",
-      "title": "",
+      "source": "https://www.beyondidentity.com/blog",
+      "feed_url": "",
       "saved": 0,
-      "method": "none"
+      "method": "agent-scrape"
     }
   ],
   "post_count": 0,
-  "fetched": "2026-06-14T20:42:17Z"
+  "fetched": "2026-06-27T12:29:00Z",
+  "agent_pulled": "2026-06-27"
 }
