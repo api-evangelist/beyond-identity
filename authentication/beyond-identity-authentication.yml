@@ -1,0 +1,15 @@
+generated: '2026-07-11'
+method: derived
+source: openapi/beyond-identity-secure-access-api-openapi.yml, openapi/beyond-identity-secure-workforce-api-openapi.yml
+summary:
+  types:
+  - http
+schemes:
+- name: BearerAuth
+  type: http
+  scheme: bearer
+  bearerFormat: JWT
+  description: See the [Authentication](#section/Authentication) section for details.
+  sources:
+  - openapi/beyond-identity-secure-access-api-openapi.yml
+  - openapi/beyond-identity-secure-workforce-api-openapi.yml

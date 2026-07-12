@@ -86,6 +86,12 @@ apis:
       - type: ReleaseNotes
         url: https://docs.beyondidentity.com/docs/release-notes/release-notes-changelog
 common:
+  - type: TrustCenter
+    url: security/beyond-identity-trust-center.yml
+  - type: DomainSecurity
+    url: security/beyond-identity-domain-security.yml
+  - type: Authentication
+    url: authentication/beyond-identity-authentication.yml
   - type: Website
     url: https://www.beyondidentity.com/
   - type: Documentation
