@@ -1,0 +1,267 @@
+openapi: 3.0.1
+info:
+  title: Beyond Identity Secure Access Applications Tenants API
+  version: 1.7.0
+  contact:
+    email: support@beyondidentity.com
+  description: "# Introduction\n\n**NOTE:** To determine if you are accessing the Secure Access Platform, check the URL of your Admin Console.\nIf it looks like one of the following, you are using the Secure Access Platform:\n- `https://console.beyondidentity.com` (Localized to your region)\n- `https://console-us.beyondidentity.com` (US region)\n- `https://console-eu.beyondidentity.com` (EU region)\n- `https://console.us1.beyondidentity-gov.com` (US FedRAMP)\n\nIf your Admin Console URL does not look like one of the above, you are using the Secure Workforce Platform. Please refer to the [Secure Workforce API documentation](https://docs.beyondidentity.com/api/v0). <br /><br />\n\nThe Beyond Identity Secure Access API defines methods for managing resources in the Beyond Identity Secure Access platform.<br /><br />\n\nAll of the functionality available in the Beyond Identity Admin Console is\nalso available through the API. <br /><br />\n\nThis API is currently in the early-access stage and is under active\ndevelopment. Feedback and suggestions are encouraged and should be directed\nto the\n[Beyond Identity Developer Slack Channel](https://join.slack.com/t/byndid/shared_invite/zt-1anns8n83-NQX4JvW7coi9dksADxgeBQ).\n\n# Base API URLs\n\nThe base API URLs is determined by the region your tenant is hosted in OR if you are a FedRAMP customer. <br><br>\n\n### US Region\n\nIf you are a US region customer, your base API URLs will be:\n- `https://api-us.beyondidentity.com`\n- `https://auth-us.beyondidentity.com`\n\n### EU Region\n\nIf you are a EU region customer, your base API URLs will be:\n- `https://api-eu.beyondidentity.com`\n- `https://auth-eu.beyondidentity.com`\n\n### US FedRAMP\n\n**NOTE**: The FedRAMP version of Secure Access is released approximately *two weeks* after the commercial version, so some API endpoints may not be available immediately. <br><br>\n\nIf you are a FedRAMP customer in the US region, your base API URLs will be:\n- `https://api.us1.beyondidentity-gov.com`\n- `https://auth.us1.beyondidentity-gov.com`\n\nFor all the examples in this document, we will use the US region API base URL. You can always replace `https://api-us.beyondidentity.com`\nand `https://auth-us.beyondidentity.com` in the examples to use the proper base URL for your tenant.\n\n# Authentication\n\nAll Beyond Identity API endpoints require authentication using an access\ntoken. The access token is generated through OAuth 2.0 or OIDC, using the\nauthorization code flow or the client credentials flow. <br /><br />\n\nThe simplest way to acquire an access token is through the Beyond Identity Admin Console. Under the \"Applications\" tab, select the \"Beyond Identity Management API\" application, navigate to the \"API Tokens\" tab, and then click on \"Create token\". <br /><br />\n\nAlternatively, an access token may also be generated directly via the API by\nrequesting a token for the \"Beyond Identity Management API\" Application. <br><br>\n\n```\ncurl https://auth-us.beyondidentity.com/v1/tenants/$TENANT_ID/realms/$REALM_ID/applications/$APPLICATION_ID/token \\\n  -X POST \\\n  -u \"$CLIENT_ID:$CLIENT_SECRET\" --basic \\\n  -H \"Content-Type: application/x-www-form-urlencoded\" \\\n  -d \"grant_type=client_credentials&scope=$SCOPES\"\n```\n\nThis will work for any application that you have configured to provide\naccess to the Beyond Identity Management API Resource Server. The \"Beyond\nIdentity Management API\" application is provided by default as part of the\ntenant onboarding process.\n\nThe access token must be provided in the `Authorization` header of the\nAPI request. <br><br>\n\n```\ncurl https://api-us.beyondidentity.com/v1/... \\\n  -X $HTTP_METHOD -H \"Authorization: Bearer $TOKEN\"\n```\n\n## Requests and Responses\n\nTo interact with the Beyond Identity API, all requests should be made over\nHTTPS. <br /><br />\n\nThe Beyond Identity API is generally structured as a resource-oriented API.\nResources are represented as JSON objects and are used as both inputs to\nand outputs from API methods. <br /><br />\n\nResource fields may be described as read-only and immutable. A read-only\nfield is only provided on the response. An immutable field is only assigned\nonce and may not be changed after. For example, system-generated IDs are\ndescribed as both read-only and immutable. <br /><br />\n\nTo create a new resource, requests should use the `POST` method. Create\nrequests include all of the necessary attributes to create a new resource.\nCreate operations return the created resource in the response. <br /><br />\n\nTo retrieve a single resource or a collection of resources, requests should\nuse the `GET` method. When retrieving a collection of resources, the\nresponse will include an array of JSON objects keyed on the plural name of\nthe requested resource. <br /><br />\n\nTo update an resource, requests should use the `PATCH` method. Update\noperations support partial updating so requests may specify only the\nattributes which should be updated. Update operations return the updated\nresource in the response. <br /><br />\n\nTo delete a resource, requests should use the `DELETE` method. Note that\ndelete operations return an empty response instead of returning the\nresource in the response. <br /><br />\n\n### Example Response for a Realm\n\n```\n{\n  \"id\": \"a448fe493e02fa9f\",\n  \"tenant_id\": \"000168dc50bdce49\",\n  \"display_name\": \"Test Realm\",\n  \"create_time\": \"2022-06-22T21:46:08.930278Z\",\n  \"update_time\": \"2022-06-22T21:46:08.930278Z\"\n}\n```\n\n### Example Response for a Collection of Realms\n\n```\n{\n  \"realms\": [\n    {\n      \"id\": \"a448fe493e02fa9f\",\n      \"tenant_id\": \"000168dc50bdce49\",\n      \"display_name\": \"Test Realm\",\n      \"create_time\": \"2022-06-22T21:46:08.930278Z\",\n      \"update_time\": \"2022-06-22T21:46:08.930278Z\"\n    }\n  ],\n  \"total_size\": 1\n}\n```\n\n## HTTP Statuses\n\nThe API returns standard HTTP statuses and error codes.\n\nStatuses in the 200 range indicate that the request was successfully\nfulfilled and there were no errors. <br><br>\n\nStatuses in the 400 range indicate that there was an issue with the request\nthat may be addressed by the client. For example, client errors may\nindicate that the request was missing proper authorization or that the\nrequest was malformed. <br><br>\n\nStatuses in the 500 range indicate that the server encountered an internal\nissue and was unable to fulfill the request. <br><br>\n\nAll error responses include a JSON object with a `code` field and a\n`message` field. `code` contains a human-readable name for the HTTP status\ncode and `message` contains a high-level description of the error. The\nerror object may also contain additional error details which may be used by\nthe client to determine the exact cause of the error. Refer to each API\nmethod's examples to determine the specific error detail types supported\nfor that method. <br><br>\n\n### Invalid Access Token Example\n\nIf the provided access token is invalid, you will receive a 401 error.\nThis error indicates that the token is not recognized and was not generated\nby Beyond Identity. <br><br>\n\n```\nHTTP/1.1 401 Unauthorized\n{\n  \"code\": \"unauthorized\",\n  \"message\": \"unauthorized\"\n}\n```\n\n### Permission Denied Example\n\nIf the provided access token does not have access to the requested resource,\nyou will receive a 403 error. Access tokens are scoped at a minimum to your\ntenant. Any request for resources outside of your tenant will result in this\nerror. <br><br>\n\n```\nHTTP/1.1 403 Forbidden\n{\n  \"code\": \"forbidden\",\n  \"message\": \"forbidden\"\n}\n```\n\n### Missing Resource Example\n\nIf the requested resource does not exist, you will receive a 404 error. The\nspecific API method may return additional details about the missing\nresource. <br><br>\n\n```\nHTTP/1.1 404 Not Found\n{\n  \"code\": \"not_found\",\n  \"message\": \"group not found\"\n  \"details\": [\n    {\n      \"type\": \"ResourceInfo\",\n      \"resource_type\": \"Group\",\n      \"id\": \"4822738be6b7f658\",\n      \"description\": \"group not found\"\n    }\n  ],\n}\n```\n\n### Invalid Parameters Example\n\nIf the request body contains invalid parameters, you will receive a 400\nerror. The specific API method may return additional details about the\ninvalid parameter. <br><br>\n\n```\nHTTP/1.1 400 Bad Request\n{\n  \"code\": \"bad_request\",\n  \"message\": \"invalid parameters\"\n  \"details\": [\n    {\n      \"type\": \"FieldViolations\"\n      \"field_violations\": [\n        {\n          \"description\": \"missing\",\n          \"field\": \"group.display_name\"\n        }\n      ],\n    }\n  ],\n}\n```\n"
+servers:
+- url: https://api-us.beyondidentity.com
+  description: US region API base URL
+- url: https://api-eu.beyondidentity.com
+  description: EU region API base URL
+- url: https://api.us1.beyondidentity-gov.com/
+  description: US FedRAMP API base URL
+security:
+- BearerAuth: []
+tags:
+- name: Tenants
+  description: 'A tenant represents an organization in the Beyond Identity Cloud. Tenants contain all data necessary for that organization to operate.
+
+    '
+paths:
+  /v1/tenants/{tenant_id}:
+    get:
+      tags:
+      - Tenants
+      operationId: GetTenant
+      summary: Retrieve an Existing Tenant
+      description: 'To retrieve an existing tenant, send a GET request to `/v1/tenants/$TENANT_ID`.
+
+        '
+      security:
+      - BearerAuth:
+        - tenants:read
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      responses:
+        '200':
+          description: 'The response will be a JSON object containing the standard attributes associated with a tenant.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+              examples:
+                Success:
+                  value:
+                    id: 000176d94fd7b4d1
+                    display_name: Test Tenant
+                    create_time: '2022-01-28T12:00:02.423Z'
+                    update_time: '2022-04-19T15:17:21.186Z'
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Missing Authorization:
+                  value:
+                    code: unauthorized
+                    message: unauthorized
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Insufficient Authorization:
+                  value:
+                    code: forbidden
+                    message: forbidden
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Internal Error:
+                  value:
+                    code: internal_server_error
+                    message: internal server error
+    patch:
+      tags:
+      - Tenants
+      operationId: UpdateTenant
+      summary: Patch a Tenant
+      description: 'To update only specific attributes of an existing tenant, send a PATCH request to `/v1/tenants/$TENANT_ID`. Values in the request body for immutable or read-only fields will be ignored. Fields that are omitted from the request body will be left unchanged.
+
+        '
+      security:
+      - BearerAuth:
+        - tenants:update
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      requestBody:
+        description: Updates to the specified tenant.
+        content:
+          application/json:
+            schema:
+              title: Update Tenant Request
+              description: Request for UpdateTenant.
+              type: object
+              properties:
+                tenant:
+                  $ref: '#/components/schemas/Tenant'
+              required:
+              - tenant
+            examples:
+              Update Display Name:
+                value:
+                  tenant:
+                    display_name: Test Tenant
+      responses:
+        '200':
+          description: 'The response will be a JSON object containing the standard attributes associated with a tenant.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+              examples:
+                Success:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/200/content/application~1json/examples/Success'
+        '400':
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Malformed Request:
+                  value:
+                    code: bad_request
+                    message: invalid request
+                Invalid Parameters:
+                  value:
+                    code: bad_request
+                    message: invalid parameters
+                    details:
+                    - type: FieldViolations
+                      field_violations:
+                      - field: tenant.display_name
+                        description: empty string
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Missing Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/401/content/application~1json/examples/Missing%20Authorization'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Insufficient Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/403/content/application~1json/examples/Insufficient%20Authorization'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Internal Error:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
+components:
+  schemas:
+    Tenant:
+      title: Tenant
+      type: object
+      description: 'A tenant represents an organization in the Beyond Identity Cloud. Tenants contain all data necessary for that organization to operate.
+
+        '
+      properties:
+        id:
+          type: string
+          description: 'A unique identifier for the tenant. This is automatically generated on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 000176d94fd7b4d1
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
+          description: 'A human-readable name for the tenant. This name is used for display purposes.
+
+            '
+          example: Test Tenant
+        create_time:
+          type: string
+          format: date-time
+          description: 'A time value given in ISO8601 combined date and time format that represents when the tenant was created. This is automatically generated on creation. This field is read-only.
+
+            '
+          readOnly: true
+          example: '2022-01-28T12:00:02.423Z'
+        update_time:
+          type: string
+          format: date-time
+          description: 'A time value given in ISO8601 combined date and time format that represents when the tenant was last updated. This is automatically updated when the tenant is updated. This field is read-only.
+
+            '
+          readOnly: true
+          example: '2022-04-19T15:17:21.186Z'
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
+
+            '
+        message:
+          type: string
+          description: 'Human-readable message describing the error.
+
+            '
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      required:
+      - code
+      - message
+    ErrorDetail:
+      title: Error Detail
+      description: 'Additional details for errors designed to support client applications.
+
+        '
+      type: object
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          type: string
+          description: Type of the error detail.
+      required:
+      - type
+  parameters:
+    tenant_id:
+      name: tenant_id
+      in: path
+      description: A unique identifier for a tenant.
+      required: true
+      schema:
+        type: string
+        example: 000176d94fd7b4d1
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'See the [Authentication](#section/Authentication) section for details.
+
+        '

@@ -1,0 +1,819 @@
+openapi: 3.0.1
+info:
+  title: Beyond Identity Secure Access Applications Identity Provider API
+  version: 1.7.0
+  contact:
+    email: support@beyondidentity.com
+  description: "# Introduction\n\n**NOTE:** To determine if you are accessing the Secure Access Platform, check the URL of your Admin Console.\nIf it looks like one of the following, you are using the Secure Access Platform:\n- `https://console.beyondidentity.com` (Localized to your region)\n- `https://console-us.beyondidentity.com` (US region)\n- `https://console-eu.beyondidentity.com` (EU region)\n- `https://console.us1.beyondidentity-gov.com` (US FedRAMP)\n\nIf your Admin Console URL does not look like one of the above, you are using the Secure Workforce Platform. Please refer to the [Secure Workforce API documentation](https://docs.beyondidentity.com/api/v0). <br /><br />\n\nThe Beyond Identity Secure Access API defines methods for managing resources in the Beyond Identity Secure Access platform.<br /><br />\n\nAll of the functionality available in the Beyond Identity Admin Console is\nalso available through the API. <br /><br />\n\nThis API is currently in the early-access stage and is under active\ndevelopment. Feedback and suggestions are encouraged and should be directed\nto the\n[Beyond Identity Developer Slack Channel](https://join.slack.com/t/byndid/shared_invite/zt-1anns8n83-NQX4JvW7coi9dksADxgeBQ).\n\n# Base API URLs\n\nThe base API URLs is determined by the region your tenant is hosted in OR if you are a FedRAMP customer. <br><br>\n\n### US Region\n\nIf you are a US region customer, your base API URLs will be:\n- `https://api-us.beyondidentity.com`\n- `https://auth-us.beyondidentity.com`\n\n### EU Region\n\nIf you are a EU region customer, your base API URLs will be:\n- `https://api-eu.beyondidentity.com`\n- `https://auth-eu.beyondidentity.com`\n\n### US FedRAMP\n\n**NOTE**: The FedRAMP version of Secure Access is released approximately *two weeks* after the commercial version, so some API endpoints may not be available immediately. <br><br>\n\nIf you are a FedRAMP customer in the US region, your base API URLs will be:\n- `https://api.us1.beyondidentity-gov.com`\n- `https://auth.us1.beyondidentity-gov.com`\n\nFor all the examples in this document, we will use the US region API base URL. You can always replace `https://api-us.beyondidentity.com`\nand `https://auth-us.beyondidentity.com` in the examples to use the proper base URL for your tenant.\n\n# Authentication\n\nAll Beyond Identity API endpoints require authentication using an access\ntoken. The access token is generated through OAuth 2.0 or OIDC, using the\nauthorization code flow or the client credentials flow. <br /><br />\n\nThe simplest way to acquire an access token is through the Beyond Identity Admin Console. Under the \"Applications\" tab, select the \"Beyond Identity Management API\" application, navigate to the \"API Tokens\" tab, and then click on \"Create token\". <br /><br />\n\nAlternatively, an access token may also be generated directly via the API by\nrequesting a token for the \"Beyond Identity Management API\" Application. <br><br>\n\n```\ncurl https://auth-us.beyondidentity.com/v1/tenants/$TENANT_ID/realms/$REALM_ID/applications/$APPLICATION_ID/token \\\n  -X POST \\\n  -u \"$CLIENT_ID:$CLIENT_SECRET\" --basic \\\n  -H \"Content-Type: application/x-www-form-urlencoded\" \\\n  -d \"grant_type=client_credentials&scope=$SCOPES\"\n```\n\nThis will work for any application that you have configured to provide\naccess to the Beyond Identity Management API Resource Server. The \"Beyond\nIdentity Management API\" application is provided by default as part of the\ntenant onboarding process.\n\nThe access token must be provided in the `Authorization` header of the\nAPI request. <br><br>\n\n```\ncurl https://api-us.beyondidentity.com/v1/... \\\n  -X $HTTP_METHOD -H \"Authorization: Bearer $TOKEN\"\n```\n\n## Requests and Responses\n\nTo interact with the Beyond Identity API, all requests should be made over\nHTTPS. <br /><br />\n\nThe Beyond Identity API is generally structured as a resource-oriented API.\nResources are represented as JSON objects and are used as both inputs to\nand outputs from API methods. <br /><br />\n\nResource fields may be described as read-only and immutable. A read-only\nfield is only provided on the response. An immutable field is only assigned\nonce and may not be changed after. For example, system-generated IDs are\ndescribed as both read-only and immutable. <br /><br />\n\nTo create a new resource, requests should use the `POST` method. Create\nrequests include all of the necessary attributes to create a new resource.\nCreate operations return the created resource in the response. <br /><br />\n\nTo retrieve a single resource or a collection of resources, requests should\nuse the `GET` method. When retrieving a collection of resources, the\nresponse will include an array of JSON objects keyed on the plural name of\nthe requested resource. <br /><br />\n\nTo update an resource, requests should use the `PATCH` method. Update\noperations support partial updating so requests may specify only the\nattributes which should be updated. Update operations return the updated\nresource in the response. <br /><br />\n\nTo delete a resource, requests should use the `DELETE` method. Note that\ndelete operations return an empty response instead of returning the\nresource in the response. <br /><br />\n\n### Example Response for a Realm\n\n```\n{\n  \"id\": \"a448fe493e02fa9f\",\n  \"tenant_id\": \"000168dc50bdce49\",\n  \"display_name\": \"Test Realm\",\n  \"create_time\": \"2022-06-22T21:46:08.930278Z\",\n  \"update_time\": \"2022-06-22T21:46:08.930278Z\"\n}\n```\n\n### Example Response for a Collection of Realms\n\n```\n{\n  \"realms\": [\n    {\n      \"id\": \"a448fe493e02fa9f\",\n      \"tenant_id\": \"000168dc50bdce49\",\n      \"display_name\": \"Test Realm\",\n      \"create_time\": \"2022-06-22T21:46:08.930278Z\",\n      \"update_time\": \"2022-06-22T21:46:08.930278Z\"\n    }\n  ],\n  \"total_size\": 1\n}\n```\n\n## HTTP Statuses\n\nThe API returns standard HTTP statuses and error codes.\n\nStatuses in the 200 range indicate that the request was successfully\nfulfilled and there were no errors. <br><br>\n\nStatuses in the 400 range indicate that there was an issue with the request\nthat may be addressed by the client. For example, client errors may\nindicate that the request was missing proper authorization or that the\nrequest was malformed. <br><br>\n\nStatuses in the 500 range indicate that the server encountered an internal\nissue and was unable to fulfill the request. <br><br>\n\nAll error responses include a JSON object with a `code` field and a\n`message` field. `code` contains a human-readable name for the HTTP status\ncode and `message` contains a high-level description of the error. The\nerror object may also contain additional error details which may be used by\nthe client to determine the exact cause of the error. Refer to each API\nmethod's examples to determine the specific error detail types supported\nfor that method. <br><br>\n\n### Invalid Access Token Example\n\nIf the provided access token is invalid, you will receive a 401 error.\nThis error indicates that the token is not recognized and was not generated\nby Beyond Identity. <br><br>\n\n```\nHTTP/1.1 401 Unauthorized\n{\n  \"code\": \"unauthorized\",\n  \"message\": \"unauthorized\"\n}\n```\n\n### Permission Denied Example\n\nIf the provided access token does not have access to the requested resource,\nyou will receive a 403 error. Access tokens are scoped at a minimum to your\ntenant. Any request for resources outside of your tenant will result in this\nerror. <br><br>\n\n```\nHTTP/1.1 403 Forbidden\n{\n  \"code\": \"forbidden\",\n  \"message\": \"forbidden\"\n}\n```\n\n### Missing Resource Example\n\nIf the requested resource does not exist, you will receive a 404 error. The\nspecific API method may return additional details about the missing\nresource. <br><br>\n\n```\nHTTP/1.1 404 Not Found\n{\n  \"code\": \"not_found\",\n  \"message\": \"group not found\"\n  \"details\": [\n    {\n      \"type\": \"ResourceInfo\",\n      \"resource_type\": \"Group\",\n      \"id\": \"4822738be6b7f658\",\n      \"description\": \"group not found\"\n    }\n  ],\n}\n```\n\n### Invalid Parameters Example\n\nIf the request body contains invalid parameters, you will receive a 400\nerror. The specific API method may return additional details about the\ninvalid parameter. <br><br>\n\n```\nHTTP/1.1 400 Bad Request\n{\n  \"code\": \"bad_request\",\n  \"message\": \"invalid parameters\"\n  \"details\": [\n    {\n      \"type\": \"FieldViolations\"\n      \"field_violations\": [\n        {\n          \"description\": \"missing\",\n          \"field\": \"group.display_name\"\n        }\n      ],\n    }\n  ],\n}\n```\n"
+servers:
+- url: https://api-us.beyondidentity.com
+  description: US region API base URL
+- url: https://api-eu.beyondidentity.com
+  description: EU region API base URL
+- url: https://api.us1.beyondidentity-gov.com/
+  description: US FedRAMP API base URL
+security:
+- BearerAuth: []
+tags:
+- name: Identity Provider
+  description: 'Identity providers enable integration with external systems to support IdP-authorized workflows, such as passkey enrollment. They serve as the counterpart to SSO applications, focusing on initiating authentication workflows and enabling secure interactions.
+
+    '
+paths:
+  /v1/tenants/{tenant_id}/realms/{realm_id}/identity-providers:
+    get:
+      operationId: listIdentityProviders
+      tags:
+      - Identity Provider
+      summary: Lists Identity Providers by Realm.
+      description: Lists Identity Providers by Realm.
+      parameters:
+      - $ref: '#/components/parameters/correlation_id'
+      - $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/parameters/1'
+      - $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/parameters/2'
+      - name: sso_config_id
+        in: path
+        required: true
+        description: A unique identifier of the sso configuration
+        schema:
+          type: string
+      - $ref: '#/components/parameters/page_size'
+      - $ref: '#/components/parameters/page_token'
+      responses:
+        '200':
+          description: The list operation was successful.
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityProviderListResponse'
+        '400':
+          description: The request is malformed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+        '401':
+          description: An invalid Authorization token has been supplied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+        '403':
+          description: The supplied authorization token doesn't allow the requested operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+    post:
+      operationId: createIdentityProvider
+      tags:
+      - Identity Provider
+      summary: Creates a new identity provider.
+      description: Creates a new identity provider.
+      parameters:
+      - $ref: '#/components/parameters/correlation_id'
+      - $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/parameters/1'
+      - $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/parameters/2'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: Represents an identity provider.
+              type: object
+              required:
+              - protocol_config
+              - display_name
+              properties:
+                id:
+                  description: 'A unique identifier identifying an identity provider within a realm. This is
+
+                    automatically set on creation. This field is immutable and read-only.
+
+                    '
+                  type: string
+                  readOnly: true
+                tenant_id:
+                  type: string
+                  description: 'A unique identifier for the identity''s tenant. This is automatically
+
+                    set on creation. This field is immutable and read-only.
+
+                    '
+                  readOnly: true
+                  example: 0001f1f460b1ace6
+                realm_id:
+                  type: string
+                  description: 'A unique identifier for the identity''s realm. This is automatically
+
+                    set on creation. This field is immutable and read-only.
+
+                    '
+                  readOnly: true
+                  example: 8f5bec58229e6f29
+                display_name:
+                  type: string
+                  description: 'The human-readable name associated with the identity provider.
+
+                    '
+                protocol_config:
+                  description: 'The kind of protocol we should use to communicate with the identity
+
+                    provider.
+
+                    '
+                  allOf:
+                  - $ref: '#/components/schemas/IdentityProviderProtocolConfig'
+      responses:
+        '200':
+          description: The identity provider has been created.
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityProviderProtocolConfigResponse'
+        '400':
+          description: The request is malformed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+        '401':
+          description: An invalid Authorization token has been supplied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+        '403':
+          description: The supplied authorization token doesn't allow the requested operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+  /v1/tenants/{tenant_id}/realms/{realm_id}/identity-providers/{identity_provider_id}:
+    patch:
+      operationId: updateIdentityProvider
+      tags:
+      - Identity Provider
+      summary: Updates an identity provider.
+      description: Updates an identity provider.
+      parameters:
+      - $ref: '#/components/parameters/correlation_id'
+      - $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/parameters/1'
+      - $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/parameters/2'
+      - $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1identity-providers~1%7Bidentity_provider_id%7D/get/parameters/3'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdentityProviderUpdate'
+      responses:
+        '200':
+          description: The identity provider has been updated.
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityProviderResponse'
+        '400':
+          description: The request is malformed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+        '401':
+          description: An invalid Authorization token has been supplied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+        '403':
+          description: The supplied authorization token doesn't allow the requested operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+    get:
+      operationId: getIdentityProvider
+      tags:
+      - Identity Provider
+      summary: Retrieves data about an Identity Provider.
+      description: Retrieves data about an identity provider.
+      parameters:
+      - $ref: '#/components/parameters/correlation_id'
+      - $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/parameters/1'
+      - $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/parameters/2'
+      - name: identity_provider_id
+        in: path
+        description: A unique identifier for an identity provider.
+        required: true
+        schema:
+          type: string
+          example: e372db224c06e850
+      responses:
+        '200':
+          description: The requested identity provider.
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityProviderResponse'
+        '400':
+          description: The request is malformed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+        '401':
+          description: An invalid Authorization token has been supplied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+        '403':
+          description: The supplied authorization token doesn't allow the requested operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+    delete:
+      operationId: deleteIdentityProvider
+      tags:
+      - Identity Provider
+      summary: Deletes an Identity Provider.
+      description: Deletes an identity provider.
+      parameters:
+      - $ref: '#/components/parameters/correlation_id'
+      - $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/parameters/1'
+      - $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/parameters/2'
+      - $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1identity-providers~1%7Bidentity_provider_id%7D/get/parameters/3'
+      responses:
+        '200':
+          description: The identity provider has been deleted.
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+        '400':
+          description: The request is malformed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+        '401':
+          description: An invalid Authorization token has been supplied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+        '403':
+          description: The supplied authorization token doesn't allow the requested operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          headers:
+            x-correlation-id:
+              $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
+components:
+  schemas:
+    SubjectField:
+      description: 'Defines which field should be used to populate the subject field of an id token.
+
+        - `id` - The user ID is used.
+
+        - `email` - The user email is used.
+
+        - `username` - The username is used.
+
+        '
+      type: string
+      enum:
+      - id
+      - email
+      - username
+      - external_id
+    IdentityProviderProtocolConfigResponse:
+      description: 'Represents the protocol configuration that is used by the identity
+
+        provider.
+
+        '
+      oneOf:
+      - $ref: '#/components/schemas/IdentityProviderProtocolConfigOidcIdpResponse'
+    IdentityProviderProtocolConfigOidcIdp:
+      description: 'OIDC protocol configuration for connecting to an identity provider, and
+
+        validating the token we received.
+
+        '
+      type: object
+      required:
+      - client_id
+      - client_secret
+      - token_scopes
+      - identity_attribute
+      - pkce
+      - jwks_url
+      - token_url
+      - authorize_url
+      - identifying_claim_name
+      - type
+      properties:
+        type:
+          type: string
+          enum:
+          - oidc_idp
+        client_id:
+          description: 'The OIDC client id. This value is from the identity provider.
+
+            '
+          type: string
+        client_secret:
+          description: 'The OIDC client secret. This value is from the identity provider.
+
+            '
+          type: string
+        token_scopes:
+          description: 'The scopes which to assign to the generated Access token. Scopes will be checked against the identity before validating.
+
+            '
+          type: array
+          items:
+            type: string
+        identity_attribute:
+          $ref: '#/components/schemas/SubjectField'
+        pkce:
+          $ref: '#/components/schemas/PkceConfig'
+        jwks_url:
+          description: 'The URL that points to the ".well-known/jwks.json" of the identity
+
+            provider. Must be a URL.
+
+            '
+          type: string
+        token_url:
+          description: 'The URL that points to the "/token" endpoint of the identity
+
+            provider. Must be a URL.
+
+            '
+          type: string
+        authorize_url:
+          description: 'The "/authorize" URL to authenticate against inside of the identity
+
+            provider. Must be a URL.
+
+            '
+          type: string
+        identifying_claim_name:
+          description: 'The name of the claim that specifies the user''s identity inside of a
+
+            token.
+
+            '
+          type: string
+    PkceConfig:
+      type: string
+      enum:
+      - disabled
+      - plain
+      - s256
+      description: "PKCE code challenge methods supported for applications, as defined by\n[RFC-7636](https://datatracker.ietf.org/doc/html/rfc7636). Allowable values are:\n  - `disabled` : PKCE is disabled for this application. This is the default state if\n    the `pkce` field is left blank. Please note that public OIDC and OAuth2 configured\n    applications MUST enable PKCE support. Confidential clients can leave PKCE disabled\n    if they choose.\n  - `plain` : PKCE is enabled for this application. The server will correlate the `code_challenge` and\n    `code_verifier` between the `authorize` and `token` requests. In this configuration, those fields are\n    required to be identical. This is the lower security option for PKCE support and should only be used\n    by legacy clients, or clients that don't support `s256`.\n  - `s256` : PKCE is enabled for this application, and the server will correlate the `code_challenge` and\n    `code_verifier` between the `authorize` and `token` requests. In this configuration, those fields are\n    required to equate as follows: `code_challenge` = `base64url(sha256(ascii(code_verifier)))`. This is\n    the higher security option and should always be preferred if it is supported by the client.\n"
+      example: s256
+    IdentityProviderUpdateProtocolConfigOidcIdp:
+      description: 'OIDC protocol configuration for connecting to an identity provider, and
+
+        validating the token we received.
+
+        '
+      type: object
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum:
+          - oidc_idp
+        client_id:
+          description: 'The OIDC client id. This value is from the identity provider.
+
+            '
+          type: string
+        client_secret:
+          description: 'The OIDC client secret. This value is from the identity provider.
+
+            '
+          type: string
+        token_scopes:
+          description: 'The scopes which to assign to the generated Access token. Scopes will be checked against the identity before validating.
+
+            '
+          type: array
+          items:
+            type: string
+        identity_attribute:
+          $ref: '#/components/schemas/SubjectField'
+        pkce:
+          $ref: '#/components/schemas/PkceConfig'
+        jwks_url:
+          description: 'The URL that points to the ".well-known/jwks.json" of the identity
+
+            provider. Must be a URL.
+
+            '
+          type: string
+        token_url:
+          description: 'The URL that points to the "/token" endpoint of the identity
+
+            provider. Must be a URL.
+
+            '
+          type: string
+        authorize_url:
+          description: 'The "/authorize" URL to authenticate against inside of the identity
+
+            provider. Must be a URL.
+
+            '
+          type: string
+        identifying_claim_name:
+          description: 'The name of the claim that specifies the user''s identity inside of a
+
+            token.
+
+            '
+          type: string
+    ErrorDetail:
+      title: Error Detail
+      description: 'Additional details for errors designed to support client applications.
+
+        '
+      type: object
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          type: string
+          description: Type of the error detail.
+      required:
+      - type
+    IdentityProviderUpdateProtocolConfig:
+      description: 'Represents the protocol configuration that is used by the identity
+
+        provider.
+
+        '
+      oneOf:
+      - $ref: '#/components/schemas/IdentityProviderUpdateProtocolConfigOidcIdp'
+      discriminator:
+        propertyName: type
+    IdentityProviderUpdate:
+      description: Represents an identity provider.
+      type: object
+      properties:
+        identity_provider:
+          type: object
+          description: The identity provider object.
+          properties:
+            id:
+              description: 'A unique identifier identifying an identity provider. This is automatically
+
+                set on creation. This field is immutable and read-only.
+
+                '
+              type: string
+              readOnly: true
+            tenant_id:
+              type: string
+              description: 'A unique identifier for the identity provider''s tenant. This is automatically
+
+                set on creation. This field is immutable and read-only.
+
+                '
+              readOnly: true
+              example: 0001f1f460b1ace6
+            realm_id:
+              type: string
+              description: 'A unique identifier for the identity provider''s realm. This is automatically
+
+                set on creation. This field is immutable and read-only.
+
+                '
+              readOnly: true
+              example: 8f5bec58229e6f29
+            display_name:
+              type: string
+              description: 'The human-readable name associated with the identity provider.
+
+                '
+            protocol_config:
+              description: 'The kind of protocol we should use to communicate with the identity
+
+                provider.
+
+                '
+              allOf:
+              - $ref: '#/components/schemas/IdentityProviderUpdateProtocolConfig'
+    IdentityProviderProtocolConfig:
+      description: 'Represents the protocol configuration that is used by the identity
+
+        provider.
+
+        '
+      oneOf:
+      - $ref: '#/components/schemas/IdentityProviderProtocolConfigOidcIdp'
+    IdentityProviderResponse:
+      description: Represents an identity provider.
+      type: object
+      required:
+      - id
+      - tenant_id
+      - realm_id
+      - protocol_config
+      - display_name
+      properties:
+        id:
+          description: 'A unique identifier identifying an identity provider within a realm. This is
+
+            automatically set on creation. This field is immutable and read-only.
+
+            '
+          type: string
+          readOnly: true
+        tenant_id:
+          type: string
+          description: 'A unique identifier for the identity provider''s tenant. This is automatically
+
+            set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 0001f1f460b1ace6
+        realm_id:
+          type: string
+          description: 'A unique identifier for the identity provider''s realm. This is automatically
+
+            set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 8f5bec58229e6f29
+        display_name:
+          type: string
+          description: 'The human-readable name associated with the identity provider.
+
+            '
+        protocol_config:
+          $ref: '#/components/schemas/IdentityProviderProtocolConfigResponse'
+    IdentityProviderListResponse:
+      description: Represents a list of identity providers as a response body.
+      type: object
+      required:
+      - identity_providers
+      - total_size
+      properties:
+        identity_providers:
+          description: The identity providers that are in the list.
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityProviderResponse'
+        total_size:
+          description: The total number of identity providers contained by the Realm.
+          type: integer
+          format: uint
+          minimum: 0
+        next_page_token:
+          description: The value to be passed as the page_token parameter to retrieve the next page.
+          type: string
+          nullable: true
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
+
+            '
+        message:
+          type: string
+          description: 'Human-readable message describing the error.
+
+            '
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      required:
+      - code
+      - message
+    IdentityProviderProtocolConfigOidcIdpResponse:
+      description: 'OIDC protocol configuration for connecting to an identity provider, and
+
+        validating the token we received.
+
+        '
+      type: object
+      required:
+      - client_id
+      - client_secret
+      - token_scopes
+      - identity_attribute
+      - pkce
+      - jwks_url
+      - token_url
+      - authorize_url
+      - redirect_url
+      - identifying_claim_name
+      - type
+      properties:
+        type:
+          type: string
+          enum:
+          - oidc_idp
+        client_id:
+          description: 'The OIDC client id. This value is from the identity provider.
+
+            '
+          type: string
+        client_secret:
+          description: 'The OIDC client secret. This value is from the identity provider.
+
+            '
+          type: string
+        token_scopes:
+          description: 'The scopes to assign to the generated Access token. Scopes will be checked against the identity before validating.
+
+            '
+          type: array
+          items:
+            type: string
+        identity_attribute:
+          $ref: '#/components/schemas/SubjectField'
+        pkce:
+          $ref: '#/components/schemas/PkceConfig'
+        jwks_url:
+          description: 'The URL that points to the ".well-known/jwks.json" of the identity
+
+            provider. Must be a URL.
+
+            '
+          type: string
+        token_url:
+          description: 'The URL that points to the "/token" endpoint of the identity
+
+            provider. Must be a URL.
+
+            '
+          type: string
+        authorize_url:
+          description: 'The "/authorize" URL to authenticate against inside of the identity
+
+            provider. Must be a URL.
+
+            '
+          type: string
+        redirect_url:
+          description: 'Redirect URL provided by Beyond Identity that the IdP can redirect
+
+            end users to after successful authorize call. This is an
+
+            OIDC-compliant callback.
+
+            '
+          type: string
+        identifying_claim_name:
+          description: 'The name of the claim that specifies the user''s identity inside of a
+
+            token.
+
+            '
+          type: string
+  parameters:
+    page_size:
+      name: page_size
+      in: query
+      description: 'Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.
+
+        '
+      schema:
+        type: integer
+        format: uint32
+        minimum: 0
+    page_token:
+      name: page_token
+      in: query
+      description: 'Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.
+
+        '
+      schema:
+        type: string
+    correlation_id:
+      name: x-correlation_id
+      description: Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.
+      in: header
+      required: true
+      schema:
+        type: string
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'See the [Authentication](#section/Authentication) section for details.
+
+        '

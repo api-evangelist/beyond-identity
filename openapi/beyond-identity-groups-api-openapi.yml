@@ -1,0 +1,1525 @@
+openapi: 3.0.1
+info:
+  title: Beyond Identity Secure Access Applications Groups API
+  version: 1.7.0
+  contact:
+    email: support@beyondidentity.com
+  description: "# Introduction\n\n**NOTE:** To determine if you are accessing the Secure Access Platform, check the URL of your Admin Console.\nIf it looks like one of the following, you are using the Secure Access Platform:\n- `https://console.beyondidentity.com` (Localized to your region)\n- `https://console-us.beyondidentity.com` (US region)\n- `https://console-eu.beyondidentity.com` (EU region)\n- `https://console.us1.beyondidentity-gov.com` (US FedRAMP)\n\nIf your Admin Console URL does not look like one of the above, you are using the Secure Workforce Platform. Please refer to the [Secure Workforce API documentation](https://docs.beyondidentity.com/api/v0). <br /><br />\n\nThe Beyond Identity Secure Access API defines methods for managing resources in the Beyond Identity Secure Access platform.<br /><br />\n\nAll of the functionality available in the Beyond Identity Admin Console is\nalso available through the API. <br /><br />\n\nThis API is currently in the early-access stage and is under active\ndevelopment. Feedback and suggestions are encouraged and should be directed\nto the\n[Beyond Identity Developer Slack Channel](https://join.slack.com/t/byndid/shared_invite/zt-1anns8n83-NQX4JvW7coi9dksADxgeBQ).\n\n# Base API URLs\n\nThe base API URLs is determined by the region your tenant is hosted in OR if you are a FedRAMP customer. <br><br>\n\n### US Region\n\nIf you are a US region customer, your base API URLs will be:\n- `https://api-us.beyondidentity.com`\n- `https://auth-us.beyondidentity.com`\n\n### EU Region\n\nIf you are a EU region customer, your base API URLs will be:\n- `https://api-eu.beyondidentity.com`\n- `https://auth-eu.beyondidentity.com`\n\n### US FedRAMP\n\n**NOTE**: The FedRAMP version of Secure Access is released approximately *two weeks* after the commercial version, so some API endpoints may not be available immediately. <br><br>\n\nIf you are a FedRAMP customer in the US region, your base API URLs will be:\n- `https://api.us1.beyondidentity-gov.com`\n- `https://auth.us1.beyondidentity-gov.com`\n\nFor all the examples in this document, we will use the US region API base URL. You can always replace `https://api-us.beyondidentity.com`\nand `https://auth-us.beyondidentity.com` in the examples to use the proper base URL for your tenant.\n\n# Authentication\n\nAll Beyond Identity API endpoints require authentication using an access\ntoken. The access token is generated through OAuth 2.0 or OIDC, using the\nauthorization code flow or the client credentials flow. <br /><br />\n\nThe simplest way to acquire an access token is through the Beyond Identity Admin Console. Under the \"Applications\" tab, select the \"Beyond Identity Management API\" application, navigate to the \"API Tokens\" tab, and then click on \"Create token\". <br /><br />\n\nAlternatively, an access token may also be generated directly via the API by\nrequesting a token for the \"Beyond Identity Management API\" Application. <br><br>\n\n```\ncurl https://auth-us.beyondidentity.com/v1/tenants/$TENANT_ID/realms/$REALM_ID/applications/$APPLICATION_ID/token \\\n  -X POST \\\n  -u \"$CLIENT_ID:$CLIENT_SECRET\" --basic \\\n  -H \"Content-Type: application/x-www-form-urlencoded\" \\\n  -d \"grant_type=client_credentials&scope=$SCOPES\"\n```\n\nThis will work for any application that you have configured to provide\naccess to the Beyond Identity Management API Resource Server. The \"Beyond\nIdentity Management API\" application is provided by default as part of the\ntenant onboarding process.\n\nThe access token must be provided in the `Authorization` header of the\nAPI request. <br><br>\n\n```\ncurl https://api-us.beyondidentity.com/v1/... \\\n  -X $HTTP_METHOD -H \"Authorization: Bearer $TOKEN\"\n```\n\n## Requests and Responses\n\nTo interact with the Beyond Identity API, all requests should be made over\nHTTPS. <br /><br />\n\nThe Beyond Identity API is generally structured as a resource-oriented API.\nResources are represented as JSON objects and are used as both inputs to\nand outputs from API methods. <br /><br />\n\nResource fields may be described as read-only and immutable. A read-only\nfield is only provided on the response. An immutable field is only assigned\nonce and may not be changed after. For example, system-generated IDs are\ndescribed as both read-only and immutable. <br /><br />\n\nTo create a new resource, requests should use the `POST` method. Create\nrequests include all of the necessary attributes to create a new resource.\nCreate operations return the created resource in the response. <br /><br />\n\nTo retrieve a single resource or a collection of resources, requests should\nuse the `GET` method. When retrieving a collection of resources, the\nresponse will include an array of JSON objects keyed on the plural name of\nthe requested resource. <br /><br />\n\nTo update an resource, requests should use the `PATCH` method. Update\noperations support partial updating so requests may specify only the\nattributes which should be updated. Update operations return the updated\nresource in the response. <br /><br />\n\nTo delete a resource, requests should use the `DELETE` method. Note that\ndelete operations return an empty response instead of returning the\nresource in the response. <br /><br />\n\n### Example Response for a Realm\n\n```\n{\n  \"id\": \"a448fe493e02fa9f\",\n  \"tenant_id\": \"000168dc50bdce49\",\n  \"display_name\": \"Test Realm\",\n  \"create_time\": \"2022-06-22T21:46:08.930278Z\",\n  \"update_time\": \"2022-06-22T21:46:08.930278Z\"\n}\n```\n\n### Example Response for a Collection of Realms\n\n```\n{\n  \"realms\": [\n    {\n      \"id\": \"a448fe493e02fa9f\",\n      \"tenant_id\": \"000168dc50bdce49\",\n      \"display_name\": \"Test Realm\",\n      \"create_time\": \"2022-06-22T21:46:08.930278Z\",\n      \"update_time\": \"2022-06-22T21:46:08.930278Z\"\n    }\n  ],\n  \"total_size\": 1\n}\n```\n\n## HTTP Statuses\n\nThe API returns standard HTTP statuses and error codes.\n\nStatuses in the 200 range indicate that the request was successfully\nfulfilled and there were no errors. <br><br>\n\nStatuses in the 400 range indicate that there was an issue with the request\nthat may be addressed by the client. For example, client errors may\nindicate that the request was missing proper authorization or that the\nrequest was malformed. <br><br>\n\nStatuses in the 500 range indicate that the server encountered an internal\nissue and was unable to fulfill the request. <br><br>\n\nAll error responses include a JSON object with a `code` field and a\n`message` field. `code` contains a human-readable name for the HTTP status\ncode and `message` contains a high-level description of the error. The\nerror object may also contain additional error details which may be used by\nthe client to determine the exact cause of the error. Refer to each API\nmethod's examples to determine the specific error detail types supported\nfor that method. <br><br>\n\n### Invalid Access Token Example\n\nIf the provided access token is invalid, you will receive a 401 error.\nThis error indicates that the token is not recognized and was not generated\nby Beyond Identity. <br><br>\n\n```\nHTTP/1.1 401 Unauthorized\n{\n  \"code\": \"unauthorized\",\n  \"message\": \"unauthorized\"\n}\n```\n\n### Permission Denied Example\n\nIf the provided access token does not have access to the requested resource,\nyou will receive a 403 error. Access tokens are scoped at a minimum to your\ntenant. Any request for resources outside of your tenant will result in this\nerror. <br><br>\n\n```\nHTTP/1.1 403 Forbidden\n{\n  \"code\": \"forbidden\",\n  \"message\": \"forbidden\"\n}\n```\n\n### Missing Resource Example\n\nIf the requested resource does not exist, you will receive a 404 error. The\nspecific API method may return additional details about the missing\nresource. <br><br>\n\n```\nHTTP/1.1 404 Not Found\n{\n  \"code\": \"not_found\",\n  \"message\": \"group not found\"\n  \"details\": [\n    {\n      \"type\": \"ResourceInfo\",\n      \"resource_type\": \"Group\",\n      \"id\": \"4822738be6b7f658\",\n      \"description\": \"group not found\"\n    }\n  ],\n}\n```\n\n### Invalid Parameters Example\n\nIf the request body contains invalid parameters, you will receive a 400\nerror. The specific API method may return additional details about the\ninvalid parameter. <br><br>\n\n```\nHTTP/1.1 400 Bad Request\n{\n  \"code\": \"bad_request\",\n  \"message\": \"invalid parameters\"\n  \"details\": [\n    {\n      \"type\": \"FieldViolations\"\n      \"field_violations\": [\n        {\n          \"description\": \"missing\",\n          \"field\": \"group.display_name\"\n        }\n      ],\n    }\n  ],\n}\n```\n"
+servers:
+- url: https://api-us.beyondidentity.com
+  description: US region API base URL
+- url: https://api-eu.beyondidentity.com
+  description: EU region API base URL
+- url: https://api.us1.beyondidentity-gov.com/
+  description: US FedRAMP API base URL
+security:
+- BearerAuth: []
+tags:
+- name: Groups
+  description: 'A group is a logical collection of identities. Groups are commonly used as a predicate in a policy rule.
+
+    '
+paths:
+  /v1/tenants/{tenant_id}/realms/{realm_id}/groups:
+    post:
+      tags:
+      - Groups
+      operationId: CreateGroup
+      summary: Create a New Group
+      description: 'To create a group, send a POST request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/groups`. Values in the request body for read-only fields will be ignored.
+
+        '
+      security:
+      - BearerAuth:
+        - groups:create
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/realm_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Create Group Request
+              description: Request for CreateGroup.
+              type: object
+              properties:
+                group:
+                  $ref: '#/components/schemas/Group'
+              required:
+              - group
+            examples:
+              Create Group:
+                value:
+                  group:
+                    display_name: Realm Administrators
+                    description: A group of realm administrators.
+      responses:
+        '200':
+          description: 'The response will be a JSON object containing the standard attributes associated with a group.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+              examples:
+                Success:
+                  value:
+                    id: 81490afab171aef0
+                    realm_id: 7df92e4a38ba0993
+                    tenant_id: 0001b42d80372976
+                    display_name: Realm Administrators
+                    description: A group of realm administrators.
+                    create_time: '2022-03-14T03:42:52.905657Z'
+                    update_time: '2022-06-14T05:55:23.823187Z'
+        '400':
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Malformed Request:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/patch/responses/400/content/application~1json/examples/Malformed%20Request'
+                Invalid Parameters:
+                  value:
+                    code: bad_request
+                    message: invalid parameters
+                    details:
+                    - type: FieldViolations
+                      field_violations:
+                      - field: group.display_name
+                        description: empty string
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Missing Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/401/content/application~1json/examples/Missing%20Authorization'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Insufficient Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/403/content/application~1json/examples/Insufficient%20Authorization'
+        '404':
+          description: The resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Realm Not Found:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D/get/responses/404/content/application~1json/examples/Realm%20Not%20Found'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Internal Error:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
+    get:
+      tags:
+      - Groups
+      operationId: ListGroups
+      summary: List Groups for a Realm
+      description: 'To list all groups for a realm, send a GET request to
+
+        `/v1/tenants/$TENANT_ID/realms/$REALM_ID/groups`.
+
+
+        The response will contain at most 200 items and may contain a page token to
+
+        query the remaining items. If page size is not specified, the response will
+
+        contain 20 items. There is no defined ordering of the list of groups in the
+
+        response. Note that the maximum and default page sizes are subject to
+
+        change.
+
+
+        When paginating, the page size is maintained by the page token but may be
+
+        overridden on subsequent requests. The skip is not maintained by the page
+
+        token and must be specified on each subsequent request.
+
+
+        Page tokens expire after one week. Requests which specify an expired page
+
+        token will result in undefined behavior.
+
+        '
+      security:
+      - BearerAuth:
+        - groups:read
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/realm_id'
+      - $ref: '#/components/parameters/page_size'
+      - $ref: '#/components/parameters/page_token'
+      - $ref: '#/components/parameters/skip'
+      responses:
+        '200':
+          description: 'The response will be a JSON object with keys for `groups` and `total_size`. `groups` will be set to an array of group objects, each of which contains the standard group attributes. `total_size` will be set to the total number of items matched by the list request. If there are more items to be returned by the requested query, the response will also contain a key called `next_page_token`.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListGroupsResponse'
+              examples:
+                Success:
+                  value:
+                    groups:
+                    - id: 81490afab171aef0
+                      realm_id: 7df92e4a38ba0993
+                      tenant_id: 0001b42d80372976
+                      display_name: Realm Administrators
+                      description: A group of realm administrators.
+                      create_time: '2022-03-14T03:42:52.905657Z'
+                      update_time: '2022-06-14T05:55:23.823187Z'
+                    total_size: 1
+        '400':
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Invalid Parameters:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms/get/responses/400/content/application~1json/examples/Invalid%20Parameters'
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Missing Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/401/content/application~1json/examples/Missing%20Authorization'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Insufficient Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/403/content/application~1json/examples/Insufficient%20Authorization'
+        '404':
+          description: The resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Realm Not Found:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D/get/responses/404/content/application~1json/examples/Realm%20Not%20Found'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Internal Error:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
+  /v1/tenants/{tenant_id}/realms/{realm_id}/groups/{group_id}:
+    get:
+      tags:
+      - Groups
+      operationId: GetGroup
+      summary: Retrieve an Existing Group
+      description: 'To retrieve an existing group, send a GET request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/groups/$GROUP_ID`.
+
+        '
+      security:
+      - BearerAuth:
+        - groups:read
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/realm_id'
+      - $ref: '#/components/parameters/group_id'
+      responses:
+        '200':
+          description: 'The response will be a JSON object containing the standard attributes associated with a group.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+              examples:
+                Success:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1groups/post/responses/200/content/application~1json/examples/Success'
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Missing Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/401/content/application~1json/examples/Missing%20Authorization'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Insufficient Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/403/content/application~1json/examples/Insufficient%20Authorization'
+        '404':
+          description: The resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Group Not Found:
+                  value:
+                    code: not_found
+                    message: group not found
+                    details:
+                    - type: ResourceInfo
+                      resource_type: Group
+                      id: 4822738be6b7f658
+                      description: group not found
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Internal Error:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
+    patch:
+      tags:
+      - Groups
+      operationId: UpdateGroup
+      summary: Patch a Group
+      description: 'To update only specific attributes of an existing group, send a PATCH request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/groups/$GROUP_ID`. Values in the request body for immutable or read-only fields will be ignored. Fields that are omitted from the request body will be left unchanged.
+
+        '
+      security:
+      - BearerAuth:
+        - groups:update
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/realm_id'
+      - $ref: '#/components/parameters/group_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Update Group Request
+              description: Request for UpdateGroup.
+              type: object
+              properties:
+                group:
+                  $ref: '#/components/schemas/Group'
+              required:
+              - group
+            examples:
+              Update Display Name:
+                value:
+                  group:
+                    display_name: Realm Administrators
+      responses:
+        '200':
+          description: 'The response will be a JSON object containing the standard attributes associated with a group.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+              examples:
+                Success:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1groups/post/responses/200/content/application~1json/examples/Success'
+        '400':
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Malformed Request:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/patch/responses/400/content/application~1json/examples/Malformed%20Request'
+                Invalid Parameters:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1groups/post/responses/400/content/application~1json/examples/Invalid%20Parameters'
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Missing Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/401/content/application~1json/examples/Missing%20Authorization'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Insufficient Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/403/content/application~1json/examples/Insufficient%20Authorization'
+        '404':
+          description: The resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Group Not Found:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1groups~1%7Bgroup_id%7D/get/responses/404/content/application~1json/examples/Group%20Not%20Found'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Internal Error:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
+    delete:
+      tags:
+      - Groups
+      operationId: DeleteGroup
+      summary: Delete a Group
+      description: 'To delete a group, send a DELETE request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/groups/$GROUP_ID`. To be deleted, a group must not have any members. Any existing members must first be deleted or you will receive a 409 error.
+
+        A successful request will receive a 200 status code with no body in the response. This indicates that the request was processed successfully.
+
+        '
+      security:
+      - BearerAuth:
+        - groups:delete
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/realm_id'
+      - $ref: '#/components/parameters/group_id'
+      responses:
+        '200':
+          description: The action was successful and the response body is empty.
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Missing Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/401/content/application~1json/examples/Missing%20Authorization'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Insufficient Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/403/content/application~1json/examples/Insufficient%20Authorization'
+        '404':
+          description: The resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Group Not Found:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1groups~1%7Bgroup_id%7D/get/responses/404/content/application~1json/examples/Group%20Not%20Found'
+        '409':
+          description: Conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Group Has Members:
+                  value:
+                    code: conflict
+                    message: group has children
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Internal Error:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
+  /v1/tenants/{tenant_id}/realms/{realm_id}/groups/{group_id}:addMembers:
+    post:
+      tags:
+      - Groups
+      operationId: AddGroupMembers
+      summary: Add Members to a Group
+      description: 'To add members to a group, send a POST request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/groups/$GROUP_ID:addMembers`. The request must contain at least one and no more than 1000 identity IDs.
+
+        '
+      security:
+      - BearerAuth:
+        - groups:update
+        - identities:read
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/realm_id'
+      - $ref: '#/components/parameters/group_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Add Group Members Request
+              description: Request for AddGroupMembers.
+              type: object
+              properties:
+                identity_ids:
+                  description: IDs of the identities to be added to the group.
+                  type: array
+                  items:
+                    type: string
+                  minItems: 1
+                  maxItems: 1000
+              required:
+              - identity_ids
+            examples:
+              Add Members:
+                value:
+                  identity_ids:
+                  - e372db224c06e850
+                  - 3a28d4f28b57cc93
+      responses:
+        '200':
+          description: 'The response will be a JSON object containing the standard attributes associated with a group.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+              examples:
+                Success:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1groups/post/responses/200/content/application~1json/examples/Success'
+        '400':
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Malformed Request:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/patch/responses/400/content/application~1json/examples/Malformed%20Request'
+                Invalid Parameters:
+                  value:
+                    code: bad_request
+                    message: invalid parameters
+                    details:
+                    - type: FieldViolations
+                      field_violations:
+                      - field: identity_ids
+                        description: array exceeds 1000 elements
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Missing Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/401/content/application~1json/examples/Missing%20Authorization'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Insufficient Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/403/content/application~1json/examples/Insufficient%20Authorization'
+        '404':
+          description: The resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Group Not Found:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1groups~1%7Bgroup_id%7D/get/responses/404/content/application~1json/examples/Group%20Not%20Found'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Internal Error:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
+  /v1/tenants/{tenant_id}/realms/{realm_id}/groups/{group_id}:deleteMembers:
+    post:
+      tags:
+      - Groups
+      operationId: DeleteGroupMembers
+      summary: Delete Members from a Group
+      description: 'To delete members from a group, send a POST request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/groups/$GROUP_ID:deleteMembers`. The request must contain at least one and no more than 1000 identity IDs.
+
+        '
+      security:
+      - BearerAuth:
+        - groups:update
+        - identities:read
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/realm_id'
+      - $ref: '#/components/parameters/group_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Delete Group Members Request
+              description: Request for DeleteGroupMembers.
+              type: object
+              properties:
+                identity_ids:
+                  description: IDs of the identities to be removed from the group.
+                  type: array
+                  items:
+                    type: string
+                  minItems: 1
+                  maxItems: 1000
+              required:
+              - identity_ids
+            examples:
+              Delete Members:
+                value:
+                  identity_ids:
+                  - e372db224c06e850
+                  - 3a28d4f28b57cc93
+      responses:
+        '200':
+          description: 'The response will be a JSON object containing the standard attributes associated with a group.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+              examples:
+                Success:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1groups/post/responses/200/content/application~1json/examples/Success'
+        '400':
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Malformed Request:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/patch/responses/400/content/application~1json/examples/Malformed%20Request'
+                Invalid Parameters:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1groups~1%7Bgroup_id%7D%3AaddMembers/post/responses/400/content/application~1json/examples/Invalid%20Parameters'
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Missing Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/401/content/application~1json/examples/Missing%20Authorization'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Insufficient Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/403/content/application~1json/examples/Insufficient%20Authorization'
+        '404':
+          description: The resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Group Not Found:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1groups~1%7Bgroup_id%7D/get/responses/404/content/application~1json/examples/Group%20Not%20Found'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Internal Error:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
+  /v1/tenants/{tenant_id}/realms/{realm_id}/groups/{group_id}:listMembers:
+    get:
+      tags:
+      - Groups
+      operationId: ListGroupMembers
+      summary: List Members for a Group
+      description: 'To list members belonging to a group, send a GET request to
+
+        `/v1/tenants/$TENANT_ID/realms/$REALM_ID/groups/$GROUP_ID:listMembers`.
+
+
+        The response will contain at most 200 items and may contain a page token to
+
+        query the remaining items. If page size is not specified, the response will
+
+        contain 20 items. There is no defined ordering of the list of members in the
+
+        response. Note that the maximum and default page sizes are subject to
+
+        change.
+
+
+        When paginating, the page size is maintained by the page token but may be
+
+        overridden on subsequent requests. The skip is not maintained by the page
+
+        token and must be specified on each subsequent request.
+
+
+        Page tokens expire after one week. Requests which specify an expired page
+
+        token will result in undefined behavior.
+
+        '
+      security:
+      - BearerAuth:
+        - groups:read
+        - identities:read
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/realm_id'
+      - $ref: '#/components/parameters/group_id'
+      - $ref: '#/components/parameters/page_size'
+      - $ref: '#/components/parameters/page_token'
+      - $ref: '#/components/parameters/skip'
+      responses:
+        '200':
+          description: 'The response will be a JSON object with keys for `identities` and `total_size`. `identities` will be set to an array of identity objects, each of which contains the standard identity attributes. `total_size` will be set to the total number of items matched by the list request. If there are more items to be returned by the requested query, the response will also contain a key called `next_page_token`.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListGroupMembersResponse'
+              examples:
+                Success:
+                  value:
+                    identities:
+                    - id: e372db224c06e850
+                      realm_id: 8f5bec58229e6f29
+                      tenant_id: 0001f1f460b1ace6
+                      display_name: Test Identity
+                      create_time: '2022-04-12T05:53:07.119Z'
+                      update_time: '2022-06-16T14:31:03.770Z'
+                      traits:
+                        type: traits_v0
+                        username: test
+                        primary_email_address: test@example.com
+                    total_size: 1
+        '400':
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Invalid Parameters:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms/get/responses/400/content/application~1json/examples/Invalid%20Parameters'
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Missing Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/401/content/application~1json/examples/Missing%20Authorization'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Insufficient Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/403/content/application~1json/examples/Insufficient%20Authorization'
+        '404':
+          description: The resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Group Not Found:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1groups~1%7Bgroup_id%7D/get/responses/404/content/application~1json/examples/Group%20Not%20Found'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Internal Error:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
+  /v1/tenants/{tenant_id}/realms/{realm_id}/groups/{group_id}:listRoles:
+    get:
+      tags:
+      - Groups
+      operationId: ListGroupRoles
+      summary: List Role Memberships for a Group
+      description: 'To list the roles to which a group is assigned, send a GET request to
+
+        `/v1/tenants/$TENANT_ID/realms/$REALM_ID/groups/$GROUP_ID:listRoles`.
+
+
+        The request must include the `resource_server_id` query parameter specifying
+
+        the resource server on which to filter the roles. If the specified resource
+
+        server does not exist, you will receive a 409 error.
+
+
+        The response will contain at most 200 items and may contain a page token to
+
+        query the remaining items. If page size is not specified, the response will
+
+        contain 20 items. There is no defined ordering of the list of roles in the
+
+        response. Note that the maximum and default page sizes are subject to
+
+        change.
+
+
+        When paginating, the page size is maintained by the page token but may be
+
+        overridden on subsequent requests. The skip is not maintained by the page
+
+        token and must be specified on each subsequent request.
+
+
+        Page tokens expire after one week. Requests which specify an expired page
+
+        token will result in undefined behavior.
+
+        '
+      security:
+      - BearerAuth:
+        - groups:read
+        - roles:read
+        - resource-servers:read
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/realm_id'
+      - $ref: '#/components/parameters/group_id'
+      - $ref: '#/components/parameters/resource_server_id_query'
+      - $ref: '#/components/parameters/page_size'
+      - $ref: '#/components/parameters/page_token'
+      - $ref: '#/components/parameters/skip'
+      responses:
+        '200':
+          description: 'The response will be a JSON object with keys for `roles` and `total_size`. `roles` will be set to an array of role objects, each of which contains the standard role attributes. `total_size` will be set to the total number of items matched by the list request. If there are more items to be returned by the requested query, the response will also contain a key called `next_page_token`.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListGroupRolesResponse'
+              examples:
+                Success:
+                  value:
+                    roles:
+                    - id: fb785d40cbe4fc0d
+                      resource_server_id: 7b5a4325-00e0-4379-bd7b-3e5e7e30b09e
+                      realm_id: bb26e0e8ecdef843
+                      tenant_id: 00010036778ce59f
+                      description: Help Desk
+                      display_name: Customer support personnel.
+                      create_time: '2023-02-14T18:18:58.332247Z'
+                      update_time: '2023-02-14T18:18:58.332247Z'
+                    total_size: 1
+        '400':
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Invalid Parameters:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms/get/responses/400/content/application~1json/examples/Invalid%20Parameters'
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Missing Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/401/content/application~1json/examples/Missing%20Authorization'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Insufficient Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/403/content/application~1json/examples/Insufficient%20Authorization'
+        '404':
+          description: The resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Role Not Found:
+                  value:
+                    code: not_found
+                    message: role not found
+                    details:
+                    - type: ResourceInfo
+                      resource_type: Role
+                      id: fb785d40cbe4fc0d
+                      description: role not found
+        '409':
+          description: Conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Resource Server Not Found:
+                  value:
+                    code: conflict
+                    message: resource server not found
+                    details:
+                    - type: ResourceInfo
+                      resource_type: ResourceServer
+                      id: 7b5a4325-00e0-4379-bd7b-3e5e7e30b09e
+                      description: resource server not found
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Internal Error:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
+components:
+  parameters:
+    skip:
+      name: skip
+      in: query
+      description: 'Number of items to skip. This is the zero-based index of the first result.
+
+        '
+      schema:
+        type: integer
+        format: uint32
+        minimum: 0
+        default: 0
+    realm_id:
+      name: realm_id
+      in: path
+      description: A unique identifier for a realm.
+      required: true
+      schema:
+        type: string
+        example: 19a95130480dfa79
+    page_size:
+      name: page_size
+      in: query
+      description: 'Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.
+
+        '
+      schema:
+        type: integer
+        format: uint32
+        minimum: 0
+    group_id:
+      name: group_id
+      in: path
+      description: A unique identifier for a group.
+      required: true
+      schema:
+        type: string
+        example: 81490afab171aef0
+    tenant_id:
+      name: tenant_id
+      in: path
+      description: A unique identifier for a tenant.
+      required: true
+      schema:
+        type: string
+        example: 000176d94fd7b4d1
+    page_token:
+      name: page_token
+      in: query
+      description: 'Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.
+
+        '
+      schema:
+        type: string
+    resource_server_id_query:
+      name: resource_server_id
+      in: query
+      description: The unique identifier of the resource server used to filter roles.
+      schema:
+        type: string
+        minLength: 1
+  schemas:
+    Role:
+      title: Role
+      type: object
+      description: 'A role is a logical collection of scopes. Roles are commonly used to limit
+
+        access control.
+
+
+        The scopes belonging to a role are limited to its associated resource server.
+
+        However, note that the resource server may change independently of the role.
+
+        If scopes are added to or removed from a resource server, its associated
+
+        roles must be manually updated using the AddRoleScopes or DeleteRoleScopes
+
+        methods.
+
+        '
+      properties:
+        id:
+          type: string
+          description: 'A unique identifier for a role. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the realm.
+
+            '
+          readOnly: true
+          example: fb785d40cbe4fc0d
+        resource_server_id:
+          type: string
+          description: 'A unique identifier for the role''s resource server. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 7b5a4325-00e0-4379-bd7b-3e5e7e30b09e
+        realm_id:
+          type: string
+          description: 'A unique identifier for the role''s realm. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: bb26e0e8ecdef843
+        tenant_id:
+          type: string
+          description: 'A unique identifier for the role''s tenant. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 00010036778ce59f
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
+          description: 'A human-readable name for the role. This name is used for display purposes.
+
+            '
+          example: Help Desk
+        description:
+          type: string
+          maxLength: 300
+          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
+          description: 'A free-form text field to describe a role.
+
+            '
+          example: Customer support personnel.
+        create_time:
+          type: string
+          format: date-time
+          description: 'A time value given in ISO8601 combined date and time format that represents when the role was created. This is automatically generated on creation. This field is read-only.
+
+            '
+          readOnly: true
+          example: '2023-02-14T18:18:58.332247Z'
+        update_time:
+          type: string
+          format: date-time
+          description: 'A time value given in ISO8601 combined date and time format that represents when the role was last updated. This is automatically updated when the group is updated. This field is read-only.
+
+            '
+          readOnly: true
+          example: '2023-02-14T18:18:58.332247Z'
+    Group:
+      title: Group
+      type: object
+      description: 'A group is a logical collection of identities. Groups are commonly used as a predicate in a policy rule.
+
+        '
+      properties:
+        id:
+          type: string
+          description: 'A unique identifier for a group. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the realm.
+
+            '
+          readOnly: true
+          example: 81490afab171aef0
+        realm_id:
+          type: string
+          description: 'A unique identifier for the group''s realm. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 7df92e4a38ba0993
+        tenant_id:
+          type: string
+          description: 'A unique identifier for the group''s tenant. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 0001b42d80372976
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
+          description: 'A human-readable name for the group. This name is used for display purposes.
+
+            '
+          example: Realm Administrators
+        description:
+          type: string
+          maxLength: 300
+          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
+          description: 'A free-form text field to describe a group.
+
+            '
+          example: A group of realm administrators.
+        create_time:
+          type: string
+          format: date-time
+          description: 'A time value given in ISO8601 combined date and time format that represents when the group was created. This is automatically generated on creation. This field is read-only.
+
+            '
+          readOnly: true
+          example: '2022-03-14T03:42:52.905657Z'
+        update_time:
+          type: string
+          format: date-time
+          description: 'A time value given in ISO8601 combined date and time format that represents when the group was last updated. This is automatically updated when the group is updated. This field is read-only.
+
+            '
+          readOnly: true
+          example: '2022-06-14T05:55:23.823187Z'
+    ListGroupMembersResponse:
+      title: List Group Members Response
+      description: Response for ListGroupMembers.
+      type: object
+      properties:
+        identities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Identity'
+          maxItems: 200
+          description: An unordered array of identities corresponding to the request.
+        total_size:
+          type: integer
+          format: uint32
+          description: 'Total number of results returned by the operation. This value may be larger than the number of resources returned, such as when returning a single page where multiple pages are available.
+
+            '
+          example: 1000
+        next_page_token:
+          type: string
+          description: 'Token used to fetch the next set of results. If this field is omitted, there are no subsequent pages.
+
+            '
+      required:
+      - identities
+      - total_size
+    ErrorDetail:
+      title: Error Detail
+      description: 'Additional details for errors designed to support client applications.
+
+        '
+      type: object
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          type: string
+          description: Type of the error detail.
+      required:
+      - type
+    Identity:
+      title: Identity
+      type: object
+      description: 'An identity is a unique identifier that may be used by an end-user to gain access governed by Beyond Identity.
+
+        '
+      properties:
+        id:
+          type: string
+          description: 'A unique identifier for the identity. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the realm.
+
+            '
+          readOnly: true
+          example: e372db224c06e850
+        realm_id:
+          type: string
+          description: 'A unique identifier for the identity''s realm. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 8f5bec58229e6f29
+        tenant_id:
+          type: string
+          description: 'A unique identifier for the identity''s tenant. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 0001f1f460b1ace6
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
+          description: 'A human-readable name for the identity. This name is used for display purposes.
+
+            '
+          example: Test Display
+        create_time:
+          type: string
+          format: date-time
+          description: 'A time value given in ISO8601 combined date and time format that represents when the identity was created. This is automatically generated on creation. This field is read-only.
+
+            '
+          readOnly: true
+          example: '2022-04-12T05:53:07.119Z'
+        update_time:
+          type: string
+          format: date-time
+          description: 'A time value given in ISO8601 combined date and time format that represents when the identity was last updated. This is automatically updated when the identity is updated. This field is read-only.
+
+            '
+          readOnly: true
+          example: '2022-06-16T14:31:03.770Z'
+        status:
+          type: string
+          description: 'Indicator for the identity''s administrative status.  If ''active'', the identity is able to generate passkeys and login.  If ''suspended'', the identity is unable to generate passkeys or login.
+
+            '
+          example: active
+        traits:
+          description: 'A collection of properties to describe an identity. All traits contain a `type` key which describes the specific traits schema.
+
+            '
+          oneOf:
+          - $ref: '#/components/schemas/Traits_v0'
+          discriminator:
+            propertyName: type
+            mapping:
+              traits_v0: '#/components/schemas/Traits_v0'
+        enrollment_status:
+          type: string
+          enum:
+          - ENROLLED
+          - PENDING
+          - INVITE_FAILED
+          - UNENROLLED
+          description: 'Indicator for the identity''s enrollment status.
+
+
+            If ''ENROLLED'', the identity has 1 or more active passkeys.
+
+            If ''PENDING'', the identity has no active passkeys and 1 or more pending enrollments.
+
+            If ''INVITE_FAILED'', the identity has no active passkeys, no pending enrollments, and 1 or more failed enrollments.
+
+            If ''UNENROLLED'', the identity is not enrolled in the organization.
+
+
+            May be undefined. This field is output-only.
+
+            '
+          example: ENROLLED
+          readOnly: true
+    ListGroupRolesResponse:
+      title: List Group Roles Response
+      description: Response for ListGroupRoles.
+      type: object
+      properties:
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+          maxItems: 200
+          description: An unordered array of roles corresponding to the request.
+        total_size:
+          type: integer
+          format: uint32
+          description: 'Total number of results returned by the operation. This value may be larger than the number of resources returned, such as when returning a single page where multiple pages are available.
+
+            '
+          example: 1000
+        next_page_token:
+          type: string
+          description: 'Token used to fetch the next set of results. If this field is omitted, there are no subsequent pages.
+
+            '
+      required:
+      - roles
+      - total_size
+    Traits_v0:
+      title: Traits_v0
+      description: Set of traits associated with an identity.
+      type: object
+      properties:
+        type:
+          type: string
+          description: 'The type of the traits schema. This value must be provided on all writes.
+
+            '
+          example: traits_v0
+        username:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
+          description: A required, unique, case-insensitive username for an identity in the realm.
+          example: test
+        primary_email_address:
+          type: string
+          description: Email address serving as primary contact for identity.
+          example: test@example.com
+        secondary_email_address:
+          type: string
+          description: 'An additional email address for the user.
+
+            '
+        external_id:
+          type: string
+          description: 'An ID issued by the provisioning client. It is assumed that the value''s uniqueness is controlled by the client setting the value.
+
+            '
+        family_name:
+          type: string
+          description: 'The family name or last name in most Western languages.
+
+            '
+        given_name:
+          type: string
+          description: 'The given name or first name in most Western languages.
+
+            '
+        formatted_name:
+          type: string
+          description: 'The full name, including all middle names, titles, and suffixes as appropriate, formatted for display (e.g. "Ms. Barbara Jane Jensen, III").
+
+            '
+        middle_name:
+          type: string
+          description: 'The middle name of the user, if applicable.
+
+            '
+        honorific_prefix:
+          type: string
+          description: 'Honorifics like "Mr.", "Mrs.", "Dr.", etc.
+
+            '
+        honorific_suffix:
+          type: string
+          description: 'Suffixes such as "Jr.", "Sr.", "III", etc.
+
+            '
+        nick_name:
+          type: string
+          description: 'A nickname the user goes by.
+
+            '
+        title:
+          type: string
+          description: 'The user''s job title.
+
+            '
+        primary_phone:
+          type: string
+          description: 'The primary contact phone number for the user.
+
+            '
+        secondary_phone:
+          type: string
+          description: 'An additional phone number for the user.
+
+            '
+        profile_url:
+          type: string
+          description: 'A URL to the user''s profile.
+
+            '
+        photo:
+          type: string
+          description: 'A URL to the user''s photo.
+
+            '
+        preferred_language:
+          type: string
+          description: 'The user''s preferred language.
+
+            '
+        locale:
+          type: string
+          description: 'The locale of the user, typically in the format of language-region.
+
+            '
+        timezone:
+          type: string
+          description: 'The timezone of the user.
+
+            '
+        formatted_address:
+          type: string
+          description: 'The full mailing address, formatted for display or use with a mailing label. This attribute MAY contain newlines.
+
+            '
+        street_address:
+          type: string
+          description: 'The full street address component, which may include house number, street name, P.O. box, and multi-line extended street address information. This attribute MAY contain newlines.
+
+            '
+        locality:
+          type: string
+          description: 'The locality or city of the user.
+
+            '
+        region:
+          type: string
+          description: 'The region or state of the user.
+
+            '
+        postal_code:
+          type: string
+          description: 'The zip code or postal code of the user.
+
+            '
+        country:
+          type: string
+          description: 'The country of the user.
+
+            '
+        user_type:
+          type: string
+          description: 'Used to identify the relationship between the organization and the user. Typical values used might be ''Contractor'', ''Employee'', ''Intern'', ''Temp'', ''External'', and ''Unknown'', but any value may be used.
+
+            '
+        employee_number:
+          type: string
+          description: 'The employee number assigned to the user, typically based on order of hire or association with an organization.
+
+            '
+        cost_center:
+          type: string
+          description: 'The cost center associated with the user.
+
+            '
+        organization:
+          type: string
+          description: 'The organization the user belongs to.
+
+            '
+        division:
+          type: string
+          description: 'The division of the organization the user belongs to.
+
+            '
+        department:
+          type: string
+          description: 'The department of the organization the user belongs to.
+
+            '
+        manager_id:
+          type: string
+          description: 'The unique identifier for the user''s manager.
+
+            '
+        manager_name:
+          type: string
+          description: 'The name of the user''s manager.
+
+            '
+      required:
+      - type
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
+
+            '
+        message:
+          type: string
+          description: 'Human-readable message describing the error.
+
+            '
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      required:
+      - code
+      - message
+    ListGroupsResponse:
+      title: List Groups Response
+      description: Response for ListGroups.
+      type: object
+      properties:
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/Group'
+          maxItems: 200
+          description: An unordered array of groups corresponding to the request.
+        total_size:
+          type: integer
+          format: uint32
+          description: 'Total number of results returned by the operation. This value may be larger than the number of resources returned, such as when returning a single page where multiple pages are available.
+
+            '
+          example: 1000
+        next_page_token:
+          type: string
+          description: 'Token used to fetch the next set of results. If this field is omitted, there are no subsequent pages.
+
+            '
+      required:
+      - groups
+      - total_size
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'See the [Authentication](#section/Authentication) section for details.
+
+        '

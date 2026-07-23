@@ -1,0 +1,606 @@
+openapi: 3.0.1
+info:
+  title: Beyond Identity Secure Access Applications Realms API
+  version: 1.7.0
+  contact:
+    email: support@beyondidentity.com
+  description: "# Introduction\n\n**NOTE:** To determine if you are accessing the Secure Access Platform, check the URL of your Admin Console.\nIf it looks like one of the following, you are using the Secure Access Platform:\n- `https://console.beyondidentity.com` (Localized to your region)\n- `https://console-us.beyondidentity.com` (US region)\n- `https://console-eu.beyondidentity.com` (EU region)\n- `https://console.us1.beyondidentity-gov.com` (US FedRAMP)\n\nIf your Admin Console URL does not look like one of the above, you are using the Secure Workforce Platform. Please refer to the [Secure Workforce API documentation](https://docs.beyondidentity.com/api/v0). <br /><br />\n\nThe Beyond Identity Secure Access API defines methods for managing resources in the Beyond Identity Secure Access platform.<br /><br />\n\nAll of the functionality available in the Beyond Identity Admin Console is\nalso available through the API. <br /><br />\n\nThis API is currently in the early-access stage and is under active\ndevelopment. Feedback and suggestions are encouraged and should be directed\nto the\n[Beyond Identity Developer Slack Channel](https://join.slack.com/t/byndid/shared_invite/zt-1anns8n83-NQX4JvW7coi9dksADxgeBQ).\n\n# Base API URLs\n\nThe base API URLs is determined by the region your tenant is hosted in OR if you are a FedRAMP customer. <br><br>\n\n### US Region\n\nIf you are a US region customer, your base API URLs will be:\n- `https://api-us.beyondidentity.com`\n- `https://auth-us.beyondidentity.com`\n\n### EU Region\n\nIf you are a EU region customer, your base API URLs will be:\n- `https://api-eu.beyondidentity.com`\n- `https://auth-eu.beyondidentity.com`\n\n### US FedRAMP\n\n**NOTE**: The FedRAMP version of Secure Access is released approximately *two weeks* after the commercial version, so some API endpoints may not be available immediately. <br><br>\n\nIf you are a FedRAMP customer in the US region, your base API URLs will be:\n- `https://api.us1.beyondidentity-gov.com`\n- `https://auth.us1.beyondidentity-gov.com`\n\nFor all the examples in this document, we will use the US region API base URL. You can always replace `https://api-us.beyondidentity.com`\nand `https://auth-us.beyondidentity.com` in the examples to use the proper base URL for your tenant.\n\n# Authentication\n\nAll Beyond Identity API endpoints require authentication using an access\ntoken. The access token is generated through OAuth 2.0 or OIDC, using the\nauthorization code flow or the client credentials flow. <br /><br />\n\nThe simplest way to acquire an access token is through the Beyond Identity Admin Console. Under the \"Applications\" tab, select the \"Beyond Identity Management API\" application, navigate to the \"API Tokens\" tab, and then click on \"Create token\". <br /><br />\n\nAlternatively, an access token may also be generated directly via the API by\nrequesting a token for the \"Beyond Identity Management API\" Application. <br><br>\n\n```\ncurl https://auth-us.beyondidentity.com/v1/tenants/$TENANT_ID/realms/$REALM_ID/applications/$APPLICATION_ID/token \\\n  -X POST \\\n  -u \"$CLIENT_ID:$CLIENT_SECRET\" --basic \\\n  -H \"Content-Type: application/x-www-form-urlencoded\" \\\n  -d \"grant_type=client_credentials&scope=$SCOPES\"\n```\n\nThis will work for any application that you have configured to provide\naccess to the Beyond Identity Management API Resource Server. The \"Beyond\nIdentity Management API\" application is provided by default as part of the\ntenant onboarding process.\n\nThe access token must be provided in the `Authorization` header of the\nAPI request. <br><br>\n\n```\ncurl https://api-us.beyondidentity.com/v1/... \\\n  -X $HTTP_METHOD -H \"Authorization: Bearer $TOKEN\"\n```\n\n## Requests and Responses\n\nTo interact with the Beyond Identity API, all requests should be made over\nHTTPS. <br /><br />\n\nThe Beyond Identity API is generally structured as a resource-oriented API.\nResources are represented as JSON objects and are used as both inputs to\nand outputs from API methods. <br /><br />\n\nResource fields may be described as read-only and immutable. A read-only\nfield is only provided on the response. An immutable field is only assigned\nonce and may not be changed after. For example, system-generated IDs are\ndescribed as both read-only and immutable. <br /><br />\n\nTo create a new resource, requests should use the `POST` method. Create\nrequests include all of the necessary attributes to create a new resource.\nCreate operations return the created resource in the response. <br /><br />\n\nTo retrieve a single resource or a collection of resources, requests should\nuse the `GET` method. When retrieving a collection of resources, the\nresponse will include an array of JSON objects keyed on the plural name of\nthe requested resource. <br /><br />\n\nTo update an resource, requests should use the `PATCH` method. Update\noperations support partial updating so requests may specify only the\nattributes which should be updated. Update operations return the updated\nresource in the response. <br /><br />\n\nTo delete a resource, requests should use the `DELETE` method. Note that\ndelete operations return an empty response instead of returning the\nresource in the response. <br /><br />\n\n### Example Response for a Realm\n\n```\n{\n  \"id\": \"a448fe493e02fa9f\",\n  \"tenant_id\": \"000168dc50bdce49\",\n  \"display_name\": \"Test Realm\",\n  \"create_time\": \"2022-06-22T21:46:08.930278Z\",\n  \"update_time\": \"2022-06-22T21:46:08.930278Z\"\n}\n```\n\n### Example Response for a Collection of Realms\n\n```\n{\n  \"realms\": [\n    {\n      \"id\": \"a448fe493e02fa9f\",\n      \"tenant_id\": \"000168dc50bdce49\",\n      \"display_name\": \"Test Realm\",\n      \"create_time\": \"2022-06-22T21:46:08.930278Z\",\n      \"update_time\": \"2022-06-22T21:46:08.930278Z\"\n    }\n  ],\n  \"total_size\": 1\n}\n```\n\n## HTTP Statuses\n\nThe API returns standard HTTP statuses and error codes.\n\nStatuses in the 200 range indicate that the request was successfully\nfulfilled and there were no errors. <br><br>\n\nStatuses in the 400 range indicate that there was an issue with the request\nthat may be addressed by the client. For example, client errors may\nindicate that the request was missing proper authorization or that the\nrequest was malformed. <br><br>\n\nStatuses in the 500 range indicate that the server encountered an internal\nissue and was unable to fulfill the request. <br><br>\n\nAll error responses include a JSON object with a `code` field and a\n`message` field. `code` contains a human-readable name for the HTTP status\ncode and `message` contains a high-level description of the error. The\nerror object may also contain additional error details which may be used by\nthe client to determine the exact cause of the error. Refer to each API\nmethod's examples to determine the specific error detail types supported\nfor that method. <br><br>\n\n### Invalid Access Token Example\n\nIf the provided access token is invalid, you will receive a 401 error.\nThis error indicates that the token is not recognized and was not generated\nby Beyond Identity. <br><br>\n\n```\nHTTP/1.1 401 Unauthorized\n{\n  \"code\": \"unauthorized\",\n  \"message\": \"unauthorized\"\n}\n```\n\n### Permission Denied Example\n\nIf the provided access token does not have access to the requested resource,\nyou will receive a 403 error. Access tokens are scoped at a minimum to your\ntenant. Any request for resources outside of your tenant will result in this\nerror. <br><br>\n\n```\nHTTP/1.1 403 Forbidden\n{\n  \"code\": \"forbidden\",\n  \"message\": \"forbidden\"\n}\n```\n\n### Missing Resource Example\n\nIf the requested resource does not exist, you will receive a 404 error. The\nspecific API method may return additional details about the missing\nresource. <br><br>\n\n```\nHTTP/1.1 404 Not Found\n{\n  \"code\": \"not_found\",\n  \"message\": \"group not found\"\n  \"details\": [\n    {\n      \"type\": \"ResourceInfo\",\n      \"resource_type\": \"Group\",\n      \"id\": \"4822738be6b7f658\",\n      \"description\": \"group not found\"\n    }\n  ],\n}\n```\n\n### Invalid Parameters Example\n\nIf the request body contains invalid parameters, you will receive a 400\nerror. The specific API method may return additional details about the\ninvalid parameter. <br><br>\n\n```\nHTTP/1.1 400 Bad Request\n{\n  \"code\": \"bad_request\",\n  \"message\": \"invalid parameters\"\n  \"details\": [\n    {\n      \"type\": \"FieldViolations\"\n      \"field_violations\": [\n        {\n          \"description\": \"missing\",\n          \"field\": \"group.display_name\"\n        }\n      ],\n    }\n  ],\n}\n```\n"
+servers:
+- url: https://api-us.beyondidentity.com
+  description: US region API base URL
+- url: https://api-eu.beyondidentity.com
+  description: EU region API base URL
+- url: https://api.us1.beyondidentity-gov.com/
+  description: US FedRAMP API base URL
+security:
+- BearerAuth: []
+tags:
+- name: Realms
+  description: 'A realm is a unique administrative domain within a tenant. Realms may be used to define multiple development environments or for isolated administrative domains.
+
+    '
+paths:
+  /v1/tenants/{tenant_id}/realms:
+    post:
+      tags:
+      - Realms
+      operationId: CreateRealm
+      summary: Create a New Realm
+      description: 'To create a realm, send a POST request to `/v1/tenants/$TENANT_ID/realms`. Values in the request body for read-only fields will be ignored.
+
+        '
+      security:
+      - BearerAuth:
+        - realms:create
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Create Realm Request
+              description: Request for CreateRealm.
+              type: object
+              properties:
+                realm:
+                  $ref: '#/components/schemas/Realm'
+              required:
+              - realm
+      responses:
+        '200':
+          description: 'The response will be a JSON object containing the standard attributes associated with a realm.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Realm'
+              examples:
+                Success:
+                  value:
+                    id: 19a95130480dfa79
+                    tenant_id: 0001f1f460b1ace6
+                    display_name: Test Realm
+                    classification: SECURE_WORKFORCE
+                    create_time: '2022-05-18T18:00:01.167Z'
+                    update_time: '2022-05-19T14:23:01.327Z'
+        '400':
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Malformed Request:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/patch/responses/400/content/application~1json/examples/Malformed%20Request'
+                Invalid Parameters:
+                  value:
+                    code: bad_request
+                    message: invalid parameters
+                    details:
+                    - type: FieldViolations
+                      field_violations:
+                      - field: realm.display_name
+                        description: empty string
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Missing Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/401/content/application~1json/examples/Missing%20Authorization'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Insufficient Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/403/content/application~1json/examples/Insufficient%20Authorization'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Internal Error:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
+    get:
+      tags:
+      - Realms
+      operationId: ListRealms
+      summary: List Realms for a Tenant
+      description: 'To list all realms for a tenant, send a GET request to
+
+        `/v1/tenants/$TENANT_ID/realms`.
+
+
+        The response will contain at most 200 items and may contain a page token to
+
+        query the remaining items. If page size is not specified, the response will
+
+        contain 20 items. There is no defined ordering of the list of realms in the
+
+        response. Note that the maximum and default page sizes are subject to
+
+        change.
+
+
+        When paginating, the page size is maintained by the page token but may be
+
+        overridden on subsequent requests. The skip is not maintained by the page
+
+        token and must be specified on each subsequent request.
+
+
+        Page tokens expire after one week. Requests which specify an expired page
+
+        token will result in undefined behavior.
+
+        '
+      security:
+      - BearerAuth:
+        - realms:read
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/page_size'
+      - $ref: '#/components/parameters/page_token'
+      - $ref: '#/components/parameters/skip'
+      responses:
+        '200':
+          description: 'The response will be a JSON object with keys for `realms` and `total_size`. `realms` will be set to an array of realm objects, each of which contain the standard realm attributes. `total_size` will be set to the total number of items matched by the list request. If there are more items to be returned by the requested query, the response will also contain a key called `next_page_token`.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListRealmsResponse'
+              examples:
+                Success:
+                  value:
+                    realms:
+                    - id: 19a95130480dfa79
+                      tenant_id: 0001f1f460b1ace6
+                      display_name: Test Realm
+                      create_time: '2022-05-18T18:00:01.167Z'
+                      update_time: '2022-05-19T14:23:01.327Z'
+                    total_size: 1
+        '400':
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Invalid Parameters:
+                  value:
+                    code: bad_request
+                    message: invalid parameters
+                    details:
+                    - type: FieldViolations
+                      field_violations:
+                      - field: page_token
+                        description: invalid page token
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Missing Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/401/content/application~1json/examples/Missing%20Authorization'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Insufficient Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/403/content/application~1json/examples/Insufficient%20Authorization'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Internal Error:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
+  /v1/tenants/{tenant_id}/realms/{realm_id}:
+    get:
+      tags:
+      - Realms
+      operationId: GetRealm
+      summary: Retrieve an Existing Realm
+      description: 'To retrieve an existing realm, send a GET request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID`.
+
+        '
+      security:
+      - BearerAuth:
+        - realms:read
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/realm_id'
+      responses:
+        '200':
+          description: 'The response will be a JSON object containing the standard attributes associated with a realm.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Realm'
+              examples:
+                Success:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms/post/responses/200/content/application~1json/examples/Success'
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Missing Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/401/content/application~1json/examples/Missing%20Authorization'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Insufficient Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/403/content/application~1json/examples/Insufficient%20Authorization'
+        '404':
+          description: The resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Realm Not Found:
+                  value:
+                    code: not_found
+                    message: realm not found
+                    details:
+                    - type: ResourceInfo
+                      resource_type: Realm
+                      id: 19a95130480dfa79
+                      description: realm not found
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Internal Error:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
+    patch:
+      tags:
+      - Realms
+      operationId: UpdateRealm
+      summary: Patch a Realm
+      description: 'To update only specific attributes of an existing realm, send a PATCH request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID`. Values in the request body for immutable or read-only fields will be ignored. Fields that are omitted from the request body will be left unchanged.
+
+        '
+      security:
+      - BearerAuth:
+        - realms:update
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/realm_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Update Realm Request
+              description: Request for UpdateRealm.
+              type: object
+              properties:
+                realm:
+                  $ref: '#/components/schemas/Realm'
+              required:
+              - realm
+            examples:
+              Update Display Name:
+                value:
+                  realm:
+                    display_name: Test Realm
+      responses:
+        '200':
+          description: 'The response will be a JSON object containing the standard attributes associated with a realm.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Realm'
+              examples:
+                Success:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms/post/responses/200/content/application~1json/examples/Success'
+        '400':
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Malformed Request:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/patch/responses/400/content/application~1json/examples/Malformed%20Request'
+                Invalid Parameters:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms/post/responses/400/content/application~1json/examples/Invalid%20Parameters'
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Missing Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/401/content/application~1json/examples/Missing%20Authorization'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Insufficient Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/403/content/application~1json/examples/Insufficient%20Authorization'
+        '404':
+          description: The resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Realm Not Found:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D/get/responses/404/content/application~1json/examples/Realm%20Not%20Found'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Internal Error:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
+    delete:
+      tags:
+      - Realms
+      operationId: DeleteRealm
+      summary: Delete a Realm
+      description: 'To delete a realm, send a DELETE request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID`. To be deleted, a realm must not have any identities, groups, or roles. All associated resources must first be deleted or you will receive a 409 error.
+
+        A successful request will receive a 200 status code with no body in the response. This indicates that the request was processed successfully.
+
+        '
+      security:
+      - BearerAuth:
+        - realms:delete
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/realm_id'
+      responses:
+        '200':
+          description: The action was successful and the response body is empty.
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Missing Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/401/content/application~1json/examples/Missing%20Authorization'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Insufficient Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/403/content/application~1json/examples/Insufficient%20Authorization'
+        '404':
+          description: The resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Realm Not Found:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D/get/responses/404/content/application~1json/examples/Realm%20Not%20Found'
+        '409':
+          description: Conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Realm Has Resources:
+                  value:
+                    code: conflict
+                    message: realm has children
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Internal Error:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
+components:
+  schemas:
+    ListRealmsResponse:
+      title: List Realms Response
+      description: Response for ListRealms.
+      type: object
+      properties:
+        realms:
+          type: array
+          items:
+            $ref: '#/components/schemas/Realm'
+          maxItems: 200
+          description: An unordered array of realms corresponding to the request.
+        total_size:
+          type: integer
+          format: uint32
+          description: 'Total number of results returned by the operation. This value may be larger than the number of resources returned, such as when returning a single page where multiple pages are available.
+
+            '
+          example: 1000
+        next_page_token:
+          type: string
+          description: 'Token used to fetch the next set of results. If this field is omitted, there are no subsequent pages.
+
+            '
+      required:
+      - realms
+      - total_size
+    ErrorDetail:
+      title: Error Detail
+      description: 'Additional details for errors designed to support client applications.
+
+        '
+      type: object
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          type: string
+          description: Type of the error detail.
+      required:
+      - type
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
+
+            '
+        message:
+          type: string
+          description: 'Human-readable message describing the error.
+
+            '
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      required:
+      - code
+      - message
+    Realm:
+      title: Realm
+      type: object
+      description: 'A realm is a unique administrative domain within a tenant. Realms may be used to define multiple development environments or for isolated administrative domains.
+
+        '
+      properties:
+        id:
+          type: string
+          description: 'A unique identifier for the realm. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the tenant.
+
+            '
+          readOnly: true
+          example: 19a95130480dfa79
+        tenant_id:
+          type: string
+          description: 'A unique identifier of the realm''s tenant. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 0001f1f460b1ace6
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
+          description: 'A human-readable name for the realm. This name is used for display purposes.
+
+            '
+          example: Test Realm
+        classification:
+          type: string
+          description: Classification of the realm. Can be either SECURE_WORFORCE or SECURE_CUSTOMER
+          example: SECURE_CUSTOMER
+        create_time:
+          type: string
+          format: date-time
+          description: 'A time value given in ISO8601 combined date and time format that represents when the realm was created. This is automatically generated on creation. This field is read-only.
+
+            '
+          readOnly: true
+          example: '2022-05-18T18:00:01.167Z'
+        update_time:
+          type: string
+          format: date-time
+          description: 'A time value given in ISO8601 combined date and time format that represents when the realm was last updated. This is automatically updated when the realm is updated. This field is read-only.
+
+            '
+          readOnly: true
+          example: '2022-05-19T14:23:01.327Z'
+  parameters:
+    realm_id:
+      name: realm_id
+      in: path
+      description: A unique identifier for a realm.
+      required: true
+      schema:
+        type: string
+        example: 19a95130480dfa79
+    skip:
+      name: skip
+      in: query
+      description: 'Number of items to skip. This is the zero-based index of the first result.
+
+        '
+      schema:
+        type: integer
+        format: uint32
+        minimum: 0
+        default: 0
+    page_size:
+      name: page_size
+      in: query
+      description: 'Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.
+
+        '
+      schema:
+        type: integer
+        format: uint32
+        minimum: 0
+    tenant_id:
+      name: tenant_id
+      in: path
+      description: A unique identifier for a tenant.
+      required: true
+      schema:
+        type: string
+        example: 000176d94fd7b4d1
+    page_token:
+      name: page_token
+      in: query
+      description: 'Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.
+
+        '
+      schema:
+        type: string
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'See the [Authentication](#section/Authentication) section for details.
+
+        '

@@ -1,0 +1,851 @@
+openapi: 3.0.1
+info:
+  title: Beyond Identity Secure Access Applications Authenticator Configurations API
+  version: 1.7.0
+  contact:
+    email: support@beyondidentity.com
+  description: "# Introduction\n\n**NOTE:** To determine if you are accessing the Secure Access Platform, check the URL of your Admin Console.\nIf it looks like one of the following, you are using the Secure Access Platform:\n- `https://console.beyondidentity.com` (Localized to your region)\n- `https://console-us.beyondidentity.com` (US region)\n- `https://console-eu.beyondidentity.com` (EU region)\n- `https://console.us1.beyondidentity-gov.com` (US FedRAMP)\n\nIf your Admin Console URL does not look like one of the above, you are using the Secure Workforce Platform. Please refer to the [Secure Workforce API documentation](https://docs.beyondidentity.com/api/v0). <br /><br />\n\nThe Beyond Identity Secure Access API defines methods for managing resources in the Beyond Identity Secure Access platform.<br /><br />\n\nAll of the functionality available in the Beyond Identity Admin Console is\nalso available through the API. <br /><br />\n\nThis API is currently in the early-access stage and is under active\ndevelopment. Feedback and suggestions are encouraged and should be directed\nto the\n[Beyond Identity Developer Slack Channel](https://join.slack.com/t/byndid/shared_invite/zt-1anns8n83-NQX4JvW7coi9dksADxgeBQ).\n\n# Base API URLs\n\nThe base API URLs is determined by the region your tenant is hosted in OR if you are a FedRAMP customer. <br><br>\n\n### US Region\n\nIf you are a US region customer, your base API URLs will be:\n- `https://api-us.beyondidentity.com`\n- `https://auth-us.beyondidentity.com`\n\n### EU Region\n\nIf you are a EU region customer, your base API URLs will be:\n- `https://api-eu.beyondidentity.com`\n- `https://auth-eu.beyondidentity.com`\n\n### US FedRAMP\n\n**NOTE**: The FedRAMP version of Secure Access is released approximately *two weeks* after the commercial version, so some API endpoints may not be available immediately. <br><br>\n\nIf you are a FedRAMP customer in the US region, your base API URLs will be:\n- `https://api.us1.beyondidentity-gov.com`\n- `https://auth.us1.beyondidentity-gov.com`\n\nFor all the examples in this document, we will use the US region API base URL. You can always replace `https://api-us.beyondidentity.com`\nand `https://auth-us.beyondidentity.com` in the examples to use the proper base URL for your tenant.\n\n# Authentication\n\nAll Beyond Identity API endpoints require authentication using an access\ntoken. The access token is generated through OAuth 2.0 or OIDC, using the\nauthorization code flow or the client credentials flow. <br /><br />\n\nThe simplest way to acquire an access token is through the Beyond Identity Admin Console. Under the \"Applications\" tab, select the \"Beyond Identity Management API\" application, navigate to the \"API Tokens\" tab, and then click on \"Create token\". <br /><br />\n\nAlternatively, an access token may also be generated directly via the API by\nrequesting a token for the \"Beyond Identity Management API\" Application. <br><br>\n\n```\ncurl https://auth-us.beyondidentity.com/v1/tenants/$TENANT_ID/realms/$REALM_ID/applications/$APPLICATION_ID/token \\\n  -X POST \\\n  -u \"$CLIENT_ID:$CLIENT_SECRET\" --basic \\\n  -H \"Content-Type: application/x-www-form-urlencoded\" \\\n  -d \"grant_type=client_credentials&scope=$SCOPES\"\n```\n\nThis will work for any application that you have configured to provide\naccess to the Beyond Identity Management API Resource Server. The \"Beyond\nIdentity Management API\" application is provided by default as part of the\ntenant onboarding process.\n\nThe access token must be provided in the `Authorization` header of the\nAPI request. <br><br>\n\n```\ncurl https://api-us.beyondidentity.com/v1/... \\\n  -X $HTTP_METHOD -H \"Authorization: Bearer $TOKEN\"\n```\n\n## Requests and Responses\n\nTo interact with the Beyond Identity API, all requests should be made over\nHTTPS. <br /><br />\n\nThe Beyond Identity API is generally structured as a resource-oriented API.\nResources are represented as JSON objects and are used as both inputs to\nand outputs from API methods. <br /><br />\n\nResource fields may be described as read-only and immutable. A read-only\nfield is only provided on the response. An immutable field is only assigned\nonce and may not be changed after. For example, system-generated IDs are\ndescribed as both read-only and immutable. <br /><br />\n\nTo create a new resource, requests should use the `POST` method. Create\nrequests include all of the necessary attributes to create a new resource.\nCreate operations return the created resource in the response. <br /><br />\n\nTo retrieve a single resource or a collection of resources, requests should\nuse the `GET` method. When retrieving a collection of resources, the\nresponse will include an array of JSON objects keyed on the plural name of\nthe requested resource. <br /><br />\n\nTo update an resource, requests should use the `PATCH` method. Update\noperations support partial updating so requests may specify only the\nattributes which should be updated. Update operations return the updated\nresource in the response. <br /><br />\n\nTo delete a resource, requests should use the `DELETE` method. Note that\ndelete operations return an empty response instead of returning the\nresource in the response. <br /><br />\n\n### Example Response for a Realm\n\n```\n{\n  \"id\": \"a448fe493e02fa9f\",\n  \"tenant_id\": \"000168dc50bdce49\",\n  \"display_name\": \"Test Realm\",\n  \"create_time\": \"2022-06-22T21:46:08.930278Z\",\n  \"update_time\": \"2022-06-22T21:46:08.930278Z\"\n}\n```\n\n### Example Response for a Collection of Realms\n\n```\n{\n  \"realms\": [\n    {\n      \"id\": \"a448fe493e02fa9f\",\n      \"tenant_id\": \"000168dc50bdce49\",\n      \"display_name\": \"Test Realm\",\n      \"create_time\": \"2022-06-22T21:46:08.930278Z\",\n      \"update_time\": \"2022-06-22T21:46:08.930278Z\"\n    }\n  ],\n  \"total_size\": 1\n}\n```\n\n## HTTP Statuses\n\nThe API returns standard HTTP statuses and error codes.\n\nStatuses in the 200 range indicate that the request was successfully\nfulfilled and there were no errors. <br><br>\n\nStatuses in the 400 range indicate that there was an issue with the request\nthat may be addressed by the client. For example, client errors may\nindicate that the request was missing proper authorization or that the\nrequest was malformed. <br><br>\n\nStatuses in the 500 range indicate that the server encountered an internal\nissue and was unable to fulfill the request. <br><br>\n\nAll error responses include a JSON object with a `code` field and a\n`message` field. `code` contains a human-readable name for the HTTP status\ncode and `message` contains a high-level description of the error. The\nerror object may also contain additional error details which may be used by\nthe client to determine the exact cause of the error. Refer to each API\nmethod's examples to determine the specific error detail types supported\nfor that method. <br><br>\n\n### Invalid Access Token Example\n\nIf the provided access token is invalid, you will receive a 401 error.\nThis error indicates that the token is not recognized and was not generated\nby Beyond Identity. <br><br>\n\n```\nHTTP/1.1 401 Unauthorized\n{\n  \"code\": \"unauthorized\",\n  \"message\": \"unauthorized\"\n}\n```\n\n### Permission Denied Example\n\nIf the provided access token does not have access to the requested resource,\nyou will receive a 403 error. Access tokens are scoped at a minimum to your\ntenant. Any request for resources outside of your tenant will result in this\nerror. <br><br>\n\n```\nHTTP/1.1 403 Forbidden\n{\n  \"code\": \"forbidden\",\n  \"message\": \"forbidden\"\n}\n```\n\n### Missing Resource Example\n\nIf the requested resource does not exist, you will receive a 404 error. The\nspecific API method may return additional details about the missing\nresource. <br><br>\n\n```\nHTTP/1.1 404 Not Found\n{\n  \"code\": \"not_found\",\n  \"message\": \"group not found\"\n  \"details\": [\n    {\n      \"type\": \"ResourceInfo\",\n      \"resource_type\": \"Group\",\n      \"id\": \"4822738be6b7f658\",\n      \"description\": \"group not found\"\n    }\n  ],\n}\n```\n\n### Invalid Parameters Example\n\nIf the request body contains invalid parameters, you will receive a 400\nerror. The specific API method may return additional details about the\ninvalid parameter. <br><br>\n\n```\nHTTP/1.1 400 Bad Request\n{\n  \"code\": \"bad_request\",\n  \"message\": \"invalid parameters\"\n  \"details\": [\n    {\n      \"type\": \"FieldViolations\"\n      \"field_violations\": [\n        {\n          \"description\": \"missing\",\n          \"field\": \"group.display_name\"\n        }\n      ],\n    }\n  ],\n}\n```\n"
+servers:
+- url: https://api-us.beyondidentity.com
+  description: US region API base URL
+- url: https://api-eu.beyondidentity.com
+  description: EU region API base URL
+- url: https://api.us1.beyondidentity-gov.com/
+  description: US FedRAMP API base URL
+security:
+- BearerAuth: []
+tags:
+- name: Authenticator Configurations
+  description: 'A authenticator configuration prescribes how an end user may authenticate themselves to Beyond Identity. Beyond Identity provides a Hosted Web Authenticator which will work out-of-the-box, as well as SDKs that can be embedded into an end user application.
+
+    '
+paths:
+  /v1/tenants/{tenant_id}/realms/{realm_id}/authenticator-configs:
+    post:
+      operationId: CreateAuthenticatorConfig
+      tags:
+      - Authenticator Configurations
+      summary: Create a New Authenticator Configuration
+      description: 'To create an authenticator configuration, send a POST request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/authenticator-configs`. Values in the request body for read-only fields will be ignored.
+
+        '
+      security:
+      - BearerAuth:
+        - authenticator-configs:create
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/realm_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Create Authenticator Configuration Request
+              description: Request for CreateAuthenticatorConfig.
+              type: object
+              properties:
+                authenticator_config:
+                  $ref: '#/components/schemas/AuthenticatorConfig'
+              required:
+              - authenticator_config
+            examples:
+              Create Authenticator Configuration:
+                value:
+                  authenticator_config:
+                    display_name: Pet Authenticator Configuration
+                    config:
+                      type: embedded
+                      invoke_url: http://localhost:8092
+                      trusted_origins:
+                      - http://localhost:8092
+      responses:
+        '200':
+          description: 'The response will be a JSON object containing the standard attributes associated with an authenticator configuration.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticatorConfig'
+              examples:
+                Success Embedded:
+                  value:
+                    id: 73731b7f-eb76-4143-9b4b-81a720385f5a
+                    realm_id: caf2ff640497591a
+                    tenant_id: 00011f1183c67b69
+                    display_name: Pet Authenticator Configuration
+                    config:
+                      type: embedded
+                      invoke_url: http://localhost:8092
+                      invocation_type: automatic
+                      trusted_origins:
+                      - http://localhost:8092
+                      authentication_methods:
+                      - type: email_one_time_password
+                      - type: software_passkey
+                      - type: webauthn_passkey
+                Success Hosted Web:
+                  value:
+                    id: 73731b7f-eb76-4143-9b4b-81a720385f5a
+                    realm_id: caf2ff640497591a
+                    tenant_id: 00011f1183c67b69
+                    display_name: Pet Authenticator Configuration
+                    config:
+                      type: hosted_web
+                      authentication_methods:
+                      - type: software_passkey
+                      trusted_origins:
+                      - http://localhost:8092
+        '400':
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Malformed Request:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/patch/responses/400/content/application~1json/examples/Malformed%20Request'
+                Invalid Parameters:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1applications/get/responses/400/content/application~1json/examples/Invalid%20Parameters'
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Missing Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/401/content/application~1json/examples/Missing%20Authorization'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Insufficient Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/403/content/application~1json/examples/Insufficient%20Authorization'
+        '404':
+          description: The resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Realm Not Found:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1applications/get/responses/404/content/application~1json/examples/Realm%20Not%20Found'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Internal Error:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
+    get:
+      operationId: ListAuthenticatorConfigs
+      tags:
+      - Authenticator Configurations
+      summary: List Authenticator Configurations for a Realm
+      description: 'To list all authenticator configurations for a realm, send a GET request to
+
+        `/v1/tenants/$TENANT_ID/realms/$REALM_ID/authenticator-configs`.
+
+
+        The response will contain at most 100 items and may contain a page token to
+
+        query the remaining items. If page size is not specified, the response will
+
+        contain 100 items. There is no defined ordering of the list of authenticator
+
+        configurations in the response. Note that the maximum and default page sizes
+
+        are subject to change.
+
+
+        When paginating, the page size is maintained by the page token but may be
+
+        overridden on subsequent requests. The skip is not maintained by the page
+
+        token and must be specified on each subsequent request.
+
+
+        Page tokens expire after one week. Requests which specify an expired page
+
+        token will result in undefined behavior.
+
+        '
+      security:
+      - BearerAuth:
+        - authenticator-configs:read
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/realm_id'
+      - $ref: '#/components/parameters/page_size'
+      - $ref: '#/components/parameters/page_token'
+      - $ref: '#/components/parameters/filter'
+      responses:
+        '200':
+          description: 'The response will be a JSON object with a keys for `authenticator_configs` and `total_size`. `authenticator_configs` will be set to an array of authenticator configuration objects, each of which contains the standard authenticator configuration attributes. `total_size` will be set to the total number of items matched by the list request. If there are more items to be returned by the requested query, the response will also contain a key called `next_page_token`.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListAuthenticatorConfigsResponse'
+              examples:
+                Success:
+                  value:
+                    authenticator_configs:
+                    - id: 73731b7f-eb76-4143-9b4b-81a720385f5a
+                      realm_id: caf2ff640497591a
+                      tenant_id: 00011f1183c67b69
+                      display_name: Pet Authenticator Configuration
+                      config:
+                        invoke_url: http://localhost:8092
+                        invocation_type: automatic
+                        trusted_origins:
+                        - http://localhost:8092
+                        type: embedded
+                    total_size: 1
+        '400':
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Invalid Parameters:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1applications/get/responses/400/content/application~1json/examples/Invalid%20Parameters'
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Missing Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/401/content/application~1json/examples/Missing%20Authorization'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Insufficient Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/403/content/application~1json/examples/Insufficient%20Authorization'
+        '404':
+          description: The resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Realm Not Found:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1applications/get/responses/404/content/application~1json/examples/Realm%20Not%20Found'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Internal Error:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
+  /v1/tenants/{tenant_id}/realms/{realm_id}/authenticator-configs/{authenticator_config_id}:
+    get:
+      operationId: GetAuthenticatorConfig
+      tags:
+      - Authenticator Configurations
+      summary: Retrieve an Existing Authenticator Configuration
+      description: 'To retrieve an existing authenticator configuration, send a GET request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/authenticator-configs/$AUTHENTICATOR_CONFIG_ID`.
+
+        '
+      security:
+      - BearerAuth:
+        - authenticator-configs:read
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/realm_id'
+      - $ref: '#/components/parameters/authenticator_config_id'
+      responses:
+        '200':
+          description: 'The response will be a JSON object containing the standard attributes associated with an authenticator configuration.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticatorConfig'
+              examples:
+                Success:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1authenticator-configs/post/responses/200/content/application~1json/examples/Success%20Embedded'
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Missing Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/401/content/application~1json/examples/Missing%20Authorization'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Insufficient Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/403/content/application~1json/examples/Insufficient%20Authorization'
+        '404':
+          description: The resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Authenticator Configuration Not Found:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1applications/get/responses/404/content/application~1json/examples/Realm%20Not%20Found'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Internal Error:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
+    patch:
+      operationId: UpdateAuthenticatorConfig
+      tags:
+      - Authenticator Configurations
+      summary: Patch an Authenticator Configuration
+      description: 'To update only specific attributes of an existing authenticator configuration, send a PATCH request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/authenticator-configs/$AUTHENTICATOR_CONFIG_ID`. Values in the request body for immutable or read-only fields will be ignored. Fields that are omitted from the request body will be left unchanged.
+
+        '
+      security:
+      - BearerAuth:
+        - authenticator-configs:update
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/realm_id'
+      - $ref: '#/components/parameters/authenticator_config_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Update Authenticator Configuration Request
+              description: Request for UpdateAuthenticatorConfig.
+              type: object
+              properties:
+                authenticator_config:
+                  $ref: '#/components/schemas/AuthenticatorConfig'
+              required:
+              - authenticator_config
+            examples:
+              Update Embedded Invoke URL:
+                value:
+                  authenticator_config:
+                    display_name: Pet Authenticator Configuration
+                    config:
+                      invoke_url: http://localhost:8092
+      responses:
+        '200':
+          description: 'The response will be a JSON object containing the standard attributes associated with an authenticator configuration.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticatorConfig'
+              examples:
+                Success Embedded:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1authenticator-configs/post/responses/200/content/application~1json/examples/Success%20Embedded'
+                Success Hosted Web:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1authenticator-configs/post/responses/200/content/application~1json/examples/Success%20Hosted%20Web'
+        '400':
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Malformed Request:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/patch/responses/400/content/application~1json/examples/Malformed%20Request'
+                Invalid Parameters:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1applications/get/responses/400/content/application~1json/examples/Invalid%20Parameters'
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Missing Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/401/content/application~1json/examples/Missing%20Authorization'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Insufficient Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/403/content/application~1json/examples/Insufficient%20Authorization'
+        '404':
+          description: The resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Authenticator Configuration Not Found:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1applications/get/responses/404/content/application~1json/examples/Realm%20Not%20Found'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Internal Error:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
+    delete:
+      operationId: DeleteAuthenticatorConfig
+      tags:
+      - Authenticator Configurations
+      summary: Delete an Authenticator Configuration
+      description: 'To delete an authenticator configuration, send a DELETE request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/authenticator-configs/$AUTHENTICATOR_CONFIG_ID`.
+
+        A successful request will receive a 200 status code with no body in the response. This indicates that the request was processed successfully.
+
+        '
+      security:
+      - BearerAuth:
+        - authenticator-configs:delete
+      parameters:
+      - $ref: '#/components/parameters/tenant_id'
+      - $ref: '#/components/parameters/realm_id'
+      - $ref: '#/components/parameters/authenticator_config_id'
+      responses:
+        '200':
+          description: The action was successful and the response body is empty.
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Missing Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/401/content/application~1json/examples/Missing%20Authorization'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Insufficient Authorization:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/403/content/application~1json/examples/Insufficient%20Authorization'
+        '404':
+          description: The resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Authenticator Configuration Not Found:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1applications/get/responses/404/content/application~1json/examples/Realm%20Not%20Found'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Internal Error:
+                  $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
+components:
+  parameters:
+    realm_id:
+      name: realm_id
+      in: path
+      description: A unique identifier for a realm.
+      required: true
+      schema:
+        type: string
+        example: 19a95130480dfa79
+    page_size:
+      name: page_size
+      in: query
+      description: 'Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.
+
+        '
+      schema:
+        type: integer
+        format: uint32
+        minimum: 0
+    tenant_id:
+      name: tenant_id
+      in: path
+      description: A unique identifier for a tenant.
+      required: true
+      schema:
+        type: string
+        example: 000176d94fd7b4d1
+    page_token:
+      name: page_token
+      in: query
+      description: 'Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.
+
+        '
+      schema:
+        type: string
+    filter:
+      name: filter
+      in: query
+      description: 'Filter to constrain the response. The response will only include resources matching this filter. Filters follow the SCIM grammar from [RFC-7644 Section 3.4.2.2](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.2).
+
+        '
+      schema:
+        type: string
+    authenticator_config_id:
+      name: authenticator_config_id
+      in: path
+      description: A unique identifier for an authenticator configuration.
+      required: true
+      schema:
+        type: string
+        example: 73731b7f-eb76-4143-9b4b-81a720385f5a
+  schemas:
+    AuthenticatorConfig:
+      title: Authenticator Configuration
+      type: object
+      description: 'Representation of an authenticator configuration. This prescribes how an identity may authenticate themselves with Beyond Identity.
+
+        '
+      properties:
+        id:
+          type: string
+          description: 'A unique identifier for an authenticator configuration. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the realm.
+
+            '
+          readOnly: true
+          example: 73731b7f-eb76-4143-9b4b-81a720385f5a
+        realm_id:
+          type: string
+          description: 'A unique identifier for the authenticator configuration''s realm. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: caf2ff640497591a
+        tenant_id:
+          type: string
+          description: 'A unique identifier for the authenticator configuration''s tenant. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 00011f1183c67b69
+        display_name:
+          type: string
+          description: 'A human-readable name for the authenticator configuration. This name is used for display purposes.
+
+            '
+          example: Pet Authenticator Configuration
+        config:
+          description: 'An object specifying the settings for the supported authenticator type.
+
+            '
+          oneOf:
+          - title: Embedded SDK Authenticator
+            description: Configuration options for the embedded SDK authenticator.
+            type: object
+            required:
+            - type
+            - invoke_url
+            - trusted_origins
+            properties:
+              invocation_type:
+                default: automatic
+                description: 'The method used to invoke the `invoke_url` in the embedded authenticator
+
+                  config type. The two methods available are:
+
+
+                  The value `automatic` indicates that this invocation type automatically
+
+                  redirects you to your native or web app using the Invoke URL with a
+
+                  challenge that your app will need to sign.
+
+
+                  The value `manual` indicates that this invocation type will cause the
+
+                  challenge to be returned to you as part of a JSON response. It will then
+
+                  be up to you to get it to your native/web app any way you see fit. This is
+
+                  useful for flows where you require a lot more control when redirecting to
+
+                  your native/web app. Since the challenge is packaged as part of a URL,
+
+                  following the URL will result in the same behavior as if an Invocation
+
+                  Type of "automatic" were selected.
+
+                  '
+                enum:
+                - automatic
+                - manual
+                type: string
+              invoke_url:
+                description: URL to invoke during the authentication flow.
+                example: http://localhost:8092
+                type: string
+              trusted_origins:
+                description: 'Trusted origins are URLs that will be allowed to make requests from a browser to the Beyond Identity API. This is used with Cross-Origin Resource Sharing (CORS). These may be in the form of `<scheme> "://" <host> [ ":" <port> ]`, such as `https://auth.your-domain.com` or `http://localhost:3000`.
+
+                  '
+                items:
+                  example: http://localhost:8092
+                  type: string
+                type: array
+              type:
+                enum:
+                - embedded
+                type: string
+              authentication_methods:
+                items:
+                  properties:
+                    type:
+                      description: 'Within our hosted web product, an array of values determines the
+
+                        client-side authentication workflows:
+
+
+                        The value `webauthn_passkey` triggers a workflow that generates a hardware
+
+                        key within your device''s trusted execution environment (TEE). If webauthn
+
+                        passkeys are not supported in the browser, specifying one of the other two
+
+                        authentication methods will result in a fallback to that mechanism.
+
+
+                        The value `software_passkey` activates a workflow where a passkey is
+
+                        securely created within the browser''s context.
+
+
+                        The value `email_one_time_password` enables a workflow that verifies
+
+                        identity via an email of a one-time password.
+
+                        '
+                      enum:
+                      - email_one_time_password
+                      - software_passkey
+                      - webauthn_passkey
+                      type: string
+                  required:
+                  - type
+                  title: AuthenticationMethod
+                  type: object
+                type: array
+          - title: Hosted Web Authenticator
+            description: 'Configuration options for the hosted web experience. This authenticator is maintained by Beyond Identity and allows the caller to customize authentication methods.
+
+              '
+            type: object
+            required:
+            - type
+            - authentication_methods
+            - trusted_origins
+            properties:
+              authentication_methods:
+                items:
+                  $ref: '#/components/schemas/AuthenticatorConfig/properties/config/oneOf/0/properties/authentication_methods/items'
+                type: array
+              trusted_origins:
+                description: 'Trusted origins are URLs that will be allowed to make requests from a browser to the Beyond Identity API. This is used with Cross-Origin Resource Sharing (CORS). These may be in the form of `<scheme> "://" <host> [ ":" <port> ]`, such as `https://auth.your-domain.com` or `http://localhost:3000`.
+
+                  '
+                items:
+                  example: http://localhost:8092
+                  type: string
+                type: array
+              type:
+                enum:
+                - hosted_web
+                type: string
+          - title: Console Authenticator
+            description: 'Configuration options for credential enrollment, enabling an identity to access the Beyond Identity Console. These options support both IDP-authorized flows and non-verified enrollment pathways.
+
+              '
+            type: object
+            required:
+            - type
+            - onboarding_configuration
+            properties:
+              type:
+                enum:
+                - console
+                type: string
+              onboarding_configuration:
+                title: Console Onboarding Configuration
+                description: Configuration options for the console onboarding experience.
+                type: object
+                required:
+                - verification_method
+                properties:
+                  verification_method:
+                    oneOf:
+                    - title: Console Verification Method IDP
+                      description: Configures IDP verification for identities onboarding.
+                      type: object
+                      required:
+                      - type
+                      - idp_id
+                      properties:
+                        type:
+                          description: 'The type of verification method to be used for credential onboarding. Currently only `idp` or `none` are supported options.
+
+                            If set to `none` there will be no verification step performed for the identity selected for credential onboarding.'
+                          type: string
+                          enum:
+                          - idp
+                        idp_id:
+                          description: The id of the IDP to use to verify the identity during the onboarding process.
+                          type: string
+                          format: uuid
+                    - title: Console Verification Method None
+                      description: An onboarding configuration with no verification configured. Identities will not be verified during the onboarding operation.
+                      type: object
+                      required:
+                      - type
+                      properties:
+                        type:
+                          description: 'The type of verification method to be used for credential onboarding. Currently only `idp` or `none` are supported options.
+
+                            If set to `none` there will be no verification step performed for the identity selected for credential onboard.'
+                          type: string
+                          enum:
+                          - none
+          - title: Platform Authenticator
+            description: Configuration options for the platform authenticator.
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                enum:
+                - platform
+              trusted_origins:
+                description: Trusted origins are URLs that will be allowed to make requests from a browser to the Beyond Identity API. This is used with Cross-Origin Resource Sharing (CORS). These may be in the form of `<scheme> "://" <host> [ ":" <port> ],` such as `https://auth.your-domain.com` or `http://localhost:3000`.
+                type: array
+                items:
+                  type: string
+                nullable: true
+              roaming_auth_config:
+                description: The roaming_auth_config offers advanced configuration options for the roaming auth feature.
+                title: RoamingAuthConfig
+                type: object
+                required:
+                - enabled
+                - allow_unknow_user
+                properties:
+                  enabled:
+                    description: If false, roaming auth is never offered as an available flow during authentication on this Authenticator Config.
+                    type: boolean
+                  allow_unknown_user:
+                    description: If a login_hint is not provided or the login_hint does not match for exactly one user in the directory, the user will be considered "unknown" and the value of allow_unknown_user will be used to determine whether or not to offer roaming auth.
+                    type: boolean
+                  allowed_source_ips:
+                    description: If allowed_source_ips is not null and not empty, roaming auth will only be offered to users who begin the authentication from a specified IP address or range.
+                    type: array
+                    items:
+                      type: string
+                  allowed_user_group_ids:
+                    description: If allowed_user_group_ids is not nil and not empty, roaming auth will only be offered to users if they are part of one of those user groups. Note that the user is determined _before_ authentication using a best effort lookup by login_hint, if provided. If a login_hint is not provided or the login_hint does not match for exactly one user in the directory, the user will be considered \"unknown\" and the value of allow_unknown_user will be used to determine whether or not to offer roaming auth.
+                    type: array
+                    items:
+                      type: string
+                  allowed_user_ids:
+                    description: If allowed_user_ids is not nil and not empty, roaming auth will only be offered to specified users. Note that the user is determined _before_ authentication using a best effort lookup by login_hint, if provided. If a login_hint is not provided or the login_hint does not match for exactly one user in the directory, the user will be considered \"unknown\" and the value of allow_unknown_user will be used to determine whether or not to offer roaming auth.
+                    type: array
+                    items:
+                      type: string
+    ListAuthenticatorConfigsResponse:
+      title: List Authenticator Configurations Response
+      description: Response for ListAuthenticatorConfigs.
+      type: object
+      properties:
+        authenticator_configs:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthenticatorConfig'
+          maxItems: 100
+          description: 'An unordered array of authenticator configurations corresponding to the request.
+
+            '
+        total_size:
+          type: integer
+          format: uint32
+          description: 'Total number of results returned by the operation. This value may be larger than the number of resources returned, such as when returning a single page where multiple pages are available.
+
+            '
+          example: 1000
+        next_page_token:
+          type: string
+          description: 'Token used to fetch the next set of results. If this field is omitted, there are no subsequent pages.
+
+            '
+      required:
+      - authenticator_configs
+      - total_size
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
+
+            '
+        message:
+          type: string
+          description: 'Human-readable message describing the error.
+
+            '
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      required:
+      - code
+      - message
+    ErrorDetail:
+      title: Error Detail
+      description: 'Additional details for errors designed to support client applications.
+
+        '
+      type: object
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          type: string
+          description: Type of the error detail.
+      required:
+      - type
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'See the [Authentication](#section/Authentication) section for details.
+
+        '
