@@ -1,0 +1,1066 @@
+{
+  "info": {
+    "_postman_id": "53c2e76c-a59e-4ff0-b094-8bd0cca770bb",
+    "name": "Beyond Identity Secure Access Applications Launch Mechanisms API",
+    "description": "# Introduction\n\n**NOTE:** To determine if you are accessing the Secure Access Platform, check the URL of your Admin Console.\nIf it looks like one of the following, you are using the Secure Access Platform:\n- `https://console.beyondidentity.com` (Localized to your region)\n- `https://console-us.beyondidentity.com` (US region)\n- `https://console-eu.beyondidentity.com` (EU region)\n- `https://console.us1.beyondidentity-gov.com` (US FedRAMP)\n\nIf your Admin Console URL does not look like one of the above, you are using the Secure Workforce Platform. Please refer to the [Secure Workforce API documentation](https://docs.beyondidentity.com/api/v0). <br /><br />\n\nThe Beyond Identity Secure Access API defines methods for managing resources in the Beyond Identity Secure Access platform.<br /><br />\n\nAll of the functionality available in the Beyond Identity Admin Console is\nalso available through the API. <br /><br />\n\nThis API is currently in the early-access stage and is under active\ndevelopment. Feedback and suggestions are encouraged and should be directed\nto the\n[Beyond Identity Developer Slack Channel](https://join.slack.com/t/byndid/shared_invite/zt-1anns8n83-NQX4JvW7coi9dksADxgeBQ).\n\n# Base API URLs\n\nThe base API URLs is determined by the region your tenant is hosted in OR if you are a FedRAMP customer. <br><br>\n\n### US Region\n\nIf you are a US region customer, your base API URLs will be:\n- `https://api-us.beyondidentity.com`\n- `https://auth-us.beyondidentity.com`\n\n### EU Region\n\nIf you are a EU region customer, your base API URLs will be:\n- `https://api-eu.beyondidentity.com`\n- `https://auth-eu.beyondidentity.com`\n\n### US FedRAMP\n\n**NOTE**: The FedRAMP version of Secure Access is released approximately *two weeks* after the commercial version, so some API endpoints may not be available immediately. <br><br>\n\nIf you are a FedRAMP customer in the US region, your base API URLs will be:\n- `https://api.us1.beyondidentity-gov.com`\n- `https://auth.us1.beyondidentity-gov.com`\n\nFor all the examples in this document, we will use the US region API base URL. You can always replace `https://api-us.beyondidentity.com`\nand `https://auth-us.beyondidentity.com` in the examples to use the proper base URL for your tenant.\n\n# Authentication\n\nAll Beyond Identity API endpoints require authentication using an access\ntoken. The access token is generated through OAuth 2.0 or OIDC, using the\nauthorization code flow or the client credentials flow. <br /><br />\n\nThe simplest way to acquire an access token is through the Beyond Identity Admin Console. Under the \"Applications\" tab, select the \"Beyond Identity Management API\" application, navigate to the \"API Tokens\" tab, and then click on \"Create token\". <br /><br />\n\nAlternatively, an access token may also be generated directly via the API by\nrequesting a token for the \"Beyond Identity Management API\" Application. <br><br>\n\n```\ncurl https://auth-us.beyondidentity.com/v1/tenants/$TENANT_ID/realms/$REALM_ID/applications/$APPLICATION_ID/token \\\n  -X POST \\\n  -u \"$CLIENT_ID:$CLIENT_SECRET\" --basic \\\n  -H \"Content-Type: application/x-www-form-urlencoded\" \\\n  -d \"grant_type=client_credentials&scope=$SCOPES\"\n```\n\nThis will work for any application that you have configured to provide\naccess to the Beyond Identity Management API Resource Server. The \"Beyond\nIdentity Management API\" application is provided by default as part of the\ntenant onboarding process.\n\nThe access token must be provided in the `Authorization` header of the\nAPI request. <br><br>\n\n```\ncurl https://api-us.beyondidentity.com/v1/... \\\n  -X $HTTP_METHOD -H \"Authorization: Bearer $TOKEN\"\n```\n\n## Requests and Responses\n\nTo interact with the Beyond Identity API, all requests should be made over\nHTTPS. <br /><br />\n\nThe Beyond Identity API is generally structured as a resource-oriented API.\nResources are represented as JSON objects and are used as both inputs to\nand outputs from API methods. <br /><br />\n\nResource fields may be described as read-only and immutable. A read-only\nfield is only provided on the response. An immutable field is only assigned\nonce and may not be changed after. For example, system-generated IDs are\ndescribed as both read-only and immutable. <br /><br />\n\nTo create a new resource, requests should use the `POST` method. Create\nrequests include all of the necessary attributes to create a new resource.\nCreate operations return the created resource in the response. <br /><br />\n\nTo retrieve a single resource or a collection of resources, requests should\nuse the `GET` method. When retrieving a collection of resources, the\nresponse will include an array of JSON objects keyed on the plural name of\nthe requested resource. <br /><br />\n\nTo update an resource, requests should use the `PATCH` method. Update\noperations support partial updating so requests may specify only the\nattributes which should be updated. Update operations return the updated\nresource in the response. <br /><br />\n\nTo delete a resource, requests should use the `DELETE` method. Note that\ndelete operations return an empty response instead of returning the\nresource in the response. <br /><br />\n\n### Example Response for a Realm\n\n```\n{\n  \"id\": \"a448fe493e02fa9f\",\n  \"tenant_id\": \"000168dc50bdce49\",\n  \"display_name\": \"Test Realm\",\n  \"create_time\": \"2022-06-22T21:46:08.930278Z\",\n  \"update_time\": \"2022-06-22T21:46:08.930278Z\"\n}\n```\n\n### Example Response for a Collection of Realms\n\n```\n{\n  \"realms\": [\n    {\n      \"id\": \"a448fe493e02fa9f\",\n      \"tenant_id\": \"000168dc50bdce49\",\n      \"display_name\": \"Test Realm\",\n      \"create_time\": \"2022-06-22T21:46:08.930278Z\",\n      \"update_time\": \"2022-06-22T21:46:08.930278Z\"\n    }\n  ],\n  \"total_size\": 1\n}\n```\n\n## HTTP Statuses\n\nThe API returns standard HTTP statuses and error codes.\n\nStatuses in the 200 range indicate that the request was successfully\nfulfilled and there were no errors. <br><br>\n\nStatuses in the 400 range indicate that there was an issue with the request\nthat may be addressed by the client. For example, client errors may\nindicate that the request was missing proper authorization or that the\nrequest was malformed. <br><br>\n\nStatuses in the 500 range indicate that the server encountered an internal\nissue and was unable to fulfill the request. <br><br>\n\nAll error responses include a JSON object with a `code` field and a\n`message` field. `code` contains a human-readable name for the HTTP status\ncode and `message` contains a high-level description of the error. The\nerror object may also contain additional error details which may be used by\nthe client to determine the exact cause of the error. Refer to each API\nmethod's examples to determine the specific error detail types supported\nfor that method. <br><br>\n\n### Invalid Access Token Example\n\nIf the provided access token is invalid, you will receive a 401 error.\nThis error indicates that the token is not recognized and was not generated\nby Beyond Identity. <br><br>\n\n```\nHTTP/1.1 401 Unauthorized\n{\n  \"code\": \"unauthorized\",\n  \"message\": \"unauthorized\"\n}\n```\n\n### Permission Denied Example\n\nIf the provided access token does not have access to the requested resource,\nyou will receive a 403 error. Access tokens are scoped at a minimum to your\ntenant. Any request for resources outside of your tenant will result in this\nerror. <br><br>\n\n```\nHTTP/1.1 403 Forbidden\n{\n  \"code\": \"forbidden\",\n  \"message\": \"forbidden\"\n}\n```\n\n### Missing Resource Example\n\nIf the requested resource does not exist, you will receive a 404 error. The\nspecific API method may return additional details about the missing\nresource. <br><br>\n\n```\nHTTP/1.1 404 Not Found\n{\n  \"code\": \"not_found\",\n  \"message\": \"group not found\"\n  \"details\": [\n    {\n      \"type\": \"ResourceInfo\",\n      \"resource_type\": \"Group\",\n      \"id\": \"4822738be6b7f658\",\n      \"description\": \"group not found\"\n    }\n  ],\n}\n```\n\n### Invalid Parameters Example\n\nIf the request body contains invalid parameters, you will receive a 400\nerror. The specific API method may return additional details about the\ninvalid parameter. <br><br>\n\n```\nHTTP/1.1 400 Bad Request\n{\n  \"code\": \"bad_request\",\n  \"message\": \"invalid parameters\"\n  \"details\": [\n    {\n      \"type\": \"FieldViolations\"\n      \"field_violations\": [\n        {\n          \"description\": \"missing\",\n          \"field\": \"group.display_name\"\n        }\n      ],\n    }\n  ],\n}\n```\n\n\nContact Support:\n Email: support@beyondidentity.com",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "createdAt": "2026-07-28T01:12:58.000Z",
+    "updatedAt": "2026-07-28T01:12:58.000Z",
+    "lastUpdatedBy": "35240",
+    "uid": "35240-53c2e76c-a59e-4ff0-b094-8bd0cca770bb"
+  },
+  "item": [
+    {
+      "name": "v1",
+      "item": [
+        {
+          "name": "tenants",
+          "item": [
+            {
+              "name": "{tenant_id}",
+              "item": [
+                {
+                  "name": "realms",
+                  "item": [
+                    {
+                      "name": "{realm_id}",
+                      "item": [
+                        {
+                          "name": "flow-type-config",
+                          "item": [
+                            {
+                              "name": "Get flow type configuration",
+                              "id": "ae46dfba-c301-481b-9e31-c3ed90063b72",
+                              "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                              },
+                              "request": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/flow-type-config",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v1",
+                                    "tenants",
+                                    ":tenant_id",
+                                    "realms",
+                                    ":realm_id",
+                                    "flow-type-config"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "id": "5f20ac44-f72d-43fa-b5cd-a97822dc1ac1",
+                                      "key": "tenant_id",
+                                      "value": "<string>",
+                                      "description": "(Required) A unique identifier for a tenant."
+                                    },
+                                    {
+                                      "id": "598039fa-641c-4b87-8207-6a661b3f2a1c",
+                                      "key": "realm_id",
+                                      "value": "<string>",
+                                      "description": "(Required) A unique identifier for a realm."
+                                    }
+                                  ]
+                                },
+                                "description": "Retrieves the flow type configuration for a tenant or creates a default configuration if one does not exist"
+                              },
+                              "response": [
+                                {
+                                  "id": "fe038d1b-f694-4410-8b31-8b3aaff5f38f",
+                                  "name": "OK.",
+                                  "originalRequest": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/flow-type-config",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "flow-type-config"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "OK",
+                                  "code": 200,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"id\": \"<string>\",\n  \"tenant_id\": \"<string>\",\n  \"realm_id\": \"<string>\",\n  \"create_time\": \"<dateTime>\",\n  \"update_time\": \"<dateTime>\",\n  \"platform_config\": {\n    \"android\": {\n      \"unknown\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"scheme\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"embedded\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"copy\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"roaming_auth\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_autofill\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_accessibility\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"pipe\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"universal_link\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"safari_extension\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"layered_auth_qr_code\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"secure_localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      }\n    },\n    \"macos\": {\n      \"unknown\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"scheme\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"embedded\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"copy\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"roaming_auth\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_autofill\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_accessibility\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"pipe\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"universal_link\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"safari_extension\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"layered_auth_qr_code\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"secure_localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      }\n    },\n    \"ios\": {\n      \"unknown\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"scheme\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"embedded\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"copy\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"roaming_auth\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_autofill\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_accessibility\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"pipe\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"universal_link\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"safari_extension\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"layered_auth_qr_code\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"secure_localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      }\n    },\n    \"windows\": {\n      \"unknown\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"scheme\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"embedded\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"copy\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"roaming_auth\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_autofill\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_accessibility\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"pipe\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"universal_link\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"safari_extension\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"layered_auth_qr_code\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"secure_localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      }\n    },\n    \"web\": {\n      \"unknown\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"scheme\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"embedded\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"copy\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"roaming_auth\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_autofill\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_accessibility\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"pipe\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"universal_link\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"safari_extension\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"layered_auth_qr_code\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"secure_localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      }\n    },\n    \"linux\": {\n      \"unknown\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"scheme\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"embedded\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"copy\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"roaming_auth\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_autofill\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_accessibility\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"pipe\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"universal_link\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"safari_extension\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"layered_auth_qr_code\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"secure_localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      }\n    },\n    \"chromeos\": {\n      \"unknown\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"scheme\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"embedded\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"copy\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"roaming_auth\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_autofill\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_accessibility\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"pipe\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"universal_link\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"safari_extension\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"layered_auth_qr_code\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"secure_localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      }\n    },\n    \"chromeosweb\": {\n      \"unknown\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"scheme\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"embedded\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"copy\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"roaming_auth\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_autofill\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_accessibility\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"pipe\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"universal_link\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"safari_extension\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"layered_auth_qr_code\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"secure_localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      }\n    }\n  }\n}",
+                                  "createdAt": "2026-07-28T01:12:58.000Z",
+                                  "updatedAt": "2026-07-28T01:12:58.000Z",
+                                  "uid": "35240-fe038d1b-f694-4410-8b31-8b3aaff5f38f"
+                                },
+                                {
+                                  "id": "f70e03e4-6949-4f50-ba5b-bfae90d1cc62",
+                                  "name": "Bad request. If the request failed due to invalid fields, the error details will include a FieldViolations.\n",
+                                  "originalRequest": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/flow-type-config",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "flow-type-config"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "Bad Request",
+                                  "code": 400,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                  "createdAt": "2026-07-28T01:12:58.000Z",
+                                  "updatedAt": "2026-07-28T01:12:58.000Z",
+                                  "uid": "35240-f70e03e4-6949-4f50-ba5b-bfae90d1cc62"
+                                },
+                                {
+                                  "id": "34621ee6-3050-4103-aacc-d5432b25fef5",
+                                  "name": "Unauthenticated.",
+                                  "originalRequest": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/flow-type-config",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "flow-type-config"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "Unauthorized",
+                                  "code": 401,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                  "createdAt": "2026-07-28T01:12:58.000Z",
+                                  "updatedAt": "2026-07-28T01:12:58.000Z",
+                                  "uid": "35240-34621ee6-3050-4103-aacc-d5432b25fef5"
+                                },
+                                {
+                                  "id": "1bfcd8ff-77b2-41bc-902d-1128aa1cb913",
+                                  "name": "Permission denied. The error details will include a ResourceInfo describing the authorization failure.\n",
+                                  "originalRequest": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/flow-type-config",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "flow-type-config"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "Forbidden",
+                                  "code": 403,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                  "createdAt": "2026-07-28T01:12:58.000Z",
+                                  "updatedAt": "2026-07-28T01:12:58.000Z",
+                                  "uid": "35240-1bfcd8ff-77b2-41bc-902d-1128aa1cb913"
+                                },
+                                {
+                                  "id": "dbe49573-f2ff-4761-853b-73ab9c408711",
+                                  "name": "Not found. The error details will include a ResourceInfo describing the required resource that was not found.\n",
+                                  "originalRequest": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/flow-type-config",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "flow-type-config"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "Not Found",
+                                  "code": 404,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                  "createdAt": "2026-07-28T01:12:58.000Z",
+                                  "updatedAt": "2026-07-28T01:12:58.000Z",
+                                  "uid": "35240-dbe49573-f2ff-4761-853b-73ab9c408711"
+                                },
+                                {
+                                  "id": "77d54ec4-36df-46fe-9748-69fb3529f5ae",
+                                  "name": "Already exists. The error details will include a ResourceInfo describing the conflicting resource.\n",
+                                  "originalRequest": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/flow-type-config",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "flow-type-config"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "Conflict",
+                                  "code": 409,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                  "createdAt": "2026-07-28T01:12:58.000Z",
+                                  "updatedAt": "2026-07-28T01:12:58.000Z",
+                                  "uid": "35240-77d54ec4-36df-46fe-9748-69fb3529f5ae"
+                                },
+                                {
+                                  "id": "3b1b4c2c-8999-44ba-ad6b-35b8e5dfe95e",
+                                  "name": "Internal.",
+                                  "originalRequest": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/flow-type-config",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "flow-type-config"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "Internal Server Error",
+                                  "code": 500,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                  "createdAt": "2026-07-28T01:12:58.000Z",
+                                  "updatedAt": "2026-07-28T01:12:58.000Z",
+                                  "uid": "35240-3b1b4c2c-8999-44ba-ad6b-35b8e5dfe95e"
+                                }
+                              ],
+                              "createdAt": "2026-07-28T01:12:58.000Z",
+                              "updatedAt": "2026-07-28T01:12:58.000Z",
+                              "uid": "35240-ae46dfba-c301-481b-9e31-c3ed90063b72"
+                            },
+                            {
+                              "name": "Update flow type configuration",
+                              "id": "17a0841f-d69a-4aeb-aaf9-adb90e23ba45",
+                              "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                              },
+                              "request": {
+                                "method": "PATCH",
+                                "header": [
+                                  {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  }
+                                ],
+                                "body": {
+                                  "mode": "raw",
+                                  "raw": "{\n  \"android\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"macos\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"ios\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"windows\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"web\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"linux\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"chromeos\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"chromeosweb\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  }\n}",
+                                  "options": {
+                                    "raw": {
+                                      "headerFamily": "json",
+                                      "language": "json"
+                                    }
+                                  }
+                                },
+                                "url": {
+                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/flow-type-config",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v1",
+                                    "tenants",
+                                    ":tenant_id",
+                                    "realms",
+                                    ":realm_id",
+                                    "flow-type-config"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "id": "70cc8fdc-14c2-4519-b490-23531252cac9",
+                                      "key": "tenant_id",
+                                      "value": "<string>",
+                                      "description": "(Required) A unique identifier for a tenant."
+                                    },
+                                    {
+                                      "id": "2810fbe9-1320-4ff0-a29a-83c5eee280b8",
+                                      "key": "realm_id",
+                                      "value": "<string>",
+                                      "description": "(Required) A unique identifier for a realm."
+                                    }
+                                  ]
+                                },
+                                "description": "Updates the flow type configuration for a tenant, note that this will also create a default configuration if one does not exist"
+                              },
+                              "response": [
+                                {
+                                  "id": "43d86a29-53e8-4fc5-b0cc-5ca47779331e",
+                                  "name": "OK.",
+                                  "originalRequest": {
+                                    "method": "PATCH",
+                                    "header": [
+                                      {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "body": {
+                                      "mode": "raw",
+                                      "raw": "{\n  \"android\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"macos\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"ios\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"windows\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"web\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"linux\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"chromeos\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"chromeosweb\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  }\n}",
+                                      "options": {
+                                        "raw": {
+                                          "headerFamily": "json",
+                                          "language": "json"
+                                        }
+                                      }
+                                    },
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/flow-type-config",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "flow-type-config"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "OK",
+                                  "code": 200,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"id\": \"<string>\",\n  \"tenant_id\": \"<string>\",\n  \"realm_id\": \"<string>\",\n  \"create_time\": \"<dateTime>\",\n  \"update_time\": \"<dateTime>\",\n  \"platform_config\": {\n    \"android\": {\n      \"unknown\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"scheme\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"embedded\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"copy\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"roaming_auth\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_autofill\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_accessibility\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"pipe\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"universal_link\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"safari_extension\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"layered_auth_qr_code\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"secure_localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      }\n    },\n    \"macos\": {\n      \"unknown\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"scheme\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"embedded\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"copy\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"roaming_auth\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_autofill\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_accessibility\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"pipe\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"universal_link\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"safari_extension\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"layered_auth_qr_code\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"secure_localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      }\n    },\n    \"ios\": {\n      \"unknown\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"scheme\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"embedded\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"copy\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"roaming_auth\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_autofill\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_accessibility\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"pipe\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"universal_link\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"safari_extension\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"layered_auth_qr_code\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"secure_localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      }\n    },\n    \"windows\": {\n      \"unknown\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"scheme\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"embedded\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"copy\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"roaming_auth\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_autofill\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_accessibility\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"pipe\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"universal_link\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"safari_extension\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"layered_auth_qr_code\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"secure_localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      }\n    },\n    \"web\": {\n      \"unknown\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"scheme\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"embedded\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"copy\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"roaming_auth\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_autofill\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_accessibility\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"pipe\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"universal_link\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"safari_extension\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"layered_auth_qr_code\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"secure_localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      }\n    },\n    \"linux\": {\n      \"unknown\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"scheme\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"embedded\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"copy\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"roaming_auth\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_autofill\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_accessibility\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"pipe\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"universal_link\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"safari_extension\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"layered_auth_qr_code\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"secure_localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      }\n    },\n    \"chromeos\": {\n      \"unknown\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"scheme\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"embedded\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"copy\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"roaming_auth\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_autofill\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_accessibility\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"pipe\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"universal_link\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"safari_extension\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"layered_auth_qr_code\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"secure_localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      }\n    },\n    \"chromeosweb\": {\n      \"unknown\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"scheme\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"embedded\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"copy\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"roaming_auth\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_autofill\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"android_accessibility\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"pipe\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"universal_link\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"safari_extension\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"layered_auth_qr_code\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      },\n      \"secure_localhost\": {\n        \"enabled\": \"<boolean>\",\n        \"valid\": \"<boolean>\"\n      }\n    }\n  }\n}",
+                                  "createdAt": "2026-07-28T01:12:58.000Z",
+                                  "updatedAt": "2026-07-28T01:12:58.000Z",
+                                  "uid": "35240-43d86a29-53e8-4fc5-b0cc-5ca47779331e"
+                                },
+                                {
+                                  "id": "cd761dd0-0be9-486e-80ca-426e75fd0ac9",
+                                  "name": "Bad request. If the request failed due to invalid fields, the error details will include a FieldViolations.\n",
+                                  "originalRequest": {
+                                    "method": "PATCH",
+                                    "header": [
+                                      {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "body": {
+                                      "mode": "raw",
+                                      "raw": "{\n  \"android\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"macos\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"ios\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"windows\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"web\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"linux\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"chromeos\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"chromeosweb\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  }\n}",
+                                      "options": {
+                                        "raw": {
+                                          "headerFamily": "json",
+                                          "language": "json"
+                                        }
+                                      }
+                                    },
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/flow-type-config",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "flow-type-config"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "Bad Request",
+                                  "code": 400,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                  "createdAt": "2026-07-28T01:12:58.000Z",
+                                  "updatedAt": "2026-07-28T01:12:58.000Z",
+                                  "uid": "35240-cd761dd0-0be9-486e-80ca-426e75fd0ac9"
+                                },
+                                {
+                                  "id": "446eee1b-ee37-4dd0-9c75-e467b2172b77",
+                                  "name": "Unauthenticated.",
+                                  "originalRequest": {
+                                    "method": "PATCH",
+                                    "header": [
+                                      {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "body": {
+                                      "mode": "raw",
+                                      "raw": "{\n  \"android\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"macos\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"ios\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"windows\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"web\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"linux\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"chromeos\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"chromeosweb\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  }\n}",
+                                      "options": {
+                                        "raw": {
+                                          "headerFamily": "json",
+                                          "language": "json"
+                                        }
+                                      }
+                                    },
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/flow-type-config",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "flow-type-config"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "Unauthorized",
+                                  "code": 401,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                  "createdAt": "2026-07-28T01:12:58.000Z",
+                                  "updatedAt": "2026-07-28T01:12:58.000Z",
+                                  "uid": "35240-446eee1b-ee37-4dd0-9c75-e467b2172b77"
+                                },
+                                {
+                                  "id": "a9f3828e-96d7-40f9-b1ff-8f7935e7d46f",
+                                  "name": "Permission denied. The error details will include a ResourceInfo describing the authorization failure.\n",
+                                  "originalRequest": {
+                                    "method": "PATCH",
+                                    "header": [
+                                      {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "body": {
+                                      "mode": "raw",
+                                      "raw": "{\n  \"android\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"macos\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"ios\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"windows\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"web\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"linux\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"chromeos\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"chromeosweb\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  }\n}",
+                                      "options": {
+                                        "raw": {
+                                          "headerFamily": "json",
+                                          "language": "json"
+                                        }
+                                      }
+                                    },
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/flow-type-config",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "flow-type-config"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "Forbidden",
+                                  "code": 403,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                  "createdAt": "2026-07-28T01:12:58.000Z",
+                                  "updatedAt": "2026-07-28T01:12:58.000Z",
+                                  "uid": "35240-a9f3828e-96d7-40f9-b1ff-8f7935e7d46f"
+                                },
+                                {
+                                  "id": "e9443b65-e5c7-4d4d-8cf2-3978f8de6fee",
+                                  "name": "Not found. The error details will include a ResourceInfo describing the required resource that was not found.\n",
+                                  "originalRequest": {
+                                    "method": "PATCH",
+                                    "header": [
+                                      {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "body": {
+                                      "mode": "raw",
+                                      "raw": "{\n  \"android\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"macos\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"ios\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"windows\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"web\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"linux\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"chromeos\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"chromeosweb\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  }\n}",
+                                      "options": {
+                                        "raw": {
+                                          "headerFamily": "json",
+                                          "language": "json"
+                                        }
+                                      }
+                                    },
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/flow-type-config",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "flow-type-config"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "Not Found",
+                                  "code": 404,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                  "createdAt": "2026-07-28T01:12:58.000Z",
+                                  "updatedAt": "2026-07-28T01:12:58.000Z",
+                                  "uid": "35240-e9443b65-e5c7-4d4d-8cf2-3978f8de6fee"
+                                },
+                                {
+                                  "id": "2398040e-ca8b-4aa4-82a2-33bcc6c88731",
+                                  "name": "Already exists. The error details will include a ResourceInfo describing the conflicting resource.\n",
+                                  "originalRequest": {
+                                    "method": "PATCH",
+                                    "header": [
+                                      {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "body": {
+                                      "mode": "raw",
+                                      "raw": "{\n  \"android\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"macos\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"ios\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"windows\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"web\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"linux\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"chromeos\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"chromeosweb\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  }\n}",
+                                      "options": {
+                                        "raw": {
+                                          "headerFamily": "json",
+                                          "language": "json"
+                                        }
+                                      }
+                                    },
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/flow-type-config",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "flow-type-config"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "Conflict",
+                                  "code": 409,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                  "createdAt": "2026-07-28T01:12:58.000Z",
+                                  "updatedAt": "2026-07-28T01:12:58.000Z",
+                                  "uid": "35240-2398040e-ca8b-4aa4-82a2-33bcc6c88731"
+                                },
+                                {
+                                  "id": "d5c6d4bf-79bd-483f-82b9-26ecb017dd79",
+                                  "name": "Internal.",
+                                  "originalRequest": {
+                                    "method": "PATCH",
+                                    "header": [
+                                      {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "body": {
+                                      "mode": "raw",
+                                      "raw": "{\n  \"android\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"macos\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"ios\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"windows\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"web\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"linux\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"chromeos\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  },\n  \"chromeosweb\": {\n    \"unknown\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"scheme\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"embedded\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"copy\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"roaming_auth\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_autofill\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"android_accessibility\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"pipe\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"universal_link\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"safari_extension\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"layered_auth_qr_code\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    },\n    \"secure_localhost\": {\n      \"enabled\": \"<boolean>\",\n      \"valid\": \"<boolean>\"\n    }\n  }\n}",
+                                      "options": {
+                                        "raw": {
+                                          "headerFamily": "json",
+                                          "language": "json"
+                                        }
+                                      }
+                                    },
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/flow-type-config",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "flow-type-config"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "Internal Server Error",
+                                  "code": 500,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                  "createdAt": "2026-07-28T01:12:58.000Z",
+                                  "updatedAt": "2026-07-28T01:12:58.000Z",
+                                  "uid": "35240-d5c6d4bf-79bd-483f-82b9-26ecb017dd79"
+                                }
+                              ],
+                              "createdAt": "2026-07-28T01:12:58.000Z",
+                              "updatedAt": "2026-07-28T01:12:58.000Z",
+                              "uid": "35240-17a0841f-d69a-4aeb-aaf9-adb90e23ba45"
+                            }
+                          ],
+                          "id": "35c4e42f-04af-4c75-9d55-f0c6719a233f",
+                          "createdAt": "2026-07-28T01:12:58.000Z",
+                          "updatedAt": "2026-07-28T01:12:58.000Z",
+                          "uid": "35240-35c4e42f-04af-4c75-9d55-f0c6719a233f"
+                        }
+                      ],
+                      "id": "590a4d0b-70a2-436f-9f07-05c6813cf399",
+                      "createdAt": "2026-07-28T01:12:58.000Z",
+                      "updatedAt": "2026-07-28T01:12:58.000Z",
+                      "uid": "35240-590a4d0b-70a2-436f-9f07-05c6813cf399"
+                    }
+                  ],
+                  "id": "e8d3bad3-c8b0-48c6-9071-c7199ef439f0",
+                  "createdAt": "2026-07-28T01:12:58.000Z",
+                  "updatedAt": "2026-07-28T01:12:58.000Z",
+                  "uid": "35240-e8d3bad3-c8b0-48c6-9071-c7199ef439f0"
+                }
+              ],
+              "id": "32f57d98-7fcf-4c55-9e2f-52b4ae07ce36",
+              "createdAt": "2026-07-28T01:12:58.000Z",
+              "updatedAt": "2026-07-28T01:12:58.000Z",
+              "uid": "35240-32f57d98-7fcf-4c55-9e2f-52b4ae07ce36"
+            }
+          ],
+          "id": "7598ea63-6904-421f-a809-78f8f6e5df7e",
+          "createdAt": "2026-07-28T01:12:58.000Z",
+          "updatedAt": "2026-07-28T01:12:58.000Z",
+          "uid": "35240-7598ea63-6904-421f-a809-78f8f6e5df7e"
+        }
+      ],
+      "id": "463f6fe6-2267-49a9-9940-2a78b5f732b1",
+      "createdAt": "2026-07-28T01:12:58.000Z",
+      "updatedAt": "2026-07-28T01:12:58.000Z",
+      "uid": "35240-463f6fe6-2267-49a9-9940-2a78b5f732b1"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{bearerToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api-us.beyondidentity.com"
+    }
+  ]
+}

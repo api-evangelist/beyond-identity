@@ -1,0 +1,2392 @@
+{
+  "info": {
+    "_postman_id": "1ba13aa2-2c38-4935-b0d3-b7a375e369b6",
+    "name": "Beyond Identity Secure Access Applications Identity Provider API",
+    "description": "# Introduction\n\n**NOTE:** To determine if you are accessing the Secure Access Platform, check the URL of your Admin Console.\nIf it looks like one of the following, you are using the Secure Access Platform:\n- `https://console.beyondidentity.com` (Localized to your region)\n- `https://console-us.beyondidentity.com` (US region)\n- `https://console-eu.beyondidentity.com` (EU region)\n- `https://console.us1.beyondidentity-gov.com` (US FedRAMP)\n\nIf your Admin Console URL does not look like one of the above, you are using the Secure Workforce Platform. Please refer to the [Secure Workforce API documentation](https://docs.beyondidentity.com/api/v0). <br /><br />\n\nThe Beyond Identity Secure Access API defines methods for managing resources in the Beyond Identity Secure Access platform.<br /><br />\n\nAll of the functionality available in the Beyond Identity Admin Console is\nalso available through the API. <br /><br />\n\nThis API is currently in the early-access stage and is under active\ndevelopment. Feedback and suggestions are encouraged and should be directed\nto the\n[Beyond Identity Developer Slack Channel](https://join.slack.com/t/byndid/shared_invite/zt-1anns8n83-NQX4JvW7coi9dksADxgeBQ).\n\n# Base API URLs\n\nThe base API URLs is determined by the region your tenant is hosted in OR if you are a FedRAMP customer. <br><br>\n\n### US Region\n\nIf you are a US region customer, your base API URLs will be:\n- `https://api-us.beyondidentity.com`\n- `https://auth-us.beyondidentity.com`\n\n### EU Region\n\nIf you are a EU region customer, your base API URLs will be:\n- `https://api-eu.beyondidentity.com`\n- `https://auth-eu.beyondidentity.com`\n\n### US FedRAMP\n\n**NOTE**: The FedRAMP version of Secure Access is released approximately *two weeks* after the commercial version, so some API endpoints may not be available immediately. <br><br>\n\nIf you are a FedRAMP customer in the US region, your base API URLs will be:\n- `https://api.us1.beyondidentity-gov.com`\n- `https://auth.us1.beyondidentity-gov.com`\n\nFor all the examples in this document, we will use the US region API base URL. You can always replace `https://api-us.beyondidentity.com`\nand `https://auth-us.beyondidentity.com` in the examples to use the proper base URL for your tenant.\n\n# Authentication\n\nAll Beyond Identity API endpoints require authentication using an access\ntoken. The access token is generated through OAuth 2.0 or OIDC, using the\nauthorization code flow or the client credentials flow. <br /><br />\n\nThe simplest way to acquire an access token is through the Beyond Identity Admin Console. Under the \"Applications\" tab, select the \"Beyond Identity Management API\" application, navigate to the \"API Tokens\" tab, and then click on \"Create token\". <br /><br />\n\nAlternatively, an access token may also be generated directly via the API by\nrequesting a token for the \"Beyond Identity Management API\" Application. <br><br>\n\n```\ncurl https://auth-us.beyondidentity.com/v1/tenants/$TENANT_ID/realms/$REALM_ID/applications/$APPLICATION_ID/token \\\n  -X POST \\\n  -u \"$CLIENT_ID:$CLIENT_SECRET\" --basic \\\n  -H \"Content-Type: application/x-www-form-urlencoded\" \\\n  -d \"grant_type=client_credentials&scope=$SCOPES\"\n```\n\nThis will work for any application that you have configured to provide\naccess to the Beyond Identity Management API Resource Server. The \"Beyond\nIdentity Management API\" application is provided by default as part of the\ntenant onboarding process.\n\nThe access token must be provided in the `Authorization` header of the\nAPI request. <br><br>\n\n```\ncurl https://api-us.beyondidentity.com/v1/... \\\n  -X $HTTP_METHOD -H \"Authorization: Bearer $TOKEN\"\n```\n\n## Requests and Responses\n\nTo interact with the Beyond Identity API, all requests should be made over\nHTTPS. <br /><br />\n\nThe Beyond Identity API is generally structured as a resource-oriented API.\nResources are represented as JSON objects and are used as both inputs to\nand outputs from API methods. <br /><br />\n\nResource fields may be described as read-only and immutable. A read-only\nfield is only provided on the response. An immutable field is only assigned\nonce and may not be changed after. For example, system-generated IDs are\ndescribed as both read-only and immutable. <br /><br />\n\nTo create a new resource, requests should use the `POST` method. Create\nrequests include all of the necessary attributes to create a new resource.\nCreate operations return the created resource in the response. <br /><br />\n\nTo retrieve a single resource or a collection of resources, requests should\nuse the `GET` method. When retrieving a collection of resources, the\nresponse will include an array of JSON objects keyed on the plural name of\nthe requested resource. <br /><br />\n\nTo update an resource, requests should use the `PATCH` method. Update\noperations support partial updating so requests may specify only the\nattributes which should be updated. Update operations return the updated\nresource in the response. <br /><br />\n\nTo delete a resource, requests should use the `DELETE` method. Note that\ndelete operations return an empty response instead of returning the\nresource in the response. <br /><br />\n\n### Example Response for a Realm\n\n```\n{\n  \"id\": \"a448fe493e02fa9f\",\n  \"tenant_id\": \"000168dc50bdce49\",\n  \"display_name\": \"Test Realm\",\n  \"create_time\": \"2022-06-22T21:46:08.930278Z\",\n  \"update_time\": \"2022-06-22T21:46:08.930278Z\"\n}\n```\n\n### Example Response for a Collection of Realms\n\n```\n{\n  \"realms\": [\n    {\n      \"id\": \"a448fe493e02fa9f\",\n      \"tenant_id\": \"000168dc50bdce49\",\n      \"display_name\": \"Test Realm\",\n      \"create_time\": \"2022-06-22T21:46:08.930278Z\",\n      \"update_time\": \"2022-06-22T21:46:08.930278Z\"\n    }\n  ],\n  \"total_size\": 1\n}\n```\n\n## HTTP Statuses\n\nThe API returns standard HTTP statuses and error codes.\n\nStatuses in the 200 range indicate that the request was successfully\nfulfilled and there were no errors. <br><br>\n\nStatuses in the 400 range indicate that there was an issue with the request\nthat may be addressed by the client. For example, client errors may\nindicate that the request was missing proper authorization or that the\nrequest was malformed. <br><br>\n\nStatuses in the 500 range indicate that the server encountered an internal\nissue and was unable to fulfill the request. <br><br>\n\nAll error responses include a JSON object with a `code` field and a\n`message` field. `code` contains a human-readable name for the HTTP status\ncode and `message` contains a high-level description of the error. The\nerror object may also contain additional error details which may be used by\nthe client to determine the exact cause of the error. Refer to each API\nmethod's examples to determine the specific error detail types supported\nfor that method. <br><br>\n\n### Invalid Access Token Example\n\nIf the provided access token is invalid, you will receive a 401 error.\nThis error indicates that the token is not recognized and was not generated\nby Beyond Identity. <br><br>\n\n```\nHTTP/1.1 401 Unauthorized\n{\n  \"code\": \"unauthorized\",\n  \"message\": \"unauthorized\"\n}\n```\n\n### Permission Denied Example\n\nIf the provided access token does not have access to the requested resource,\nyou will receive a 403 error. Access tokens are scoped at a minimum to your\ntenant. Any request for resources outside of your tenant will result in this\nerror. <br><br>\n\n```\nHTTP/1.1 403 Forbidden\n{\n  \"code\": \"forbidden\",\n  \"message\": \"forbidden\"\n}\n```\n\n### Missing Resource Example\n\nIf the requested resource does not exist, you will receive a 404 error. The\nspecific API method may return additional details about the missing\nresource. <br><br>\n\n```\nHTTP/1.1 404 Not Found\n{\n  \"code\": \"not_found\",\n  \"message\": \"group not found\"\n  \"details\": [\n    {\n      \"type\": \"ResourceInfo\",\n      \"resource_type\": \"Group\",\n      \"id\": \"4822738be6b7f658\",\n      \"description\": \"group not found\"\n    }\n  ],\n}\n```\n\n### Invalid Parameters Example\n\nIf the request body contains invalid parameters, you will receive a 400\nerror. The specific API method may return additional details about the\ninvalid parameter. <br><br>\n\n```\nHTTP/1.1 400 Bad Request\n{\n  \"code\": \"bad_request\",\n  \"message\": \"invalid parameters\"\n  \"details\": [\n    {\n      \"type\": \"FieldViolations\"\n      \"field_violations\": [\n        {\n          \"description\": \"missing\",\n          \"field\": \"group.display_name\"\n        }\n      ],\n    }\n  ],\n}\n```\n\n\nContact Support:\n Email: support@beyondidentity.com",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "createdAt": "2026-07-28T01:12:55.000Z",
+    "updatedAt": "2026-07-28T01:12:56.000Z",
+    "lastUpdatedBy": "35240",
+    "uid": "35240-1ba13aa2-2c38-4935-b0d3-b7a375e369b6"
+  },
+  "item": [
+    {
+      "name": "v1",
+      "item": [
+        {
+          "name": "tenants",
+          "item": [
+            {
+              "name": "{tenant_id}",
+              "item": [
+                {
+                  "name": "realms",
+                  "item": [
+                    {
+                      "name": "{realm_id}",
+                      "item": [
+                        {
+                          "name": "identity-providers",
+                          "item": [
+                            {
+                              "name": "{identity_provider_id}",
+                              "item": [
+                                {
+                                  "name": "Updates an identity provider.",
+                                  "id": "146756bb-9acd-4496-bf42-d85e05c7e099",
+                                  "protocolProfileBehavior": {
+                                    "disableBodyPruning": true
+                                  },
+                                  "request": {
+                                    "method": "PATCH",
+                                    "header": [
+                                      {
+                                        "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                        "key": "x-correlation_id",
+                                        "value": "<string>"
+                                      },
+                                      {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      }
+                                    ],
+                                    "body": {
+                                      "mode": "raw",
+                                      "raw": "{\n  \"identity_provider\": {\n    \"id\": \"<string>\",\n    \"tenant_id\": \"<string>\",\n    \"realm_id\": \"<string>\",\n    \"display_name\": \"<string>\",\n    \"protocol_config\": {\n      \"type\": \"oidc_idp\",\n      \"client_id\": \"<string>\",\n      \"client_secret\": \"<string>\",\n      \"token_scopes\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"identity_attribute\": \"external_id\",\n      \"pkce\": \"disabled\",\n      \"jwks_url\": \"<string>\",\n      \"token_url\": \"<string>\",\n      \"authorize_url\": \"<string>\",\n      \"identifying_claim_name\": \"<string>\"\n    }\n  }\n}",
+                                      "options": {
+                                        "raw": {
+                                          "headerFamily": "json",
+                                          "language": "json"
+                                        }
+                                      }
+                                    },
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers/:identity_provider_id",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "identity-providers",
+                                        ":identity_provider_id"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "id": "581abd3c-b4f0-4803-a4b7-d94be4f3371f",
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "id": "658270ff-061e-4792-9700-b86e4ab2e085",
+                                          "key": "realm_id"
+                                        },
+                                        {
+                                          "id": "2882d130-ba96-4b1b-a970-c651401538b2",
+                                          "key": "identity_provider_id",
+                                          "value": "<string>",
+                                          "description": "(Required) A unique identifier for an identity provider."
+                                        }
+                                      ]
+                                    },
+                                    "description": "Updates an identity provider."
+                                  },
+                                  "response": [
+                                    {
+                                      "id": "6dfef619-2fe7-457d-85e5-639978ecb35c",
+                                      "name": "The identity provider has been updated.",
+                                      "originalRequest": {
+                                        "method": "PATCH",
+                                        "header": [
+                                          {
+                                            "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                            "key": "x-correlation_id",
+                                            "value": "<string>"
+                                          },
+                                          {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "description": "Added as a part of security scheme: bearer",
+                                            "key": "Authorization",
+                                            "value": "Bearer <token>"
+                                          }
+                                        ],
+                                        "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"identity_provider\": {\n    \"id\": \"<string>\",\n    \"tenant_id\": \"<string>\",\n    \"realm_id\": \"<string>\",\n    \"display_name\": \"<string>\",\n    \"protocol_config\": {\n      \"type\": \"oidc_idp\",\n      \"client_id\": \"<string>\",\n      \"client_secret\": \"<string>\",\n      \"token_scopes\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"identity_attribute\": \"external_id\",\n      \"pkce\": \"disabled\",\n      \"jwks_url\": \"<string>\",\n      \"token_url\": \"<string>\",\n      \"authorize_url\": \"<string>\",\n      \"identifying_claim_name\": \"<string>\"\n    }\n  }\n}",
+                                          "options": {
+                                            "raw": {
+                                              "headerFamily": "json",
+                                              "language": "json"
+                                            }
+                                          }
+                                        },
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers/:identity_provider_id",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v1",
+                                            "tenants",
+                                            ":tenant_id",
+                                            "realms",
+                                            ":realm_id",
+                                            "identity-providers",
+                                            ":identity_provider_id"
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "tenant_id"
+                                            },
+                                            {
+                                              "key": "realm_id"
+                                            },
+                                            {
+                                              "key": "identity_provider_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "OK",
+                                      "code": 200,
+                                      "_postman_previewlanguage": "json",
+                                      "header": [
+                                        {
+                                          "key": "Content-Type",
+                                          "value": "application/json"
+                                        },
+                                        {
+                                          "disabled": false,
+                                          "description": {
+                                            "content": "",
+                                            "type": "text/plain"
+                                          },
+                                          "key": "x-correlation-id",
+                                          "value": ""
+                                        }
+                                      ],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": "{\n  \"id\": \"<string>\",\n  \"tenant_id\": \"<string>\",\n  \"realm_id\": \"<string>\",\n  \"protocol_config\": {\n    \"client_id\": \"<string>\",\n    \"client_secret\": \"<string>\",\n    \"token_scopes\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"identity_attribute\": \"id\",\n    \"pkce\": \"plain\",\n    \"jwks_url\": \"<string>\",\n    \"token_url\": \"<string>\",\n    \"authorize_url\": \"<string>\",\n    \"redirect_url\": \"<string>\",\n    \"identifying_claim_name\": \"<string>\",\n    \"type\": \"oidc_idp\"\n  },\n  \"display_name\": \"<string>\"\n}",
+                                      "createdAt": "2026-07-28T01:12:56.000Z",
+                                      "updatedAt": "2026-07-28T01:12:56.000Z",
+                                      "uid": "35240-6dfef619-2fe7-457d-85e5-639978ecb35c"
+                                    },
+                                    {
+                                      "id": "61b2df38-1ad9-4cd3-adf4-670b69194b1e",
+                                      "name": "The request is malformed.",
+                                      "originalRequest": {
+                                        "method": "PATCH",
+                                        "header": [
+                                          {
+                                            "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                            "key": "x-correlation_id",
+                                            "value": "<string>"
+                                          },
+                                          {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "description": "Added as a part of security scheme: bearer",
+                                            "key": "Authorization",
+                                            "value": "Bearer <token>"
+                                          }
+                                        ],
+                                        "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"identity_provider\": {\n    \"id\": \"<string>\",\n    \"tenant_id\": \"<string>\",\n    \"realm_id\": \"<string>\",\n    \"display_name\": \"<string>\",\n    \"protocol_config\": {\n      \"type\": \"oidc_idp\",\n      \"client_id\": \"<string>\",\n      \"client_secret\": \"<string>\",\n      \"token_scopes\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"identity_attribute\": \"external_id\",\n      \"pkce\": \"disabled\",\n      \"jwks_url\": \"<string>\",\n      \"token_url\": \"<string>\",\n      \"authorize_url\": \"<string>\",\n      \"identifying_claim_name\": \"<string>\"\n    }\n  }\n}",
+                                          "options": {
+                                            "raw": {
+                                              "headerFamily": "json",
+                                              "language": "json"
+                                            }
+                                          }
+                                        },
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers/:identity_provider_id",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v1",
+                                            "tenants",
+                                            ":tenant_id",
+                                            "realms",
+                                            ":realm_id",
+                                            "identity-providers",
+                                            ":identity_provider_id"
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "tenant_id"
+                                            },
+                                            {
+                                              "key": "realm_id"
+                                            },
+                                            {
+                                              "key": "identity_provider_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Bad Request",
+                                      "code": 400,
+                                      "_postman_previewlanguage": "json",
+                                      "header": [
+                                        {
+                                          "key": "Content-Type",
+                                          "value": "application/json"
+                                        },
+                                        {
+                                          "disabled": false,
+                                          "description": {
+                                            "content": "",
+                                            "type": "text/plain"
+                                          },
+                                          "key": "x-correlation-id",
+                                          "value": ""
+                                        }
+                                      ],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                      "createdAt": "2026-07-28T01:12:56.000Z",
+                                      "updatedAt": "2026-07-28T01:12:56.000Z",
+                                      "uid": "35240-61b2df38-1ad9-4cd3-adf4-670b69194b1e"
+                                    },
+                                    {
+                                      "id": "fa528b1a-da0b-4be6-890d-4121d430e2bc",
+                                      "name": "An invalid Authorization token has been supplied.",
+                                      "originalRequest": {
+                                        "method": "PATCH",
+                                        "header": [
+                                          {
+                                            "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                            "key": "x-correlation_id",
+                                            "value": "<string>"
+                                          },
+                                          {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "description": "Added as a part of security scheme: bearer",
+                                            "key": "Authorization",
+                                            "value": "Bearer <token>"
+                                          }
+                                        ],
+                                        "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"identity_provider\": {\n    \"id\": \"<string>\",\n    \"tenant_id\": \"<string>\",\n    \"realm_id\": \"<string>\",\n    \"display_name\": \"<string>\",\n    \"protocol_config\": {\n      \"type\": \"oidc_idp\",\n      \"client_id\": \"<string>\",\n      \"client_secret\": \"<string>\",\n      \"token_scopes\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"identity_attribute\": \"external_id\",\n      \"pkce\": \"disabled\",\n      \"jwks_url\": \"<string>\",\n      \"token_url\": \"<string>\",\n      \"authorize_url\": \"<string>\",\n      \"identifying_claim_name\": \"<string>\"\n    }\n  }\n}",
+                                          "options": {
+                                            "raw": {
+                                              "headerFamily": "json",
+                                              "language": "json"
+                                            }
+                                          }
+                                        },
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers/:identity_provider_id",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v1",
+                                            "tenants",
+                                            ":tenant_id",
+                                            "realms",
+                                            ":realm_id",
+                                            "identity-providers",
+                                            ":identity_provider_id"
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "tenant_id"
+                                            },
+                                            {
+                                              "key": "realm_id"
+                                            },
+                                            {
+                                              "key": "identity_provider_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Unauthorized",
+                                      "code": 401,
+                                      "_postman_previewlanguage": "json",
+                                      "header": [
+                                        {
+                                          "key": "Content-Type",
+                                          "value": "application/json"
+                                        },
+                                        {
+                                          "disabled": false,
+                                          "description": {
+                                            "content": "",
+                                            "type": "text/plain"
+                                          },
+                                          "key": "x-correlation-id",
+                                          "value": ""
+                                        }
+                                      ],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                      "createdAt": "2026-07-28T01:12:56.000Z",
+                                      "updatedAt": "2026-07-28T01:12:56.000Z",
+                                      "uid": "35240-fa528b1a-da0b-4be6-890d-4121d430e2bc"
+                                    },
+                                    {
+                                      "id": "51ba3763-d0f0-46a7-9a3a-122e4f963530",
+                                      "name": "The supplied authorization token doesn't allow the requested operation.",
+                                      "originalRequest": {
+                                        "method": "PATCH",
+                                        "header": [
+                                          {
+                                            "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                            "key": "x-correlation_id",
+                                            "value": "<string>"
+                                          },
+                                          {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "description": "Added as a part of security scheme: bearer",
+                                            "key": "Authorization",
+                                            "value": "Bearer <token>"
+                                          }
+                                        ],
+                                        "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"identity_provider\": {\n    \"id\": \"<string>\",\n    \"tenant_id\": \"<string>\",\n    \"realm_id\": \"<string>\",\n    \"display_name\": \"<string>\",\n    \"protocol_config\": {\n      \"type\": \"oidc_idp\",\n      \"client_id\": \"<string>\",\n      \"client_secret\": \"<string>\",\n      \"token_scopes\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"identity_attribute\": \"external_id\",\n      \"pkce\": \"disabled\",\n      \"jwks_url\": \"<string>\",\n      \"token_url\": \"<string>\",\n      \"authorize_url\": \"<string>\",\n      \"identifying_claim_name\": \"<string>\"\n    }\n  }\n}",
+                                          "options": {
+                                            "raw": {
+                                              "headerFamily": "json",
+                                              "language": "json"
+                                            }
+                                          }
+                                        },
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers/:identity_provider_id",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v1",
+                                            "tenants",
+                                            ":tenant_id",
+                                            "realms",
+                                            ":realm_id",
+                                            "identity-providers",
+                                            ":identity_provider_id"
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "tenant_id"
+                                            },
+                                            {
+                                              "key": "realm_id"
+                                            },
+                                            {
+                                              "key": "identity_provider_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Forbidden",
+                                      "code": 403,
+                                      "_postman_previewlanguage": "json",
+                                      "header": [
+                                        {
+                                          "key": "Content-Type",
+                                          "value": "application/json"
+                                        },
+                                        {
+                                          "disabled": false,
+                                          "description": {
+                                            "content": "",
+                                            "type": "text/plain"
+                                          },
+                                          "key": "x-correlation-id",
+                                          "value": ""
+                                        }
+                                      ],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                      "createdAt": "2026-07-28T01:12:56.000Z",
+                                      "updatedAt": "2026-07-28T01:12:56.000Z",
+                                      "uid": "35240-51ba3763-d0f0-46a7-9a3a-122e4f963530"
+                                    },
+                                    {
+                                      "id": "9262974b-5be1-4c06-9653-11263f8bfedb",
+                                      "name": "Internal server error.",
+                                      "originalRequest": {
+                                        "method": "PATCH",
+                                        "header": [
+                                          {
+                                            "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                            "key": "x-correlation_id",
+                                            "value": "<string>"
+                                          },
+                                          {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "description": "Added as a part of security scheme: bearer",
+                                            "key": "Authorization",
+                                            "value": "Bearer <token>"
+                                          }
+                                        ],
+                                        "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"identity_provider\": {\n    \"id\": \"<string>\",\n    \"tenant_id\": \"<string>\",\n    \"realm_id\": \"<string>\",\n    \"display_name\": \"<string>\",\n    \"protocol_config\": {\n      \"type\": \"oidc_idp\",\n      \"client_id\": \"<string>\",\n      \"client_secret\": \"<string>\",\n      \"token_scopes\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"identity_attribute\": \"external_id\",\n      \"pkce\": \"disabled\",\n      \"jwks_url\": \"<string>\",\n      \"token_url\": \"<string>\",\n      \"authorize_url\": \"<string>\",\n      \"identifying_claim_name\": \"<string>\"\n    }\n  }\n}",
+                                          "options": {
+                                            "raw": {
+                                              "headerFamily": "json",
+                                              "language": "json"
+                                            }
+                                          }
+                                        },
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers/:identity_provider_id",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v1",
+                                            "tenants",
+                                            ":tenant_id",
+                                            "realms",
+                                            ":realm_id",
+                                            "identity-providers",
+                                            ":identity_provider_id"
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "tenant_id"
+                                            },
+                                            {
+                                              "key": "realm_id"
+                                            },
+                                            {
+                                              "key": "identity_provider_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Internal Server Error",
+                                      "code": 500,
+                                      "_postman_previewlanguage": "json",
+                                      "header": [
+                                        {
+                                          "key": "Content-Type",
+                                          "value": "application/json"
+                                        },
+                                        {
+                                          "disabled": false,
+                                          "description": {
+                                            "content": "",
+                                            "type": "text/plain"
+                                          },
+                                          "key": "x-correlation-id",
+                                          "value": ""
+                                        }
+                                      ],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                      "createdAt": "2026-07-28T01:12:56.000Z",
+                                      "updatedAt": "2026-07-28T01:12:56.000Z",
+                                      "uid": "35240-9262974b-5be1-4c06-9653-11263f8bfedb"
+                                    }
+                                  ],
+                                  "createdAt": "2026-07-28T01:12:56.000Z",
+                                  "updatedAt": "2026-07-28T01:12:56.000Z",
+                                  "uid": "35240-146756bb-9acd-4496-bf42-d85e05c7e099"
+                                },
+                                {
+                                  "name": "Retrieves data about an Identity Provider.",
+                                  "id": "c69748ab-9660-4d16-8a35-8fc69115a39f",
+                                  "protocolProfileBehavior": {
+                                    "disableBodyPruning": true
+                                  },
+                                  "request": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                        "key": "x-correlation_id",
+                                        "value": "<string>"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers/:identity_provider_id",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "identity-providers",
+                                        ":identity_provider_id"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "id": "f4bfe535-4a25-409e-b6dc-fe7347f29907",
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "id": "719cb707-25bc-44c0-b76c-fb61e63fd61b",
+                                          "key": "realm_id"
+                                        },
+                                        {
+                                          "id": "f82902bc-b3a5-419f-b173-8ce4cbf91edb",
+                                          "key": "identity_provider_id",
+                                          "value": "<string>",
+                                          "description": "(Required) A unique identifier for an identity provider."
+                                        }
+                                      ]
+                                    },
+                                    "description": "Retrieves data about an identity provider."
+                                  },
+                                  "response": [
+                                    {
+                                      "id": "9dc605b6-3183-4392-be7e-4471a8c2ee8b",
+                                      "name": "The requested identity provider.",
+                                      "originalRequest": {
+                                        "method": "GET",
+                                        "header": [
+                                          {
+                                            "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                            "key": "x-correlation_id",
+                                            "value": "<string>"
+                                          },
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "description": "Added as a part of security scheme: bearer",
+                                            "key": "Authorization",
+                                            "value": "Bearer <token>"
+                                          }
+                                        ],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers/:identity_provider_id",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v1",
+                                            "tenants",
+                                            ":tenant_id",
+                                            "realms",
+                                            ":realm_id",
+                                            "identity-providers",
+                                            ":identity_provider_id"
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "tenant_id"
+                                            },
+                                            {
+                                              "key": "realm_id"
+                                            },
+                                            {
+                                              "key": "identity_provider_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "OK",
+                                      "code": 200,
+                                      "_postman_previewlanguage": "json",
+                                      "header": [
+                                        {
+                                          "key": "Content-Type",
+                                          "value": "application/json"
+                                        },
+                                        {
+                                          "disabled": false,
+                                          "description": {
+                                            "content": "",
+                                            "type": "text/plain"
+                                          },
+                                          "key": "x-correlation-id",
+                                          "value": ""
+                                        }
+                                      ],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": "{\n  \"id\": \"<string>\",\n  \"tenant_id\": \"<string>\",\n  \"realm_id\": \"<string>\",\n  \"protocol_config\": {\n    \"client_id\": \"<string>\",\n    \"client_secret\": \"<string>\",\n    \"token_scopes\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"identity_attribute\": \"id\",\n    \"pkce\": \"plain\",\n    \"jwks_url\": \"<string>\",\n    \"token_url\": \"<string>\",\n    \"authorize_url\": \"<string>\",\n    \"redirect_url\": \"<string>\",\n    \"identifying_claim_name\": \"<string>\",\n    \"type\": \"oidc_idp\"\n  },\n  \"display_name\": \"<string>\"\n}",
+                                      "createdAt": "2026-07-28T01:12:56.000Z",
+                                      "updatedAt": "2026-07-28T01:12:56.000Z",
+                                      "uid": "35240-9dc605b6-3183-4392-be7e-4471a8c2ee8b"
+                                    },
+                                    {
+                                      "id": "628ab15b-e905-49b5-93b8-a4304426d94a",
+                                      "name": "The request is malformed.",
+                                      "originalRequest": {
+                                        "method": "GET",
+                                        "header": [
+                                          {
+                                            "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                            "key": "x-correlation_id",
+                                            "value": "<string>"
+                                          },
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "description": "Added as a part of security scheme: bearer",
+                                            "key": "Authorization",
+                                            "value": "Bearer <token>"
+                                          }
+                                        ],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers/:identity_provider_id",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v1",
+                                            "tenants",
+                                            ":tenant_id",
+                                            "realms",
+                                            ":realm_id",
+                                            "identity-providers",
+                                            ":identity_provider_id"
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "tenant_id"
+                                            },
+                                            {
+                                              "key": "realm_id"
+                                            },
+                                            {
+                                              "key": "identity_provider_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Bad Request",
+                                      "code": 400,
+                                      "_postman_previewlanguage": "json",
+                                      "header": [
+                                        {
+                                          "key": "Content-Type",
+                                          "value": "application/json"
+                                        },
+                                        {
+                                          "disabled": false,
+                                          "description": {
+                                            "content": "",
+                                            "type": "text/plain"
+                                          },
+                                          "key": "x-correlation-id",
+                                          "value": ""
+                                        }
+                                      ],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                      "createdAt": "2026-07-28T01:12:56.000Z",
+                                      "updatedAt": "2026-07-28T01:12:56.000Z",
+                                      "uid": "35240-628ab15b-e905-49b5-93b8-a4304426d94a"
+                                    },
+                                    {
+                                      "id": "072826f3-1d44-4315-9230-93e3f28fc1c2",
+                                      "name": "An invalid Authorization token has been supplied.",
+                                      "originalRequest": {
+                                        "method": "GET",
+                                        "header": [
+                                          {
+                                            "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                            "key": "x-correlation_id",
+                                            "value": "<string>"
+                                          },
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "description": "Added as a part of security scheme: bearer",
+                                            "key": "Authorization",
+                                            "value": "Bearer <token>"
+                                          }
+                                        ],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers/:identity_provider_id",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v1",
+                                            "tenants",
+                                            ":tenant_id",
+                                            "realms",
+                                            ":realm_id",
+                                            "identity-providers",
+                                            ":identity_provider_id"
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "tenant_id"
+                                            },
+                                            {
+                                              "key": "realm_id"
+                                            },
+                                            {
+                                              "key": "identity_provider_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Unauthorized",
+                                      "code": 401,
+                                      "_postman_previewlanguage": "json",
+                                      "header": [
+                                        {
+                                          "key": "Content-Type",
+                                          "value": "application/json"
+                                        },
+                                        {
+                                          "disabled": false,
+                                          "description": {
+                                            "content": "",
+                                            "type": "text/plain"
+                                          },
+                                          "key": "x-correlation-id",
+                                          "value": ""
+                                        }
+                                      ],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                      "createdAt": "2026-07-28T01:12:56.000Z",
+                                      "updatedAt": "2026-07-28T01:12:56.000Z",
+                                      "uid": "35240-072826f3-1d44-4315-9230-93e3f28fc1c2"
+                                    },
+                                    {
+                                      "id": "0b095682-b93a-402e-90fb-e2da6b42e950",
+                                      "name": "The supplied authorization token doesn't allow the requested operation.",
+                                      "originalRequest": {
+                                        "method": "GET",
+                                        "header": [
+                                          {
+                                            "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                            "key": "x-correlation_id",
+                                            "value": "<string>"
+                                          },
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "description": "Added as a part of security scheme: bearer",
+                                            "key": "Authorization",
+                                            "value": "Bearer <token>"
+                                          }
+                                        ],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers/:identity_provider_id",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v1",
+                                            "tenants",
+                                            ":tenant_id",
+                                            "realms",
+                                            ":realm_id",
+                                            "identity-providers",
+                                            ":identity_provider_id"
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "tenant_id"
+                                            },
+                                            {
+                                              "key": "realm_id"
+                                            },
+                                            {
+                                              "key": "identity_provider_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Forbidden",
+                                      "code": 403,
+                                      "_postman_previewlanguage": "json",
+                                      "header": [
+                                        {
+                                          "key": "Content-Type",
+                                          "value": "application/json"
+                                        },
+                                        {
+                                          "disabled": false,
+                                          "description": {
+                                            "content": "",
+                                            "type": "text/plain"
+                                          },
+                                          "key": "x-correlation-id",
+                                          "value": ""
+                                        }
+                                      ],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                      "createdAt": "2026-07-28T01:12:56.000Z",
+                                      "updatedAt": "2026-07-28T01:12:56.000Z",
+                                      "uid": "35240-0b095682-b93a-402e-90fb-e2da6b42e950"
+                                    },
+                                    {
+                                      "id": "fa091fe0-23f5-4e4e-a465-fd3edcaa6b98",
+                                      "name": "Internal server error.",
+                                      "originalRequest": {
+                                        "method": "GET",
+                                        "header": [
+                                          {
+                                            "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                            "key": "x-correlation_id",
+                                            "value": "<string>"
+                                          },
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "description": "Added as a part of security scheme: bearer",
+                                            "key": "Authorization",
+                                            "value": "Bearer <token>"
+                                          }
+                                        ],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers/:identity_provider_id",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v1",
+                                            "tenants",
+                                            ":tenant_id",
+                                            "realms",
+                                            ":realm_id",
+                                            "identity-providers",
+                                            ":identity_provider_id"
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "tenant_id"
+                                            },
+                                            {
+                                              "key": "realm_id"
+                                            },
+                                            {
+                                              "key": "identity_provider_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Internal Server Error",
+                                      "code": 500,
+                                      "_postman_previewlanguage": "json",
+                                      "header": [
+                                        {
+                                          "key": "Content-Type",
+                                          "value": "application/json"
+                                        },
+                                        {
+                                          "disabled": false,
+                                          "description": {
+                                            "content": "",
+                                            "type": "text/plain"
+                                          },
+                                          "key": "x-correlation-id",
+                                          "value": ""
+                                        }
+                                      ],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                      "createdAt": "2026-07-28T01:12:56.000Z",
+                                      "updatedAt": "2026-07-28T01:12:56.000Z",
+                                      "uid": "35240-fa091fe0-23f5-4e4e-a465-fd3edcaa6b98"
+                                    }
+                                  ],
+                                  "createdAt": "2026-07-28T01:12:56.000Z",
+                                  "updatedAt": "2026-07-28T01:12:56.000Z",
+                                  "uid": "35240-c69748ab-9660-4d16-8a35-8fc69115a39f"
+                                },
+                                {
+                                  "name": "Deletes an Identity Provider.",
+                                  "id": "7926baea-01b2-43a9-8189-4352125c5783",
+                                  "protocolProfileBehavior": {
+                                    "disableBodyPruning": true
+                                  },
+                                  "request": {
+                                    "method": "DELETE",
+                                    "header": [
+                                      {
+                                        "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                        "key": "x-correlation_id",
+                                        "value": "<string>"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers/:identity_provider_id",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "identity-providers",
+                                        ":identity_provider_id"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "id": "e96ab47c-befa-4dbb-ba63-9cd91cf925a3",
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "id": "8d5e96df-1aec-444b-9d10-010ee6209f3a",
+                                          "key": "realm_id"
+                                        },
+                                        {
+                                          "id": "35cca79f-89c9-411f-88f1-07a9cd2ec859",
+                                          "key": "identity_provider_id",
+                                          "value": "<string>",
+                                          "description": "(Required) A unique identifier for an identity provider."
+                                        }
+                                      ]
+                                    },
+                                    "description": "Deletes an identity provider."
+                                  },
+                                  "response": [
+                                    {
+                                      "id": "97c3f839-8b99-4b04-987a-56402e92d805",
+                                      "name": "The identity provider has been deleted.",
+                                      "originalRequest": {
+                                        "method": "DELETE",
+                                        "header": [
+                                          {
+                                            "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                            "key": "x-correlation_id",
+                                            "value": "<string>"
+                                          },
+                                          {
+                                            "description": "Added as a part of security scheme: bearer",
+                                            "key": "Authorization",
+                                            "value": "Bearer <token>"
+                                          }
+                                        ],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers/:identity_provider_id",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v1",
+                                            "tenants",
+                                            ":tenant_id",
+                                            "realms",
+                                            ":realm_id",
+                                            "identity-providers",
+                                            ":identity_provider_id"
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "tenant_id"
+                                            },
+                                            {
+                                              "key": "realm_id"
+                                            },
+                                            {
+                                              "key": "identity_provider_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "OK",
+                                      "code": 200,
+                                      "_postman_previewlanguage": "text",
+                                      "header": [
+                                        {
+                                          "disabled": false,
+                                          "description": {
+                                            "content": "",
+                                            "type": "text/plain"
+                                          },
+                                          "key": "x-correlation-id",
+                                          "value": ""
+                                        }
+                                      ],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": null,
+                                      "createdAt": "2026-07-28T01:12:56.000Z",
+                                      "updatedAt": "2026-07-28T01:12:56.000Z",
+                                      "uid": "35240-97c3f839-8b99-4b04-987a-56402e92d805"
+                                    },
+                                    {
+                                      "id": "1f974546-192a-4e81-b03c-67a93f5bd67f",
+                                      "name": "The request is malformed.",
+                                      "originalRequest": {
+                                        "method": "DELETE",
+                                        "header": [
+                                          {
+                                            "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                            "key": "x-correlation_id",
+                                            "value": "<string>"
+                                          },
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "description": "Added as a part of security scheme: bearer",
+                                            "key": "Authorization",
+                                            "value": "Bearer <token>"
+                                          }
+                                        ],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers/:identity_provider_id",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v1",
+                                            "tenants",
+                                            ":tenant_id",
+                                            "realms",
+                                            ":realm_id",
+                                            "identity-providers",
+                                            ":identity_provider_id"
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "tenant_id"
+                                            },
+                                            {
+                                              "key": "realm_id"
+                                            },
+                                            {
+                                              "key": "identity_provider_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Bad Request",
+                                      "code": 400,
+                                      "_postman_previewlanguage": "json",
+                                      "header": [
+                                        {
+                                          "key": "Content-Type",
+                                          "value": "application/json"
+                                        },
+                                        {
+                                          "disabled": false,
+                                          "description": {
+                                            "content": "",
+                                            "type": "text/plain"
+                                          },
+                                          "key": "x-correlation-id",
+                                          "value": ""
+                                        }
+                                      ],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                      "createdAt": "2026-07-28T01:12:56.000Z",
+                                      "updatedAt": "2026-07-28T01:12:56.000Z",
+                                      "uid": "35240-1f974546-192a-4e81-b03c-67a93f5bd67f"
+                                    },
+                                    {
+                                      "id": "75b38796-af50-4fc4-87db-6a0de889a752",
+                                      "name": "An invalid Authorization token has been supplied.",
+                                      "originalRequest": {
+                                        "method": "DELETE",
+                                        "header": [
+                                          {
+                                            "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                            "key": "x-correlation_id",
+                                            "value": "<string>"
+                                          },
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "description": "Added as a part of security scheme: bearer",
+                                            "key": "Authorization",
+                                            "value": "Bearer <token>"
+                                          }
+                                        ],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers/:identity_provider_id",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v1",
+                                            "tenants",
+                                            ":tenant_id",
+                                            "realms",
+                                            ":realm_id",
+                                            "identity-providers",
+                                            ":identity_provider_id"
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "tenant_id"
+                                            },
+                                            {
+                                              "key": "realm_id"
+                                            },
+                                            {
+                                              "key": "identity_provider_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Unauthorized",
+                                      "code": 401,
+                                      "_postman_previewlanguage": "json",
+                                      "header": [
+                                        {
+                                          "key": "Content-Type",
+                                          "value": "application/json"
+                                        },
+                                        {
+                                          "disabled": false,
+                                          "description": {
+                                            "content": "",
+                                            "type": "text/plain"
+                                          },
+                                          "key": "x-correlation-id",
+                                          "value": ""
+                                        }
+                                      ],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                      "createdAt": "2026-07-28T01:12:56.000Z",
+                                      "updatedAt": "2026-07-28T01:12:56.000Z",
+                                      "uid": "35240-75b38796-af50-4fc4-87db-6a0de889a752"
+                                    },
+                                    {
+                                      "id": "bc74ce7e-cd8d-4037-bdc4-3256a3e3e075",
+                                      "name": "The supplied authorization token doesn't allow the requested operation.",
+                                      "originalRequest": {
+                                        "method": "DELETE",
+                                        "header": [
+                                          {
+                                            "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                            "key": "x-correlation_id",
+                                            "value": "<string>"
+                                          },
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "description": "Added as a part of security scheme: bearer",
+                                            "key": "Authorization",
+                                            "value": "Bearer <token>"
+                                          }
+                                        ],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers/:identity_provider_id",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v1",
+                                            "tenants",
+                                            ":tenant_id",
+                                            "realms",
+                                            ":realm_id",
+                                            "identity-providers",
+                                            ":identity_provider_id"
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "tenant_id"
+                                            },
+                                            {
+                                              "key": "realm_id"
+                                            },
+                                            {
+                                              "key": "identity_provider_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Forbidden",
+                                      "code": 403,
+                                      "_postman_previewlanguage": "json",
+                                      "header": [
+                                        {
+                                          "key": "Content-Type",
+                                          "value": "application/json"
+                                        },
+                                        {
+                                          "disabled": false,
+                                          "description": {
+                                            "content": "",
+                                            "type": "text/plain"
+                                          },
+                                          "key": "x-correlation-id",
+                                          "value": ""
+                                        }
+                                      ],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                      "createdAt": "2026-07-28T01:12:56.000Z",
+                                      "updatedAt": "2026-07-28T01:12:56.000Z",
+                                      "uid": "35240-bc74ce7e-cd8d-4037-bdc4-3256a3e3e075"
+                                    },
+                                    {
+                                      "id": "66e35a4f-a11c-48e5-bd68-54de19da9e2a",
+                                      "name": "Internal server error.",
+                                      "originalRequest": {
+                                        "method": "DELETE",
+                                        "header": [
+                                          {
+                                            "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                            "key": "x-correlation_id",
+                                            "value": "<string>"
+                                          },
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          },
+                                          {
+                                            "description": "Added as a part of security scheme: bearer",
+                                            "key": "Authorization",
+                                            "value": "Bearer <token>"
+                                          }
+                                        ],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers/:identity_provider_id",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v1",
+                                            "tenants",
+                                            ":tenant_id",
+                                            "realms",
+                                            ":realm_id",
+                                            "identity-providers",
+                                            ":identity_provider_id"
+                                          ],
+                                          "variable": [
+                                            {
+                                              "key": "tenant_id"
+                                            },
+                                            {
+                                              "key": "realm_id"
+                                            },
+                                            {
+                                              "key": "identity_provider_id"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "status": "Internal Server Error",
+                                      "code": 500,
+                                      "_postman_previewlanguage": "json",
+                                      "header": [
+                                        {
+                                          "key": "Content-Type",
+                                          "value": "application/json"
+                                        },
+                                        {
+                                          "disabled": false,
+                                          "description": {
+                                            "content": "",
+                                            "type": "text/plain"
+                                          },
+                                          "key": "x-correlation-id",
+                                          "value": ""
+                                        }
+                                      ],
+                                      "cookie": [],
+                                      "responseTime": null,
+                                      "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                      "createdAt": "2026-07-28T01:12:56.000Z",
+                                      "updatedAt": "2026-07-28T01:12:56.000Z",
+                                      "uid": "35240-66e35a4f-a11c-48e5-bd68-54de19da9e2a"
+                                    }
+                                  ],
+                                  "createdAt": "2026-07-28T01:12:56.000Z",
+                                  "updatedAt": "2026-07-28T01:12:56.000Z",
+                                  "uid": "35240-7926baea-01b2-43a9-8189-4352125c5783"
+                                }
+                              ],
+                              "id": "0ae41a67-adb2-4655-8214-0d035b9654bf",
+                              "createdAt": "2026-07-28T01:12:56.000Z",
+                              "updatedAt": "2026-07-28T01:12:56.000Z",
+                              "uid": "35240-0ae41a67-adb2-4655-8214-0d035b9654bf"
+                            },
+                            {
+                              "name": "Lists Identity Providers by Realm.",
+                              "id": "28659554-37b4-42f7-9acd-8c1a9c03997d",
+                              "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                              },
+                              "request": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                    "key": "x-correlation_id",
+                                    "value": "<string>"
+                                  },
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers?page_size=<integer>&page_token=<string>",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v1",
+                                    "tenants",
+                                    ":tenant_id",
+                                    "realms",
+                                    ":realm_id",
+                                    "identity-providers"
+                                  ],
+                                  "query": [
+                                    {
+                                      "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n",
+                                      "key": "page_size",
+                                      "value": "<integer>"
+                                    },
+                                    {
+                                      "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n",
+                                      "key": "page_token",
+                                      "value": "<string>"
+                                    }
+                                  ],
+                                  "variable": [
+                                    {
+                                      "id": "5f936a45-2a38-46e8-8be3-6970522b2da3",
+                                      "key": "tenant_id"
+                                    },
+                                    {
+                                      "id": "00ea2b8e-268a-495d-b4f0-0aad3053464b",
+                                      "key": "realm_id"
+                                    },
+                                    {
+                                      "id": "83894078-fc1a-4719-995f-5b808bf0ffa1",
+                                      "key": "sso_config_id",
+                                      "value": "<string>",
+                                      "description": "(Required) A unique identifier of the sso configuration"
+                                    }
+                                  ]
+                                },
+                                "description": "Lists Identity Providers by Realm."
+                              },
+                              "response": [
+                                {
+                                  "id": "2cd5454a-9f6a-4d84-b3ae-3bc451a2893e",
+                                  "name": "The list operation was successful.",
+                                  "originalRequest": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                        "key": "x-correlation_id",
+                                        "value": "<string>"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers?page_size=<integer>&page_token=<string>",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "identity-providers"
+                                      ],
+                                      "query": [
+                                        {
+                                          "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n",
+                                          "key": "page_size",
+                                          "value": "<integer>"
+                                        },
+                                        {
+                                          "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n",
+                                          "key": "page_token",
+                                          "value": "<string>"
+                                        }
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "OK",
+                                  "code": 200,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    },
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "",
+                                        "type": "text/plain"
+                                      },
+                                      "key": "x-correlation-id",
+                                      "value": ""
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"identity_providers\": [\n    {\n      \"id\": \"<string>\",\n      \"tenant_id\": \"<string>\",\n      \"realm_id\": \"<string>\",\n      \"protocol_config\": {\n        \"client_id\": \"<string>\",\n        \"client_secret\": \"<string>\",\n        \"token_scopes\": [\n          \"<string>\",\n          \"<string>\"\n        ],\n        \"identity_attribute\": \"username\",\n        \"pkce\": \"s256\",\n        \"jwks_url\": \"<string>\",\n        \"token_url\": \"<string>\",\n        \"authorize_url\": \"<string>\",\n        \"redirect_url\": \"<string>\",\n        \"identifying_claim_name\": \"<string>\",\n        \"type\": \"oidc_idp\"\n      },\n      \"display_name\": \"<string>\"\n    },\n    {\n      \"id\": \"<string>\",\n      \"tenant_id\": \"<string>\",\n      \"realm_id\": \"<string>\",\n      \"protocol_config\": {\n        \"client_id\": \"<string>\",\n        \"client_secret\": \"<string>\",\n        \"token_scopes\": [\n          \"<string>\",\n          \"<string>\"\n        ],\n        \"identity_attribute\": \"id\",\n        \"pkce\": \"plain\",\n        \"jwks_url\": \"<string>\",\n        \"token_url\": \"<string>\",\n        \"authorize_url\": \"<string>\",\n        \"redirect_url\": \"<string>\",\n        \"identifying_claim_name\": \"<string>\",\n        \"type\": \"oidc_idp\"\n      },\n      \"display_name\": \"<string>\"\n    }\n  ],\n  \"total_size\": \"<integer>\",\n  \"next_page_token\": \"<string>\"\n}",
+                                  "createdAt": "2026-07-28T01:12:56.000Z",
+                                  "updatedAt": "2026-07-28T01:12:56.000Z",
+                                  "uid": "35240-2cd5454a-9f6a-4d84-b3ae-3bc451a2893e"
+                                },
+                                {
+                                  "id": "3fe74866-d220-4f94-ba4c-1c83967ef96a",
+                                  "name": "The request is malformed.",
+                                  "originalRequest": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                        "key": "x-correlation_id",
+                                        "value": "<string>"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers?page_size=<integer>&page_token=<string>",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "identity-providers"
+                                      ],
+                                      "query": [
+                                        {
+                                          "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n",
+                                          "key": "page_size",
+                                          "value": "<integer>"
+                                        },
+                                        {
+                                          "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n",
+                                          "key": "page_token",
+                                          "value": "<string>"
+                                        }
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "Bad Request",
+                                  "code": 400,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    },
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "",
+                                        "type": "text/plain"
+                                      },
+                                      "key": "x-correlation-id",
+                                      "value": ""
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                  "createdAt": "2026-07-28T01:12:56.000Z",
+                                  "updatedAt": "2026-07-28T01:12:56.000Z",
+                                  "uid": "35240-3fe74866-d220-4f94-ba4c-1c83967ef96a"
+                                },
+                                {
+                                  "id": "1d76eed1-d7d0-481c-9fe3-91b1ae8c442e",
+                                  "name": "An invalid Authorization token has been supplied.",
+                                  "originalRequest": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                        "key": "x-correlation_id",
+                                        "value": "<string>"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers?page_size=<integer>&page_token=<string>",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "identity-providers"
+                                      ],
+                                      "query": [
+                                        {
+                                          "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n",
+                                          "key": "page_size",
+                                          "value": "<integer>"
+                                        },
+                                        {
+                                          "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n",
+                                          "key": "page_token",
+                                          "value": "<string>"
+                                        }
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "Unauthorized",
+                                  "code": 401,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    },
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "",
+                                        "type": "text/plain"
+                                      },
+                                      "key": "x-correlation-id",
+                                      "value": ""
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                  "createdAt": "2026-07-28T01:12:56.000Z",
+                                  "updatedAt": "2026-07-28T01:12:56.000Z",
+                                  "uid": "35240-1d76eed1-d7d0-481c-9fe3-91b1ae8c442e"
+                                },
+                                {
+                                  "id": "a30f61da-9ef6-4932-a090-fb5cd831d32a",
+                                  "name": "The supplied authorization token doesn't allow the requested operation.",
+                                  "originalRequest": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                        "key": "x-correlation_id",
+                                        "value": "<string>"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers?page_size=<integer>&page_token=<string>",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "identity-providers"
+                                      ],
+                                      "query": [
+                                        {
+                                          "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n",
+                                          "key": "page_size",
+                                          "value": "<integer>"
+                                        },
+                                        {
+                                          "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n",
+                                          "key": "page_token",
+                                          "value": "<string>"
+                                        }
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "Forbidden",
+                                  "code": 403,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    },
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "",
+                                        "type": "text/plain"
+                                      },
+                                      "key": "x-correlation-id",
+                                      "value": ""
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                  "createdAt": "2026-07-28T01:12:56.000Z",
+                                  "updatedAt": "2026-07-28T01:12:56.000Z",
+                                  "uid": "35240-a30f61da-9ef6-4932-a090-fb5cd831d32a"
+                                },
+                                {
+                                  "id": "5cbda474-f498-454a-8cc3-2546fac1e5e7",
+                                  "name": "Internal server error.",
+                                  "originalRequest": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                        "key": "x-correlation_id",
+                                        "value": "<string>"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers?page_size=<integer>&page_token=<string>",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "identity-providers"
+                                      ],
+                                      "query": [
+                                        {
+                                          "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n",
+                                          "key": "page_size",
+                                          "value": "<integer>"
+                                        },
+                                        {
+                                          "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n",
+                                          "key": "page_token",
+                                          "value": "<string>"
+                                        }
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "Internal Server Error",
+                                  "code": 500,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    },
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "",
+                                        "type": "text/plain"
+                                      },
+                                      "key": "x-correlation-id",
+                                      "value": ""
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                  "createdAt": "2026-07-28T01:12:56.000Z",
+                                  "updatedAt": "2026-07-28T01:12:56.000Z",
+                                  "uid": "35240-5cbda474-f498-454a-8cc3-2546fac1e5e7"
+                                }
+                              ],
+                              "createdAt": "2026-07-28T01:12:56.000Z",
+                              "updatedAt": "2026-07-28T01:12:56.000Z",
+                              "uid": "35240-28659554-37b4-42f7-9acd-8c1a9c03997d"
+                            },
+                            {
+                              "name": "Creates a new identity provider.",
+                              "id": "da72c8ad-edf7-4c79-8246-9f7405bdad4f",
+                              "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                              },
+                              "request": {
+                                "method": "POST",
+                                "header": [
+                                  {
+                                    "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                    "key": "x-correlation_id",
+                                    "value": "<string>"
+                                  },
+                                  {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  }
+                                ],
+                                "body": {
+                                  "mode": "raw",
+                                  "raw": "{\n  \"protocol_config\": {\n    \"client_id\": \"<string>\",\n    \"client_secret\": \"<string>\",\n    \"token_scopes\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"identity_attribute\": \"external_id\",\n    \"pkce\": \"s256\",\n    \"jwks_url\": \"<string>\",\n    \"token_url\": \"<string>\",\n    \"authorize_url\": \"<string>\",\n    \"identifying_claim_name\": \"<string>\",\n    \"type\": \"oidc_idp\"\n  },\n  \"display_name\": \"<string>\",\n  \"id\": \"<string>\",\n  \"tenant_id\": \"<string>\",\n  \"realm_id\": \"<string>\"\n}",
+                                  "options": {
+                                    "raw": {
+                                      "headerFamily": "json",
+                                      "language": "json"
+                                    }
+                                  }
+                                },
+                                "url": {
+                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v1",
+                                    "tenants",
+                                    ":tenant_id",
+                                    "realms",
+                                    ":realm_id",
+                                    "identity-providers"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "id": "6b4861a1-7145-4338-8cac-0f4d7db74b43",
+                                      "key": "tenant_id"
+                                    },
+                                    {
+                                      "id": "ece54bca-08e7-4753-95f2-ed688568caad",
+                                      "key": "realm_id"
+                                    }
+                                  ]
+                                },
+                                "description": "Creates a new identity provider."
+                              },
+                              "response": [
+                                {
+                                  "id": "169bcf9f-950d-4846-b52b-76a4f28d241e",
+                                  "name": "The identity provider has been created.",
+                                  "originalRequest": {
+                                    "method": "POST",
+                                    "header": [
+                                      {
+                                        "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                        "key": "x-correlation_id",
+                                        "value": "<string>"
+                                      },
+                                      {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "body": {
+                                      "mode": "raw",
+                                      "raw": "{\n  \"protocol_config\": {\n    \"client_id\": \"<string>\",\n    \"client_secret\": \"<string>\",\n    \"token_scopes\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"identity_attribute\": \"external_id\",\n    \"pkce\": \"s256\",\n    \"jwks_url\": \"<string>\",\n    \"token_url\": \"<string>\",\n    \"authorize_url\": \"<string>\",\n    \"identifying_claim_name\": \"<string>\",\n    \"type\": \"oidc_idp\"\n  },\n  \"display_name\": \"<string>\",\n  \"id\": \"<string>\",\n  \"tenant_id\": \"<string>\",\n  \"realm_id\": \"<string>\"\n}",
+                                      "options": {
+                                        "raw": {
+                                          "headerFamily": "json",
+                                          "language": "json"
+                                        }
+                                      }
+                                    },
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "identity-providers"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "OK",
+                                  "code": 200,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    },
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "",
+                                        "type": "text/plain"
+                                      },
+                                      "key": "x-correlation-id",
+                                      "value": ""
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"client_id\": \"<string>\",\n  \"client_secret\": \"<string>\",\n  \"token_scopes\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"identity_attribute\": \"username\",\n  \"pkce\": \"disabled\",\n  \"jwks_url\": \"<string>\",\n  \"token_url\": \"<string>\",\n  \"authorize_url\": \"<string>\",\n  \"redirect_url\": \"<string>\",\n  \"identifying_claim_name\": \"<string>\",\n  \"type\": \"oidc_idp\"\n}",
+                                  "createdAt": "2026-07-28T01:12:56.000Z",
+                                  "updatedAt": "2026-07-28T01:12:56.000Z",
+                                  "uid": "35240-169bcf9f-950d-4846-b52b-76a4f28d241e"
+                                },
+                                {
+                                  "id": "f8010a90-5ff5-4d7b-af92-3cfaf854c66e",
+                                  "name": "The request is malformed.",
+                                  "originalRequest": {
+                                    "method": "POST",
+                                    "header": [
+                                      {
+                                        "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                        "key": "x-correlation_id",
+                                        "value": "<string>"
+                                      },
+                                      {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "body": {
+                                      "mode": "raw",
+                                      "raw": "{\n  \"protocol_config\": {\n    \"client_id\": \"<string>\",\n    \"client_secret\": \"<string>\",\n    \"token_scopes\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"identity_attribute\": \"external_id\",\n    \"pkce\": \"s256\",\n    \"jwks_url\": \"<string>\",\n    \"token_url\": \"<string>\",\n    \"authorize_url\": \"<string>\",\n    \"identifying_claim_name\": \"<string>\",\n    \"type\": \"oidc_idp\"\n  },\n  \"display_name\": \"<string>\",\n  \"id\": \"<string>\",\n  \"tenant_id\": \"<string>\",\n  \"realm_id\": \"<string>\"\n}",
+                                      "options": {
+                                        "raw": {
+                                          "headerFamily": "json",
+                                          "language": "json"
+                                        }
+                                      }
+                                    },
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "identity-providers"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "Bad Request",
+                                  "code": 400,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    },
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "",
+                                        "type": "text/plain"
+                                      },
+                                      "key": "x-correlation-id",
+                                      "value": ""
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                  "createdAt": "2026-07-28T01:12:56.000Z",
+                                  "updatedAt": "2026-07-28T01:12:56.000Z",
+                                  "uid": "35240-f8010a90-5ff5-4d7b-af92-3cfaf854c66e"
+                                },
+                                {
+                                  "id": "e5aa0576-b5e3-4d1f-bc52-4611dde1c9bd",
+                                  "name": "An invalid Authorization token has been supplied.",
+                                  "originalRequest": {
+                                    "method": "POST",
+                                    "header": [
+                                      {
+                                        "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                        "key": "x-correlation_id",
+                                        "value": "<string>"
+                                      },
+                                      {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "body": {
+                                      "mode": "raw",
+                                      "raw": "{\n  \"protocol_config\": {\n    \"client_id\": \"<string>\",\n    \"client_secret\": \"<string>\",\n    \"token_scopes\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"identity_attribute\": \"external_id\",\n    \"pkce\": \"s256\",\n    \"jwks_url\": \"<string>\",\n    \"token_url\": \"<string>\",\n    \"authorize_url\": \"<string>\",\n    \"identifying_claim_name\": \"<string>\",\n    \"type\": \"oidc_idp\"\n  },\n  \"display_name\": \"<string>\",\n  \"id\": \"<string>\",\n  \"tenant_id\": \"<string>\",\n  \"realm_id\": \"<string>\"\n}",
+                                      "options": {
+                                        "raw": {
+                                          "headerFamily": "json",
+                                          "language": "json"
+                                        }
+                                      }
+                                    },
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "identity-providers"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "Unauthorized",
+                                  "code": 401,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    },
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "",
+                                        "type": "text/plain"
+                                      },
+                                      "key": "x-correlation-id",
+                                      "value": ""
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                  "createdAt": "2026-07-28T01:12:56.000Z",
+                                  "updatedAt": "2026-07-28T01:12:56.000Z",
+                                  "uid": "35240-e5aa0576-b5e3-4d1f-bc52-4611dde1c9bd"
+                                },
+                                {
+                                  "id": "1ff4ec87-50e5-4ce7-969e-9fd7b90c6f98",
+                                  "name": "The supplied authorization token doesn't allow the requested operation.",
+                                  "originalRequest": {
+                                    "method": "POST",
+                                    "header": [
+                                      {
+                                        "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                        "key": "x-correlation_id",
+                                        "value": "<string>"
+                                      },
+                                      {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "body": {
+                                      "mode": "raw",
+                                      "raw": "{\n  \"protocol_config\": {\n    \"client_id\": \"<string>\",\n    \"client_secret\": \"<string>\",\n    \"token_scopes\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"identity_attribute\": \"external_id\",\n    \"pkce\": \"s256\",\n    \"jwks_url\": \"<string>\",\n    \"token_url\": \"<string>\",\n    \"authorize_url\": \"<string>\",\n    \"identifying_claim_name\": \"<string>\",\n    \"type\": \"oidc_idp\"\n  },\n  \"display_name\": \"<string>\",\n  \"id\": \"<string>\",\n  \"tenant_id\": \"<string>\",\n  \"realm_id\": \"<string>\"\n}",
+                                      "options": {
+                                        "raw": {
+                                          "headerFamily": "json",
+                                          "language": "json"
+                                        }
+                                      }
+                                    },
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "identity-providers"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "Forbidden",
+                                  "code": 403,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    },
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "",
+                                        "type": "text/plain"
+                                      },
+                                      "key": "x-correlation-id",
+                                      "value": ""
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                  "createdAt": "2026-07-28T01:12:56.000Z",
+                                  "updatedAt": "2026-07-28T01:12:56.000Z",
+                                  "uid": "35240-1ff4ec87-50e5-4ce7-969e-9fd7b90c6f98"
+                                },
+                                {
+                                  "id": "fffe6b23-047d-475e-86a6-a1d5843acc8c",
+                                  "name": "Internal server error.",
+                                  "originalRequest": {
+                                    "method": "POST",
+                                    "header": [
+                                      {
+                                        "description": "(Required) Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.",
+                                        "key": "x-correlation_id",
+                                        "value": "<string>"
+                                      },
+                                      {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "body": {
+                                      "mode": "raw",
+                                      "raw": "{\n  \"protocol_config\": {\n    \"client_id\": \"<string>\",\n    \"client_secret\": \"<string>\",\n    \"token_scopes\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"identity_attribute\": \"external_id\",\n    \"pkce\": \"s256\",\n    \"jwks_url\": \"<string>\",\n    \"token_url\": \"<string>\",\n    \"authorize_url\": \"<string>\",\n    \"identifying_claim_name\": \"<string>\",\n    \"type\": \"oidc_idp\"\n  },\n  \"display_name\": \"<string>\",\n  \"id\": \"<string>\",\n  \"tenant_id\": \"<string>\",\n  \"realm_id\": \"<string>\"\n}",
+                                      "options": {
+                                        "raw": {
+                                          "headerFamily": "json",
+                                          "language": "json"
+                                        }
+                                      }
+                                    },
+                                    "url": {
+                                      "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/identity-providers",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "v1",
+                                        "tenants",
+                                        ":tenant_id",
+                                        "realms",
+                                        ":realm_id",
+                                        "identity-providers"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "tenant_id"
+                                        },
+                                        {
+                                          "key": "realm_id"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "Internal Server Error",
+                                  "code": 500,
+                                  "_postman_previewlanguage": "json",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "application/json"
+                                    },
+                                    {
+                                      "disabled": false,
+                                      "description": {
+                                        "content": "",
+                                        "type": "text/plain"
+                                      },
+                                      "key": "x-correlation-id",
+                                      "value": ""
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "responseTime": null,
+                                  "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                  "createdAt": "2026-07-28T01:12:56.000Z",
+                                  "updatedAt": "2026-07-28T01:12:56.000Z",
+                                  "uid": "35240-fffe6b23-047d-475e-86a6-a1d5843acc8c"
+                                }
+                              ],
+                              "createdAt": "2026-07-28T01:12:56.000Z",
+                              "updatedAt": "2026-07-28T01:12:56.000Z",
+                              "uid": "35240-da72c8ad-edf7-4c79-8246-9f7405bdad4f"
+                            }
+                          ],
+                          "id": "3658c063-f64c-4941-834a-4baf610fc633",
+                          "createdAt": "2026-07-28T01:12:56.000Z",
+                          "updatedAt": "2026-07-28T01:12:56.000Z",
+                          "uid": "35240-3658c063-f64c-4941-834a-4baf610fc633"
+                        }
+                      ],
+                      "id": "6af489f3-84c8-4bb5-9ef8-859c4aa44c31",
+                      "createdAt": "2026-07-28T01:12:56.000Z",
+                      "updatedAt": "2026-07-28T01:12:56.000Z",
+                      "uid": "35240-6af489f3-84c8-4bb5-9ef8-859c4aa44c31"
+                    }
+                  ],
+                  "id": "ebb68f0c-ac7f-4402-a37a-89b31f3c829d",
+                  "createdAt": "2026-07-28T01:12:56.000Z",
+                  "updatedAt": "2026-07-28T01:12:56.000Z",
+                  "uid": "35240-ebb68f0c-ac7f-4402-a37a-89b31f3c829d"
+                }
+              ],
+              "id": "920f9403-d847-47cb-9068-4eb272a7e30a",
+              "createdAt": "2026-07-28T01:12:56.000Z",
+              "updatedAt": "2026-07-28T01:12:56.000Z",
+              "uid": "35240-920f9403-d847-47cb-9068-4eb272a7e30a"
+            }
+          ],
+          "id": "28ff0b21-f993-40af-98f0-1e045eff7521",
+          "createdAt": "2026-07-28T01:12:56.000Z",
+          "updatedAt": "2026-07-28T01:12:56.000Z",
+          "uid": "35240-28ff0b21-f993-40af-98f0-1e045eff7521"
+        }
+      ],
+      "id": "67c5c56a-31e6-453e-b90e-34f6fd30b039",
+      "createdAt": "2026-07-28T01:12:56.000Z",
+      "updatedAt": "2026-07-28T01:12:56.000Z",
+      "uid": "35240-67c5c56a-31e6-453e-b90e-34f6fd30b039"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{bearerToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api-us.beyondidentity.com"
+    }
+  ]
+}

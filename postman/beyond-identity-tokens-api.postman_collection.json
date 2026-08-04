@@ -1,0 +1,937 @@
+{
+  "info": {
+    "_postman_id": "329c51b0-af19-4b98-9285-99ee05b001f4",
+    "name": "Beyond Identity Secure Access Applications Tokens API",
+    "description": "# Introduction\n\n**NOTE:** To determine if you are accessing the Secure Access Platform, check the URL of your Admin Console.\nIf it looks like one of the following, you are using the Secure Access Platform:\n- `https://console.beyondidentity.com` (Localized to your region)\n- `https://console-us.beyondidentity.com` (US region)\n- `https://console-eu.beyondidentity.com` (EU region)\n- `https://console.us1.beyondidentity-gov.com` (US FedRAMP)\n\nIf your Admin Console URL does not look like one of the above, you are using the Secure Workforce Platform. Please refer to the [Secure Workforce API documentation](https://docs.beyondidentity.com/api/v0). <br /><br />\n\nThe Beyond Identity Secure Access API defines methods for managing resources in the Beyond Identity Secure Access platform.<br /><br />\n\nAll of the functionality available in the Beyond Identity Admin Console is\nalso available through the API. <br /><br />\n\nThis API is currently in the early-access stage and is under active\ndevelopment. Feedback and suggestions are encouraged and should be directed\nto the\n[Beyond Identity Developer Slack Channel](https://join.slack.com/t/byndid/shared_invite/zt-1anns8n83-NQX4JvW7coi9dksADxgeBQ).\n\n# Base API URLs\n\nThe base API URLs is determined by the region your tenant is hosted in OR if you are a FedRAMP customer. <br><br>\n\n### US Region\n\nIf you are a US region customer, your base API URLs will be:\n- `https://api-us.beyondidentity.com`\n- `https://auth-us.beyondidentity.com`\n\n### EU Region\n\nIf you are a EU region customer, your base API URLs will be:\n- `https://api-eu.beyondidentity.com`\n- `https://auth-eu.beyondidentity.com`\n\n### US FedRAMP\n\n**NOTE**: The FedRAMP version of Secure Access is released approximately *two weeks* after the commercial version, so some API endpoints may not be available immediately. <br><br>\n\nIf you are a FedRAMP customer in the US region, your base API URLs will be:\n- `https://api.us1.beyondidentity-gov.com`\n- `https://auth.us1.beyondidentity-gov.com`\n\nFor all the examples in this document, we will use the US region API base URL. You can always replace `https://api-us.beyondidentity.com`\nand `https://auth-us.beyondidentity.com` in the examples to use the proper base URL for your tenant.\n\n# Authentication\n\nAll Beyond Identity API endpoints require authentication using an access\ntoken. The access token is generated through OAuth 2.0 or OIDC, using the\nauthorization code flow or the client credentials flow. <br /><br />\n\nThe simplest way to acquire an access token is through the Beyond Identity Admin Console. Under the \"Applications\" tab, select the \"Beyond Identity Management API\" application, navigate to the \"API Tokens\" tab, and then click on \"Create token\". <br /><br />\n\nAlternatively, an access token may also be generated directly via the API by\nrequesting a token for the \"Beyond Identity Management API\" Application. <br><br>\n\n```\ncurl https://auth-us.beyondidentity.com/v1/tenants/$TENANT_ID/realms/$REALM_ID/applications/$APPLICATION_ID/token \\\n  -X POST \\\n  -u \"$CLIENT_ID:$CLIENT_SECRET\" --basic \\\n  -H \"Content-Type: application/x-www-form-urlencoded\" \\\n  -d \"grant_type=client_credentials&scope=$SCOPES\"\n```\n\nThis will work for any application that you have configured to provide\naccess to the Beyond Identity Management API Resource Server. The \"Beyond\nIdentity Management API\" application is provided by default as part of the\ntenant onboarding process.\n\nThe access token must be provided in the `Authorization` header of the\nAPI request. <br><br>\n\n```\ncurl https://api-us.beyondidentity.com/v1/... \\\n  -X $HTTP_METHOD -H \"Authorization: Bearer $TOKEN\"\n```\n\n## Requests and Responses\n\nTo interact with the Beyond Identity API, all requests should be made over\nHTTPS. <br /><br />\n\nThe Beyond Identity API is generally structured as a resource-oriented API.\nResources are represented as JSON objects and are used as both inputs to\nand outputs from API methods. <br /><br />\n\nResource fields may be described as read-only and immutable. A read-only\nfield is only provided on the response. An immutable field is only assigned\nonce and may not be changed after. For example, system-generated IDs are\ndescribed as both read-only and immutable. <br /><br />\n\nTo create a new resource, requests should use the `POST` method. Create\nrequests include all of the necessary attributes to create a new resource.\nCreate operations return the created resource in the response. <br /><br />\n\nTo retrieve a single resource or a collection of resources, requests should\nuse the `GET` method. When retrieving a collection of resources, the\nresponse will include an array of JSON objects keyed on the plural name of\nthe requested resource. <br /><br />\n\nTo update an resource, requests should use the `PATCH` method. Update\noperations support partial updating so requests may specify only the\nattributes which should be updated. Update operations return the updated\nresource in the response. <br /><br />\n\nTo delete a resource, requests should use the `DELETE` method. Note that\ndelete operations return an empty response instead of returning the\nresource in the response. <br /><br />\n\n### Example Response for a Realm\n\n```\n{\n  \"id\": \"a448fe493e02fa9f\",\n  \"tenant_id\": \"000168dc50bdce49\",\n  \"display_name\": \"Test Realm\",\n  \"create_time\": \"2022-06-22T21:46:08.930278Z\",\n  \"update_time\": \"2022-06-22T21:46:08.930278Z\"\n}\n```\n\n### Example Response for a Collection of Realms\n\n```\n{\n  \"realms\": [\n    {\n      \"id\": \"a448fe493e02fa9f\",\n      \"tenant_id\": \"000168dc50bdce49\",\n      \"display_name\": \"Test Realm\",\n      \"create_time\": \"2022-06-22T21:46:08.930278Z\",\n      \"update_time\": \"2022-06-22T21:46:08.930278Z\"\n    }\n  ],\n  \"total_size\": 1\n}\n```\n\n## HTTP Statuses\n\nThe API returns standard HTTP statuses and error codes.\n\nStatuses in the 200 range indicate that the request was successfully\nfulfilled and there were no errors. <br><br>\n\nStatuses in the 400 range indicate that there was an issue with the request\nthat may be addressed by the client. For example, client errors may\nindicate that the request was missing proper authorization or that the\nrequest was malformed. <br><br>\n\nStatuses in the 500 range indicate that the server encountered an internal\nissue and was unable to fulfill the request. <br><br>\n\nAll error responses include a JSON object with a `code` field and a\n`message` field. `code` contains a human-readable name for the HTTP status\ncode and `message` contains a high-level description of the error. The\nerror object may also contain additional error details which may be used by\nthe client to determine the exact cause of the error. Refer to each API\nmethod's examples to determine the specific error detail types supported\nfor that method. <br><br>\n\n### Invalid Access Token Example\n\nIf the provided access token is invalid, you will receive a 401 error.\nThis error indicates that the token is not recognized and was not generated\nby Beyond Identity. <br><br>\n\n```\nHTTP/1.1 401 Unauthorized\n{\n  \"code\": \"unauthorized\",\n  \"message\": \"unauthorized\"\n}\n```\n\n### Permission Denied Example\n\nIf the provided access token does not have access to the requested resource,\nyou will receive a 403 error. Access tokens are scoped at a minimum to your\ntenant. Any request for resources outside of your tenant will result in this\nerror. <br><br>\n\n```\nHTTP/1.1 403 Forbidden\n{\n  \"code\": \"forbidden\",\n  \"message\": \"forbidden\"\n}\n```\n\n### Missing Resource Example\n\nIf the requested resource does not exist, you will receive a 404 error. The\nspecific API method may return additional details about the missing\nresource. <br><br>\n\n```\nHTTP/1.1 404 Not Found\n{\n  \"code\": \"not_found\",\n  \"message\": \"group not found\"\n  \"details\": [\n    {\n      \"type\": \"ResourceInfo\",\n      \"resource_type\": \"Group\",\n      \"id\": \"4822738be6b7f658\",\n      \"description\": \"group not found\"\n    }\n  ],\n}\n```\n\n### Invalid Parameters Example\n\nIf the request body contains invalid parameters, you will receive a 400\nerror. The specific API method may return additional details about the\ninvalid parameter. <br><br>\n\n```\nHTTP/1.1 400 Bad Request\n{\n  \"code\": \"bad_request\",\n  \"message\": \"invalid parameters\"\n  \"details\": [\n    {\n      \"type\": \"FieldViolations\"\n      \"field_violations\": [\n        {\n          \"description\": \"missing\",\n          \"field\": \"group.display_name\"\n        }\n      ],\n    }\n  ],\n}\n```\n\n\nContact Support:\n Email: support@beyondidentity.com",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "createdAt": "2026-07-28T01:13:15.000Z",
+    "updatedAt": "2026-07-28T01:13:15.000Z",
+    "lastUpdatedBy": "35240",
+    "uid": "35240-329c51b0-af19-4b98-9285-99ee05b001f4"
+  },
+  "item": [
+    {
+      "name": "v1",
+      "item": [
+        {
+          "name": "tenants",
+          "item": [
+            {
+              "name": "{tenant_id}",
+              "item": [
+                {
+                  "name": "realms",
+                  "item": [
+                    {
+                      "name": "{realm_id}",
+                      "item": [
+                        {
+                          "name": "applications",
+                          "item": [
+                            {
+                              "name": "{application_id}",
+                              "item": [
+                                {
+                                  "name": "tokens",
+                                  "item": [
+                                    {
+                                      "name": "{token_id}",
+                                      "item": [
+                                        {
+                                          "name": "Revoke a Token",
+                                          "id": "6d0761d8-a95a-4e7c-9b22-400ea6502c1b",
+                                          "protocolProfileBehavior": {
+                                            "disableBodyPruning": true
+                                          },
+                                          "request": {
+                                            "auth": {
+                                              "type": "bearer",
+                                              "bearer": [
+                                                {
+                                                  "key": "token",
+                                                  "value": "{{bearerToken}}",
+                                                  "type": "string"
+                                                }
+                                              ]
+                                            },
+                                            "method": "DELETE",
+                                            "header": [
+                                              {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                              }
+                                            ],
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/applications/:application_id/tokens/:token_id",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v1",
+                                                "tenants",
+                                                ":tenant_id",
+                                                "realms",
+                                                ":realm_id",
+                                                "applications",
+                                                ":application_id",
+                                                "tokens",
+                                                ":token_id"
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "id": "c5a444a6-1fde-4ddf-b495-52975cd9b4b2",
+                                                  "key": "tenant_id",
+                                                  "value": "<string>",
+                                                  "description": "(Required) A unique identifier for a tenant."
+                                                },
+                                                {
+                                                  "id": "ebd4d80e-9dac-4116-ac72-8b512a22d8f9",
+                                                  "key": "realm_id",
+                                                  "value": "<string>",
+                                                  "description": "(Required) A unique identifier for a realm."
+                                                },
+                                                {
+                                                  "id": "cb2fa9b0-71a0-4fd2-999a-7c893aa36200",
+                                                  "key": "application_id",
+                                                  "value": "<string>",
+                                                  "description": "(Required) A unique identifier for an application."
+                                                },
+                                                {
+                                                  "id": "acedf30c-d975-4fb9-9bbf-dd9ce5a74708",
+                                                  "key": "token_id",
+                                                  "value": "<string>",
+                                                  "description": "(Required) A unique identifier for a token. For JWS tokens, this corresponds to the value of the `jti` token claim."
+                                                }
+                                              ]
+                                            },
+                                            "description": "To revoke a token, send a DELETE request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/applications/$APPLICATION_ID/tokens/$TOKEN_ID`.\nThe `$APPLICATION_ID` in path corresponds to the application that is the issuer of the token.\nA successful request will receive a 200 status code with no body in the response. This indicates that the request was processed successfully.\nIf the token ID is not available, the access token must be revoked via the [RFC-7009 revoke endpoint](https://developer.beyondidentity.com/docs/revoke-access-tokens).\n"
+                                          },
+                                          "response": [
+                                            {
+                                              "id": "935183fb-7870-404e-a84e-9693f978f31f",
+                                              "name": "The action was successful and the response body is empty.",
+                                              "originalRequest": {
+                                                "method": "DELETE",
+                                                "header": [
+                                                  {
+                                                    "description": "Added as a part of security scheme: bearer",
+                                                    "key": "Authorization",
+                                                    "value": "Bearer <token>"
+                                                  }
+                                                ],
+                                                "url": {
+                                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/applications/:application_id/tokens/:token_id",
+                                                  "host": [
+                                                    "{{baseUrl}}"
+                                                  ],
+                                                  "path": [
+                                                    "v1",
+                                                    "tenants",
+                                                    ":tenant_id",
+                                                    "realms",
+                                                    ":realm_id",
+                                                    "applications",
+                                                    ":application_id",
+                                                    "tokens",
+                                                    ":token_id"
+                                                  ],
+                                                  "variable": [
+                                                    {
+                                                      "key": "tenant_id"
+                                                    },
+                                                    {
+                                                      "key": "realm_id"
+                                                    },
+                                                    {
+                                                      "key": "application_id"
+                                                    },
+                                                    {
+                                                      "key": "token_id"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "status": "OK",
+                                              "code": 200,
+                                              "_postman_previewlanguage": "text",
+                                              "header": [],
+                                              "cookie": [],
+                                              "responseTime": null,
+                                              "body": null,
+                                              "createdAt": "2026-07-28T01:13:16.000Z",
+                                              "updatedAt": "2026-07-28T01:13:16.000Z",
+                                              "uid": "35240-935183fb-7870-404e-a84e-9693f978f31f"
+                                            },
+                                            {
+                                              "id": "50d711a3-4251-490a-9eae-dcd72704c30c",
+                                              "name": "Unauthorized.",
+                                              "originalRequest": {
+                                                "method": "DELETE",
+                                                "header": [
+                                                  {
+                                                    "key": "Accept",
+                                                    "value": "application/json"
+                                                  },
+                                                  {
+                                                    "description": "Added as a part of security scheme: bearer",
+                                                    "key": "Authorization",
+                                                    "value": "Bearer <token>"
+                                                  }
+                                                ],
+                                                "url": {
+                                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/applications/:application_id/tokens/:token_id",
+                                                  "host": [
+                                                    "{{baseUrl}}"
+                                                  ],
+                                                  "path": [
+                                                    "v1",
+                                                    "tenants",
+                                                    ":tenant_id",
+                                                    "realms",
+                                                    ":realm_id",
+                                                    "applications",
+                                                    ":application_id",
+                                                    "tokens",
+                                                    ":token_id"
+                                                  ],
+                                                  "variable": [
+                                                    {
+                                                      "key": "tenant_id"
+                                                    },
+                                                    {
+                                                      "key": "realm_id"
+                                                    },
+                                                    {
+                                                      "key": "application_id"
+                                                    },
+                                                    {
+                                                      "key": "token_id"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "status": "Unauthorized",
+                                              "code": 401,
+                                              "_postman_previewlanguage": "json",
+                                              "header": [
+                                                {
+                                                  "key": "Content-Type",
+                                                  "value": "application/json"
+                                                }
+                                              ],
+                                              "cookie": [],
+                                              "responseTime": null,
+                                              "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                              "createdAt": "2026-07-28T01:13:16.000Z",
+                                              "updatedAt": "2026-07-28T01:13:16.000Z",
+                                              "uid": "35240-50d711a3-4251-490a-9eae-dcd72704c30c"
+                                            },
+                                            {
+                                              "id": "955c1171-a34a-4bcc-82a2-f2e0ca221d7d",
+                                              "name": "Forbidden.",
+                                              "originalRequest": {
+                                                "method": "DELETE",
+                                                "header": [
+                                                  {
+                                                    "key": "Accept",
+                                                    "value": "application/json"
+                                                  },
+                                                  {
+                                                    "description": "Added as a part of security scheme: bearer",
+                                                    "key": "Authorization",
+                                                    "value": "Bearer <token>"
+                                                  }
+                                                ],
+                                                "url": {
+                                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/applications/:application_id/tokens/:token_id",
+                                                  "host": [
+                                                    "{{baseUrl}}"
+                                                  ],
+                                                  "path": [
+                                                    "v1",
+                                                    "tenants",
+                                                    ":tenant_id",
+                                                    "realms",
+                                                    ":realm_id",
+                                                    "applications",
+                                                    ":application_id",
+                                                    "tokens",
+                                                    ":token_id"
+                                                  ],
+                                                  "variable": [
+                                                    {
+                                                      "key": "tenant_id"
+                                                    },
+                                                    {
+                                                      "key": "realm_id"
+                                                    },
+                                                    {
+                                                      "key": "application_id"
+                                                    },
+                                                    {
+                                                      "key": "token_id"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "status": "Forbidden",
+                                              "code": 403,
+                                              "_postman_previewlanguage": "json",
+                                              "header": [
+                                                {
+                                                  "key": "Content-Type",
+                                                  "value": "application/json"
+                                                }
+                                              ],
+                                              "cookie": [],
+                                              "responseTime": null,
+                                              "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                              "createdAt": "2026-07-28T01:13:16.000Z",
+                                              "updatedAt": "2026-07-28T01:13:16.000Z",
+                                              "uid": "35240-955c1171-a34a-4bcc-82a2-f2e0ca221d7d"
+                                            },
+                                            {
+                                              "id": "cf52a498-175f-43b0-a141-06dc4d523e5d",
+                                              "name": "The resource was not found.",
+                                              "originalRequest": {
+                                                "method": "DELETE",
+                                                "header": [
+                                                  {
+                                                    "key": "Accept",
+                                                    "value": "application/json"
+                                                  },
+                                                  {
+                                                    "description": "Added as a part of security scheme: bearer",
+                                                    "key": "Authorization",
+                                                    "value": "Bearer <token>"
+                                                  }
+                                                ],
+                                                "url": {
+                                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/applications/:application_id/tokens/:token_id",
+                                                  "host": [
+                                                    "{{baseUrl}}"
+                                                  ],
+                                                  "path": [
+                                                    "v1",
+                                                    "tenants",
+                                                    ":tenant_id",
+                                                    "realms",
+                                                    ":realm_id",
+                                                    "applications",
+                                                    ":application_id",
+                                                    "tokens",
+                                                    ":token_id"
+                                                  ],
+                                                  "variable": [
+                                                    {
+                                                      "key": "tenant_id"
+                                                    },
+                                                    {
+                                                      "key": "realm_id"
+                                                    },
+                                                    {
+                                                      "key": "application_id"
+                                                    },
+                                                    {
+                                                      "key": "token_id"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "status": "Not Found",
+                                              "code": 404,
+                                              "_postman_previewlanguage": "json",
+                                              "header": [
+                                                {
+                                                  "key": "Content-Type",
+                                                  "value": "application/json"
+                                                }
+                                              ],
+                                              "cookie": [],
+                                              "responseTime": null,
+                                              "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                              "createdAt": "2026-07-28T01:13:16.000Z",
+                                              "updatedAt": "2026-07-28T01:13:16.000Z",
+                                              "uid": "35240-cf52a498-175f-43b0-a141-06dc4d523e5d"
+                                            },
+                                            {
+                                              "id": "cdb5e95e-12cb-4769-b902-7bbe51df98f9",
+                                              "name": "Server error.",
+                                              "originalRequest": {
+                                                "method": "DELETE",
+                                                "header": [
+                                                  {
+                                                    "key": "Accept",
+                                                    "value": "application/json"
+                                                  },
+                                                  {
+                                                    "description": "Added as a part of security scheme: bearer",
+                                                    "key": "Authorization",
+                                                    "value": "Bearer <token>"
+                                                  }
+                                                ],
+                                                "url": {
+                                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/applications/:application_id/tokens/:token_id",
+                                                  "host": [
+                                                    "{{baseUrl}}"
+                                                  ],
+                                                  "path": [
+                                                    "v1",
+                                                    "tenants",
+                                                    ":tenant_id",
+                                                    "realms",
+                                                    ":realm_id",
+                                                    "applications",
+                                                    ":application_id",
+                                                    "tokens",
+                                                    ":token_id"
+                                                  ],
+                                                  "variable": [
+                                                    {
+                                                      "key": "tenant_id"
+                                                    },
+                                                    {
+                                                      "key": "realm_id"
+                                                    },
+                                                    {
+                                                      "key": "application_id"
+                                                    },
+                                                    {
+                                                      "key": "token_id"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "status": "Internal Server Error",
+                                              "code": 500,
+                                              "_postman_previewlanguage": "json",
+                                              "header": [
+                                                {
+                                                  "key": "Content-Type",
+                                                  "value": "application/json"
+                                                }
+                                              ],
+                                              "cookie": [],
+                                              "responseTime": null,
+                                              "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                              "createdAt": "2026-07-28T01:13:16.000Z",
+                                              "updatedAt": "2026-07-28T01:13:16.000Z",
+                                              "uid": "35240-cdb5e95e-12cb-4769-b902-7bbe51df98f9"
+                                            }
+                                          ],
+                                          "createdAt": "2026-07-28T01:13:16.000Z",
+                                          "updatedAt": "2026-07-28T01:13:16.000Z",
+                                          "uid": "35240-6d0761d8-a95a-4e7c-9b22-400ea6502c1b"
+                                        }
+                                      ],
+                                      "id": "2b9df76b-d8cb-4b63-a5b9-d6bea7e9db92",
+                                      "createdAt": "2026-07-28T01:13:16.000Z",
+                                      "updatedAt": "2026-07-28T01:13:16.000Z",
+                                      "uid": "35240-2b9df76b-d8cb-4b63-a5b9-d6bea7e9db92"
+                                    },
+                                    {
+                                      "name": "List Tokens",
+                                      "id": "3d3af11a-1606-4054-9663-e54fbeff785c",
+                                      "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                      },
+                                      "request": {
+                                        "auth": {
+                                          "type": "bearer",
+                                          "bearer": [
+                                            {
+                                              "key": "token",
+                                              "value": "{{bearerToken}}",
+                                              "type": "string"
+                                            }
+                                          ]
+                                        },
+                                        "method": "GET",
+                                        "header": [
+                                          {
+                                            "key": "Accept",
+                                            "value": "application/json"
+                                          }
+                                        ],
+                                        "url": {
+                                          "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/applications/:application_id/tokens?principal_type=<string>&principal_id=<string>",
+                                          "host": [
+                                            "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                            "v1",
+                                            "tenants",
+                                            ":tenant_id",
+                                            "realms",
+                                            ":realm_id",
+                                            "applications",
+                                            ":application_id",
+                                            "tokens"
+                                          ],
+                                          "query": [
+                                            {
+                                              "description": "Type of the principal. Allowable values are:\n  - `application`\n  - `identity`\n",
+                                              "key": "principal_type",
+                                              "value": "<string>"
+                                            },
+                                            {
+                                              "description": "A unique identifier for a principal. This might be an application ID or an identity ID depending on the type of principal.",
+                                              "key": "principal_id",
+                                              "value": "<string>"
+                                            }
+                                          ],
+                                          "variable": [
+                                            {
+                                              "id": "00658415-dd22-4a44-aa78-834706340955",
+                                              "key": "tenant_id",
+                                              "value": "<string>",
+                                              "description": "(Required) A unique identifier for a tenant."
+                                            },
+                                            {
+                                              "id": "ae44fe78-c7a7-487c-877a-182bb9d09c41",
+                                              "key": "realm_id",
+                                              "value": "<string>",
+                                              "description": "(Required) A unique identifier for a realm."
+                                            },
+                                            {
+                                              "id": "4285f08e-2050-406f-a36c-adeeb806ec48",
+                                              "key": "application_id",
+                                              "value": "<string>",
+                                              "description": "(Required) A unique identifier for an application."
+                                            }
+                                          ]
+                                        },
+                                        "description": "To list all tokens issued by an application, send a GET request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/applications/$APPLICATION_ID/tokens`.\nThe `$APPLICATION_ID` in path corresponds to the application that is the issuer of the token.\nTo filter the list of tokens by a principal, set `principal_type` and `principal_id`. These parameters are optional.\nThe response will contain at most 100 items and may contain a page token to query the remaining items. If page size is not specified, the response will contain 100 items. There is no defined ordering of the list of tokens in the response.  Note that the maximum and default page sizes are subject to change.\nWhen paginating, the page size is maintained by the page token but may be overridden on subsequent requests. The skip is not maintained by the page token and must be specified on each subsequent request.\nPage tokens expire after one week. Requests which specify an expired page token will result in undefined behavior.\n"
+                                      },
+                                      "response": [
+                                        {
+                                          "id": "0d9c427e-df70-4386-a64a-006614ed5976",
+                                          "name": "The response will be a JSON object with keys called `tokens` and `total_size`. `tokens` will be set to an array of token objects, each of which contains the standard token attributes. `total_size` will be set to the total number of items matched by the li",
+                                          "originalRequest": {
+                                            "method": "GET",
+                                            "header": [
+                                              {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                              },
+                                              {
+                                                "description": "Added as a part of security scheme: bearer",
+                                                "key": "Authorization",
+                                                "value": "Bearer <token>"
+                                              }
+                                            ],
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/applications/:application_id/tokens?principal_type=<string>&principal_id=<string>",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v1",
+                                                "tenants",
+                                                ":tenant_id",
+                                                "realms",
+                                                ":realm_id",
+                                                "applications",
+                                                ":application_id",
+                                                "tokens"
+                                              ],
+                                              "query": [
+                                                {
+                                                  "description": "Type of the principal. Allowable values are:\n  - `application`\n  - `identity`\n",
+                                                  "key": "principal_type",
+                                                  "value": "<string>"
+                                                },
+                                                {
+                                                  "description": "A unique identifier for a principal. This might be an application ID or an identity ID depending on the type of principal.",
+                                                  "key": "principal_id",
+                                                  "value": "<string>"
+                                                }
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "tenant_id"
+                                                },
+                                                {
+                                                  "key": "realm_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "OK",
+                                          "code": 200,
+                                          "_postman_previewlanguage": "json",
+                                          "header": [
+                                            {
+                                              "key": "Content-Type",
+                                              "value": "application/json"
+                                            }
+                                          ],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": "{\n  \"tokens\": [\n    {\n      \"id\": \"<string>\",\n      \"display_name\": \"<string>\",\n      \"scopes\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"token_suffix\": \"<string>\",\n      \"token_format\": \"<string>\",\n      \"expires\": \"<integer>\",\n      \"issued_at\": \"<integer>\",\n      \"token_type\": \"<string>\"\n    },\n    {\n      \"id\": \"<string>\",\n      \"display_name\": \"<string>\",\n      \"scopes\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"token_suffix\": \"<string>\",\n      \"token_format\": \"<string>\",\n      \"expires\": \"<integer>\",\n      \"issued_at\": \"<integer>\",\n      \"token_type\": \"<string>\"\n    }\n  ],\n  \"total_size\": \"<integer>\",\n  \"next_page_token\": \"<string>\"\n}",
+                                          "createdAt": "2026-07-28T01:13:16.000Z",
+                                          "updatedAt": "2026-07-28T01:13:16.000Z",
+                                          "uid": "35240-0d9c427e-df70-4386-a64a-006614ed5976"
+                                        },
+                                        {
+                                          "id": "e1db0066-7be1-4ea4-8b33-eafa8c5ed0bc",
+                                          "name": "Unauthorized.",
+                                          "originalRequest": {
+                                            "method": "GET",
+                                            "header": [
+                                              {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                              },
+                                              {
+                                                "description": "Added as a part of security scheme: bearer",
+                                                "key": "Authorization",
+                                                "value": "Bearer <token>"
+                                              }
+                                            ],
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/applications/:application_id/tokens?principal_type=<string>&principal_id=<string>",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v1",
+                                                "tenants",
+                                                ":tenant_id",
+                                                "realms",
+                                                ":realm_id",
+                                                "applications",
+                                                ":application_id",
+                                                "tokens"
+                                              ],
+                                              "query": [
+                                                {
+                                                  "description": "Type of the principal. Allowable values are:\n  - `application`\n  - `identity`\n",
+                                                  "key": "principal_type",
+                                                  "value": "<string>"
+                                                },
+                                                {
+                                                  "description": "A unique identifier for a principal. This might be an application ID or an identity ID depending on the type of principal.",
+                                                  "key": "principal_id",
+                                                  "value": "<string>"
+                                                }
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "tenant_id"
+                                                },
+                                                {
+                                                  "key": "realm_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "Unauthorized",
+                                          "code": 401,
+                                          "_postman_previewlanguage": "json",
+                                          "header": [
+                                            {
+                                              "key": "Content-Type",
+                                              "value": "application/json"
+                                            }
+                                          ],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                          "createdAt": "2026-07-28T01:13:16.000Z",
+                                          "updatedAt": "2026-07-28T01:13:16.000Z",
+                                          "uid": "35240-e1db0066-7be1-4ea4-8b33-eafa8c5ed0bc"
+                                        },
+                                        {
+                                          "id": "76a9f727-58ec-4753-b7c3-3a7e8f50fc20",
+                                          "name": "Forbidden.",
+                                          "originalRequest": {
+                                            "method": "GET",
+                                            "header": [
+                                              {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                              },
+                                              {
+                                                "description": "Added as a part of security scheme: bearer",
+                                                "key": "Authorization",
+                                                "value": "Bearer <token>"
+                                              }
+                                            ],
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/applications/:application_id/tokens?principal_type=<string>&principal_id=<string>",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v1",
+                                                "tenants",
+                                                ":tenant_id",
+                                                "realms",
+                                                ":realm_id",
+                                                "applications",
+                                                ":application_id",
+                                                "tokens"
+                                              ],
+                                              "query": [
+                                                {
+                                                  "description": "Type of the principal. Allowable values are:\n  - `application`\n  - `identity`\n",
+                                                  "key": "principal_type",
+                                                  "value": "<string>"
+                                                },
+                                                {
+                                                  "description": "A unique identifier for a principal. This might be an application ID or an identity ID depending on the type of principal.",
+                                                  "key": "principal_id",
+                                                  "value": "<string>"
+                                                }
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "tenant_id"
+                                                },
+                                                {
+                                                  "key": "realm_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "Forbidden",
+                                          "code": 403,
+                                          "_postman_previewlanguage": "json",
+                                          "header": [
+                                            {
+                                              "key": "Content-Type",
+                                              "value": "application/json"
+                                            }
+                                          ],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                          "createdAt": "2026-07-28T01:13:16.000Z",
+                                          "updatedAt": "2026-07-28T01:13:16.000Z",
+                                          "uid": "35240-76a9f727-58ec-4753-b7c3-3a7e8f50fc20"
+                                        },
+                                        {
+                                          "id": "8ef644f9-471f-4ed4-9970-a779bca3d947",
+                                          "name": "The resource was not found.",
+                                          "originalRequest": {
+                                            "method": "GET",
+                                            "header": [
+                                              {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                              },
+                                              {
+                                                "description": "Added as a part of security scheme: bearer",
+                                                "key": "Authorization",
+                                                "value": "Bearer <token>"
+                                              }
+                                            ],
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/applications/:application_id/tokens?principal_type=<string>&principal_id=<string>",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v1",
+                                                "tenants",
+                                                ":tenant_id",
+                                                "realms",
+                                                ":realm_id",
+                                                "applications",
+                                                ":application_id",
+                                                "tokens"
+                                              ],
+                                              "query": [
+                                                {
+                                                  "description": "Type of the principal. Allowable values are:\n  - `application`\n  - `identity`\n",
+                                                  "key": "principal_type",
+                                                  "value": "<string>"
+                                                },
+                                                {
+                                                  "description": "A unique identifier for a principal. This might be an application ID or an identity ID depending on the type of principal.",
+                                                  "key": "principal_id",
+                                                  "value": "<string>"
+                                                }
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "tenant_id"
+                                                },
+                                                {
+                                                  "key": "realm_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "Not Found",
+                                          "code": 404,
+                                          "_postman_previewlanguage": "json",
+                                          "header": [
+                                            {
+                                              "key": "Content-Type",
+                                              "value": "application/json"
+                                            }
+                                          ],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                          "createdAt": "2026-07-28T01:13:16.000Z",
+                                          "updatedAt": "2026-07-28T01:13:16.000Z",
+                                          "uid": "35240-8ef644f9-471f-4ed4-9970-a779bca3d947"
+                                        },
+                                        {
+                                          "id": "647c98a9-24db-463f-840a-4d09fbe9cf46",
+                                          "name": "Server error.",
+                                          "originalRequest": {
+                                            "method": "GET",
+                                            "header": [
+                                              {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                              },
+                                              {
+                                                "description": "Added as a part of security scheme: bearer",
+                                                "key": "Authorization",
+                                                "value": "Bearer <token>"
+                                              }
+                                            ],
+                                            "url": {
+                                              "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id/applications/:application_id/tokens?principal_type=<string>&principal_id=<string>",
+                                              "host": [
+                                                "{{baseUrl}}"
+                                              ],
+                                              "path": [
+                                                "v1",
+                                                "tenants",
+                                                ":tenant_id",
+                                                "realms",
+                                                ":realm_id",
+                                                "applications",
+                                                ":application_id",
+                                                "tokens"
+                                              ],
+                                              "query": [
+                                                {
+                                                  "description": "Type of the principal. Allowable values are:\n  - `application`\n  - `identity`\n",
+                                                  "key": "principal_type",
+                                                  "value": "<string>"
+                                                },
+                                                {
+                                                  "description": "A unique identifier for a principal. This might be an application ID or an identity ID depending on the type of principal.",
+                                                  "key": "principal_id",
+                                                  "value": "<string>"
+                                                }
+                                              ],
+                                              "variable": [
+                                                {
+                                                  "key": "tenant_id"
+                                                },
+                                                {
+                                                  "key": "realm_id"
+                                                },
+                                                {
+                                                  "key": "application_id"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "status": "Internal Server Error",
+                                          "code": 500,
+                                          "_postman_previewlanguage": "json",
+                                          "header": [
+                                            {
+                                              "key": "Content-Type",
+                                              "value": "application/json"
+                                            }
+                                          ],
+                                          "cookie": [],
+                                          "responseTime": null,
+                                          "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                                          "createdAt": "2026-07-28T01:13:16.000Z",
+                                          "updatedAt": "2026-07-28T01:13:16.000Z",
+                                          "uid": "35240-647c98a9-24db-463f-840a-4d09fbe9cf46"
+                                        }
+                                      ],
+                                      "createdAt": "2026-07-28T01:13:16.000Z",
+                                      "updatedAt": "2026-07-28T01:13:16.000Z",
+                                      "uid": "35240-3d3af11a-1606-4054-9663-e54fbeff785c"
+                                    }
+                                  ],
+                                  "id": "0c69b7af-338e-4293-a234-3350ad055dcb",
+                                  "createdAt": "2026-07-28T01:13:16.000Z",
+                                  "updatedAt": "2026-07-28T01:13:16.000Z",
+                                  "uid": "35240-0c69b7af-338e-4293-a234-3350ad055dcb"
+                                }
+                              ],
+                              "id": "ec1f4178-a59a-4984-85af-c0c44d177794",
+                              "createdAt": "2026-07-28T01:13:16.000Z",
+                              "updatedAt": "2026-07-28T01:13:16.000Z",
+                              "uid": "35240-ec1f4178-a59a-4984-85af-c0c44d177794"
+                            }
+                          ],
+                          "id": "99cd26c2-5a75-455e-8a71-802f7205fdb9",
+                          "createdAt": "2026-07-28T01:13:16.000Z",
+                          "updatedAt": "2026-07-28T01:13:16.000Z",
+                          "uid": "35240-99cd26c2-5a75-455e-8a71-802f7205fdb9"
+                        }
+                      ],
+                      "id": "22cea66f-3caa-4387-b96a-18f7595812bb",
+                      "createdAt": "2026-07-28T01:13:16.000Z",
+                      "updatedAt": "2026-07-28T01:13:16.000Z",
+                      "uid": "35240-22cea66f-3caa-4387-b96a-18f7595812bb"
+                    }
+                  ],
+                  "id": "6e62027b-2597-4bae-af1a-b34cd8feccdf",
+                  "createdAt": "2026-07-28T01:13:16.000Z",
+                  "updatedAt": "2026-07-28T01:13:16.000Z",
+                  "uid": "35240-6e62027b-2597-4bae-af1a-b34cd8feccdf"
+                }
+              ],
+              "id": "a13e19f3-3ca8-4dae-a4ab-89136859ebd6",
+              "createdAt": "2026-07-28T01:13:16.000Z",
+              "updatedAt": "2026-07-28T01:13:16.000Z",
+              "uid": "35240-a13e19f3-3ca8-4dae-a4ab-89136859ebd6"
+            }
+          ],
+          "id": "f86928f3-98d4-4766-bdaa-1b0518a2c285",
+          "createdAt": "2026-07-28T01:13:16.000Z",
+          "updatedAt": "2026-07-28T01:13:16.000Z",
+          "uid": "35240-f86928f3-98d4-4766-bdaa-1b0518a2c285"
+        }
+      ],
+      "id": "b5eb9179-f8b5-4e2c-93f2-e8dc60eacca3",
+      "createdAt": "2026-07-28T01:13:16.000Z",
+      "updatedAt": "2026-07-28T01:13:16.000Z",
+      "uid": "35240-b5eb9179-f8b5-4e2c-93f2-e8dc60eacca3"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{bearerToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api-us.beyondidentity.com"
+    }
+  ]
+}

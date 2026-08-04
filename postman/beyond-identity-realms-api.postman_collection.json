@@ -1,0 +1,2049 @@
+{
+  "info": {
+    "_postman_id": "b8fc133c-a56f-47e9-a50e-e154bec6ec2d",
+    "name": "Beyond Identity Secure Access Applications Realms API",
+    "description": "# Introduction\n\n**NOTE:** To determine if you are accessing the Secure Access Platform, check the URL of your Admin Console.\nIf it looks like one of the following, you are using the Secure Access Platform:\n- `https://console.beyondidentity.com` (Localized to your region)\n- `https://console-us.beyondidentity.com` (US region)\n- `https://console-eu.beyondidentity.com` (EU region)\n- `https://console.us1.beyondidentity-gov.com` (US FedRAMP)\n\nIf your Admin Console URL does not look like one of the above, you are using the Secure Workforce Platform. Please refer to the [Secure Workforce API documentation](https://docs.beyondidentity.com/api/v0). <br /><br />\n\nThe Beyond Identity Secure Access API defines methods for managing resources in the Beyond Identity Secure Access platform.<br /><br />\n\nAll of the functionality available in the Beyond Identity Admin Console is\nalso available through the API. <br /><br />\n\nThis API is currently in the early-access stage and is under active\ndevelopment. Feedback and suggestions are encouraged and should be directed\nto the\n[Beyond Identity Developer Slack Channel](https://join.slack.com/t/byndid/shared_invite/zt-1anns8n83-NQX4JvW7coi9dksADxgeBQ).\n\n# Base API URLs\n\nThe base API URLs is determined by the region your tenant is hosted in OR if you are a FedRAMP customer. <br><br>\n\n### US Region\n\nIf you are a US region customer, your base API URLs will be:\n- `https://api-us.beyondidentity.com`\n- `https://auth-us.beyondidentity.com`\n\n### EU Region\n\nIf you are a EU region customer, your base API URLs will be:\n- `https://api-eu.beyondidentity.com`\n- `https://auth-eu.beyondidentity.com`\n\n### US FedRAMP\n\n**NOTE**: The FedRAMP version of Secure Access is released approximately *two weeks* after the commercial version, so some API endpoints may not be available immediately. <br><br>\n\nIf you are a FedRAMP customer in the US region, your base API URLs will be:\n- `https://api.us1.beyondidentity-gov.com`\n- `https://auth.us1.beyondidentity-gov.com`\n\nFor all the examples in this document, we will use the US region API base URL. You can always replace `https://api-us.beyondidentity.com`\nand `https://auth-us.beyondidentity.com` in the examples to use the proper base URL for your tenant.\n\n# Authentication\n\nAll Beyond Identity API endpoints require authentication using an access\ntoken. The access token is generated through OAuth 2.0 or OIDC, using the\nauthorization code flow or the client credentials flow. <br /><br />\n\nThe simplest way to acquire an access token is through the Beyond Identity Admin Console. Under the \"Applications\" tab, select the \"Beyond Identity Management API\" application, navigate to the \"API Tokens\" tab, and then click on \"Create token\". <br /><br />\n\nAlternatively, an access token may also be generated directly via the API by\nrequesting a token for the \"Beyond Identity Management API\" Application. <br><br>\n\n```\ncurl https://auth-us.beyondidentity.com/v1/tenants/$TENANT_ID/realms/$REALM_ID/applications/$APPLICATION_ID/token \\\n  -X POST \\\n  -u \"$CLIENT_ID:$CLIENT_SECRET\" --basic \\\n  -H \"Content-Type: application/x-www-form-urlencoded\" \\\n  -d \"grant_type=client_credentials&scope=$SCOPES\"\n```\n\nThis will work for any application that you have configured to provide\naccess to the Beyond Identity Management API Resource Server. The \"Beyond\nIdentity Management API\" application is provided by default as part of the\ntenant onboarding process.\n\nThe access token must be provided in the `Authorization` header of the\nAPI request. <br><br>\n\n```\ncurl https://api-us.beyondidentity.com/v1/... \\\n  -X $HTTP_METHOD -H \"Authorization: Bearer $TOKEN\"\n```\n\n## Requests and Responses\n\nTo interact with the Beyond Identity API, all requests should be made over\nHTTPS. <br /><br />\n\nThe Beyond Identity API is generally structured as a resource-oriented API.\nResources are represented as JSON objects and are used as both inputs to\nand outputs from API methods. <br /><br />\n\nResource fields may be described as read-only and immutable. A read-only\nfield is only provided on the response. An immutable field is only assigned\nonce and may not be changed after. For example, system-generated IDs are\ndescribed as both read-only and immutable. <br /><br />\n\nTo create a new resource, requests should use the `POST` method. Create\nrequests include all of the necessary attributes to create a new resource.\nCreate operations return the created resource in the response. <br /><br />\n\nTo retrieve a single resource or a collection of resources, requests should\nuse the `GET` method. When retrieving a collection of resources, the\nresponse will include an array of JSON objects keyed on the plural name of\nthe requested resource. <br /><br />\n\nTo update an resource, requests should use the `PATCH` method. Update\noperations support partial updating so requests may specify only the\nattributes which should be updated. Update operations return the updated\nresource in the response. <br /><br />\n\nTo delete a resource, requests should use the `DELETE` method. Note that\ndelete operations return an empty response instead of returning the\nresource in the response. <br /><br />\n\n### Example Response for a Realm\n\n```\n{\n  \"id\": \"a448fe493e02fa9f\",\n  \"tenant_id\": \"000168dc50bdce49\",\n  \"display_name\": \"Test Realm\",\n  \"create_time\": \"2022-06-22T21:46:08.930278Z\",\n  \"update_time\": \"2022-06-22T21:46:08.930278Z\"\n}\n```\n\n### Example Response for a Collection of Realms\n\n```\n{\n  \"realms\": [\n    {\n      \"id\": \"a448fe493e02fa9f\",\n      \"tenant_id\": \"000168dc50bdce49\",\n      \"display_name\": \"Test Realm\",\n      \"create_time\": \"2022-06-22T21:46:08.930278Z\",\n      \"update_time\": \"2022-06-22T21:46:08.930278Z\"\n    }\n  ],\n  \"total_size\": 1\n}\n```\n\n## HTTP Statuses\n\nThe API returns standard HTTP statuses and error codes.\n\nStatuses in the 200 range indicate that the request was successfully\nfulfilled and there were no errors. <br><br>\n\nStatuses in the 400 range indicate that there was an issue with the request\nthat may be addressed by the client. For example, client errors may\nindicate that the request was missing proper authorization or that the\nrequest was malformed. <br><br>\n\nStatuses in the 500 range indicate that the server encountered an internal\nissue and was unable to fulfill the request. <br><br>\n\nAll error responses include a JSON object with a `code` field and a\n`message` field. `code` contains a human-readable name for the HTTP status\ncode and `message` contains a high-level description of the error. The\nerror object may also contain additional error details which may be used by\nthe client to determine the exact cause of the error. Refer to each API\nmethod's examples to determine the specific error detail types supported\nfor that method. <br><br>\n\n### Invalid Access Token Example\n\nIf the provided access token is invalid, you will receive a 401 error.\nThis error indicates that the token is not recognized and was not generated\nby Beyond Identity. <br><br>\n\n```\nHTTP/1.1 401 Unauthorized\n{\n  \"code\": \"unauthorized\",\n  \"message\": \"unauthorized\"\n}\n```\n\n### Permission Denied Example\n\nIf the provided access token does not have access to the requested resource,\nyou will receive a 403 error. Access tokens are scoped at a minimum to your\ntenant. Any request for resources outside of your tenant will result in this\nerror. <br><br>\n\n```\nHTTP/1.1 403 Forbidden\n{\n  \"code\": \"forbidden\",\n  \"message\": \"forbidden\"\n}\n```\n\n### Missing Resource Example\n\nIf the requested resource does not exist, you will receive a 404 error. The\nspecific API method may return additional details about the missing\nresource. <br><br>\n\n```\nHTTP/1.1 404 Not Found\n{\n  \"code\": \"not_found\",\n  \"message\": \"group not found\"\n  \"details\": [\n    {\n      \"type\": \"ResourceInfo\",\n      \"resource_type\": \"Group\",\n      \"id\": \"4822738be6b7f658\",\n      \"description\": \"group not found\"\n    }\n  ],\n}\n```\n\n### Invalid Parameters Example\n\nIf the request body contains invalid parameters, you will receive a 400\nerror. The specific API method may return additional details about the\ninvalid parameter. <br><br>\n\n```\nHTTP/1.1 400 Bad Request\n{\n  \"code\": \"bad_request\",\n  \"message\": \"invalid parameters\"\n  \"details\": [\n    {\n      \"type\": \"FieldViolations\"\n      \"field_violations\": [\n        {\n          \"description\": \"missing\",\n          \"field\": \"group.display_name\"\n        }\n      ],\n    }\n  ],\n}\n```\n\n\nContact Support:\n Email: support@beyondidentity.com",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "createdAt": "2026-07-28T01:12:59.000Z",
+    "updatedAt": "2026-07-28T01:13:00.000Z",
+    "lastUpdatedBy": "35240",
+    "uid": "35240-b8fc133c-a56f-47e9-a50e-e154bec6ec2d"
+  },
+  "item": [
+    {
+      "name": "v1",
+      "item": [
+        {
+          "name": "tenants",
+          "item": [
+            {
+              "name": "{tenant_id}",
+              "item": [
+                {
+                  "name": "realms",
+                  "item": [
+                    {
+                      "name": "{realm_id}",
+                      "item": [
+                        {
+                          "name": "Retrieve an Existing Realm",
+                          "id": "7ac647a8-3e6e-497d-9ff9-6ebdc17ccd1f",
+                          "protocolProfileBehavior": {
+                            "disableBodyPruning": true
+                          },
+                          "request": {
+                            "auth": {
+                              "type": "bearer",
+                              "bearer": [
+                                {
+                                  "key": "token",
+                                  "value": "{{bearerToken}}",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "v1",
+                                "tenants",
+                                ":tenant_id",
+                                "realms",
+                                ":realm_id"
+                              ],
+                              "variable": [
+                                {
+                                  "id": "ba5db2a8-c2f8-4032-a1cd-384084db0ddb",
+                                  "key": "tenant_id",
+                                  "value": "<string>",
+                                  "description": "(Required) A unique identifier for a tenant."
+                                },
+                                {
+                                  "id": "0dd74149-41b4-4f40-89fa-4884412cca58",
+                                  "key": "realm_id",
+                                  "value": "<string>",
+                                  "description": "(Required) A unique identifier for a realm."
+                                }
+                              ]
+                            },
+                            "description": "To retrieve an existing realm, send a GET request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID`.\n"
+                          },
+                          "response": [
+                            {
+                              "id": "ccb40818-ea1c-4295-8055-fb0591ca5d1f",
+                              "name": "The response will be a JSON object containing the standard attributes associated with a realm.\n",
+                              "originalRequest": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v1",
+                                    "tenants",
+                                    ":tenant_id",
+                                    "realms",
+                                    ":realm_id"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "tenant_id"
+                                    },
+                                    {
+                                      "key": "realm_id"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "OK",
+                              "code": 200,
+                              "_postman_previewlanguage": "json",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "application/json"
+                                }
+                              ],
+                              "cookie": [],
+                              "responseTime": null,
+                              "body": "{\n  \"id\": \"<string>\",\n  \"tenant_id\": \"<string>\",\n  \"display_name\": \"nq'ikZl4e\",\n  \"classification\": \"<string>\",\n  \"create_time\": \"<dateTime>\",\n  \"update_time\": \"<dateTime>\"\n}",
+                              "createdAt": "2026-07-28T01:13:00.000Z",
+                              "updatedAt": "2026-07-28T01:13:00.000Z",
+                              "uid": "35240-ccb40818-ea1c-4295-8055-fb0591ca5d1f"
+                            },
+                            {
+                              "id": "4d301fb5-4cec-4bb5-979f-3c2ac2dfffa3",
+                              "name": "Unauthorized.",
+                              "originalRequest": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v1",
+                                    "tenants",
+                                    ":tenant_id",
+                                    "realms",
+                                    ":realm_id"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "tenant_id"
+                                    },
+                                    {
+                                      "key": "realm_id"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "Unauthorized",
+                              "code": 401,
+                              "_postman_previewlanguage": "json",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "application/json"
+                                }
+                              ],
+                              "cookie": [],
+                              "responseTime": null,
+                              "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                              "createdAt": "2026-07-28T01:13:00.000Z",
+                              "updatedAt": "2026-07-28T01:13:00.000Z",
+                              "uid": "35240-4d301fb5-4cec-4bb5-979f-3c2ac2dfffa3"
+                            },
+                            {
+                              "id": "69d74900-e637-4a44-9039-74969a65646c",
+                              "name": "Forbidden.",
+                              "originalRequest": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v1",
+                                    "tenants",
+                                    ":tenant_id",
+                                    "realms",
+                                    ":realm_id"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "tenant_id"
+                                    },
+                                    {
+                                      "key": "realm_id"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "Forbidden",
+                              "code": 403,
+                              "_postman_previewlanguage": "json",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "application/json"
+                                }
+                              ],
+                              "cookie": [],
+                              "responseTime": null,
+                              "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                              "createdAt": "2026-07-28T01:13:00.000Z",
+                              "updatedAt": "2026-07-28T01:13:00.000Z",
+                              "uid": "35240-69d74900-e637-4a44-9039-74969a65646c"
+                            },
+                            {
+                              "id": "9cc4f881-4685-478f-ab6c-67c32bdd6d84",
+                              "name": "The resource was not found.",
+                              "originalRequest": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v1",
+                                    "tenants",
+                                    ":tenant_id",
+                                    "realms",
+                                    ":realm_id"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "tenant_id"
+                                    },
+                                    {
+                                      "key": "realm_id"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "Not Found",
+                              "code": 404,
+                              "_postman_previewlanguage": "json",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "application/json"
+                                }
+                              ],
+                              "cookie": [],
+                              "responseTime": null,
+                              "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                              "createdAt": "2026-07-28T01:13:00.000Z",
+                              "updatedAt": "2026-07-28T01:13:00.000Z",
+                              "uid": "35240-9cc4f881-4685-478f-ab6c-67c32bdd6d84"
+                            },
+                            {
+                              "id": "f8686bf8-69ae-4710-9189-b4aeda389377",
+                              "name": "Server error.",
+                              "originalRequest": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v1",
+                                    "tenants",
+                                    ":tenant_id",
+                                    "realms",
+                                    ":realm_id"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "tenant_id"
+                                    },
+                                    {
+                                      "key": "realm_id"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "Internal Server Error",
+                              "code": 500,
+                              "_postman_previewlanguage": "json",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "application/json"
+                                }
+                              ],
+                              "cookie": [],
+                              "responseTime": null,
+                              "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                              "createdAt": "2026-07-28T01:13:00.000Z",
+                              "updatedAt": "2026-07-28T01:13:00.000Z",
+                              "uid": "35240-f8686bf8-69ae-4710-9189-b4aeda389377"
+                            }
+                          ],
+                          "createdAt": "2026-07-28T01:13:00.000Z",
+                          "updatedAt": "2026-07-28T01:13:00.000Z",
+                          "uid": "35240-7ac647a8-3e6e-497d-9ff9-6ebdc17ccd1f"
+                        },
+                        {
+                          "name": "Patch a Realm",
+                          "id": "aa794d5f-a0fe-46ad-9e8f-bf834910a6bd",
+                          "protocolProfileBehavior": {
+                            "disableBodyPruning": true
+                          },
+                          "request": {
+                            "auth": {
+                              "type": "bearer",
+                              "bearer": [
+                                {
+                                  "key": "token",
+                                  "value": "{{bearerToken}}",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "method": "PATCH",
+                            "header": [
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              }
+                            ],
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"realm\": {\n    \"id\": \"<string>\",\n    \"tenant_id\": \"<string>\",\n    \"display_name\": \"qU'gOdmNo\",\n    \"classification\": \"<string>\",\n    \"create_time\": \"<dateTime>\",\n    \"update_time\": \"<dateTime>\"\n  }\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "v1",
+                                "tenants",
+                                ":tenant_id",
+                                "realms",
+                                ":realm_id"
+                              ],
+                              "variable": [
+                                {
+                                  "id": "4eb019a8-b317-4118-9a7d-c74bee65c18e",
+                                  "key": "tenant_id",
+                                  "value": "<string>",
+                                  "description": "(Required) A unique identifier for a tenant."
+                                },
+                                {
+                                  "id": "6ac6b0fd-6dc4-4d66-976f-63038f40b8c3",
+                                  "key": "realm_id",
+                                  "value": "<string>",
+                                  "description": "(Required) A unique identifier for a realm."
+                                }
+                              ]
+                            },
+                            "description": "To update only specific attributes of an existing realm, send a PATCH request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID`. Values in the request body for immutable or read-only fields will be ignored. Fields that are omitted from the request body will be left unchanged.\n"
+                          },
+                          "response": [
+                            {
+                              "id": "9b2e057a-9a24-4e8b-802e-1109e8e0eebb",
+                              "name": "The response will be a JSON object containing the standard attributes associated with a realm.\n",
+                              "originalRequest": {
+                                "method": "PATCH",
+                                "header": [
+                                  {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "body": {
+                                  "mode": "raw",
+                                  "raw": "{\n  \"realm\": {\n    \"id\": \"<string>\",\n    \"tenant_id\": \"<string>\",\n    \"display_name\": \"qU'gOdmNo\",\n    \"classification\": \"<string>\",\n    \"create_time\": \"<dateTime>\",\n    \"update_time\": \"<dateTime>\"\n  }\n}",
+                                  "options": {
+                                    "raw": {
+                                      "headerFamily": "json",
+                                      "language": "json"
+                                    }
+                                  }
+                                },
+                                "url": {
+                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v1",
+                                    "tenants",
+                                    ":tenant_id",
+                                    "realms",
+                                    ":realm_id"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "tenant_id"
+                                    },
+                                    {
+                                      "key": "realm_id"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "OK",
+                              "code": 200,
+                              "_postman_previewlanguage": "json",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "application/json"
+                                }
+                              ],
+                              "cookie": [],
+                              "responseTime": null,
+                              "body": "{\n  \"id\": \"<string>\",\n  \"tenant_id\": \"<string>\",\n  \"display_name\": \"nq'ikZl4e\",\n  \"classification\": \"<string>\",\n  \"create_time\": \"<dateTime>\",\n  \"update_time\": \"<dateTime>\"\n}",
+                              "createdAt": "2026-07-28T01:13:00.000Z",
+                              "updatedAt": "2026-07-28T01:13:00.000Z",
+                              "uid": "35240-9b2e057a-9a24-4e8b-802e-1109e8e0eebb"
+                            },
+                            {
+                              "id": "7250b41f-6910-428e-ab37-f2cb73fbfb59",
+                              "name": "Bad request.",
+                              "originalRequest": {
+                                "method": "PATCH",
+                                "header": [
+                                  {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "body": {
+                                  "mode": "raw",
+                                  "raw": "{\n  \"realm\": {\n    \"id\": \"<string>\",\n    \"tenant_id\": \"<string>\",\n    \"display_name\": \"qU'gOdmNo\",\n    \"classification\": \"<string>\",\n    \"create_time\": \"<dateTime>\",\n    \"update_time\": \"<dateTime>\"\n  }\n}",
+                                  "options": {
+                                    "raw": {
+                                      "headerFamily": "json",
+                                      "language": "json"
+                                    }
+                                  }
+                                },
+                                "url": {
+                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v1",
+                                    "tenants",
+                                    ":tenant_id",
+                                    "realms",
+                                    ":realm_id"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "tenant_id"
+                                    },
+                                    {
+                                      "key": "realm_id"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "Bad Request",
+                              "code": 400,
+                              "_postman_previewlanguage": "json",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "application/json"
+                                }
+                              ],
+                              "cookie": [],
+                              "responseTime": null,
+                              "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                              "createdAt": "2026-07-28T01:13:00.000Z",
+                              "updatedAt": "2026-07-28T01:13:00.000Z",
+                              "uid": "35240-7250b41f-6910-428e-ab37-f2cb73fbfb59"
+                            },
+                            {
+                              "id": "61cf5bd9-6847-4520-b236-a9725f810f3f",
+                              "name": "Unauthorized.",
+                              "originalRequest": {
+                                "method": "PATCH",
+                                "header": [
+                                  {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "body": {
+                                  "mode": "raw",
+                                  "raw": "{\n  \"realm\": {\n    \"id\": \"<string>\",\n    \"tenant_id\": \"<string>\",\n    \"display_name\": \"qU'gOdmNo\",\n    \"classification\": \"<string>\",\n    \"create_time\": \"<dateTime>\",\n    \"update_time\": \"<dateTime>\"\n  }\n}",
+                                  "options": {
+                                    "raw": {
+                                      "headerFamily": "json",
+                                      "language": "json"
+                                    }
+                                  }
+                                },
+                                "url": {
+                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v1",
+                                    "tenants",
+                                    ":tenant_id",
+                                    "realms",
+                                    ":realm_id"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "tenant_id"
+                                    },
+                                    {
+                                      "key": "realm_id"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "Unauthorized",
+                              "code": 401,
+                              "_postman_previewlanguage": "json",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "application/json"
+                                }
+                              ],
+                              "cookie": [],
+                              "responseTime": null,
+                              "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                              "createdAt": "2026-07-28T01:13:00.000Z",
+                              "updatedAt": "2026-07-28T01:13:00.000Z",
+                              "uid": "35240-61cf5bd9-6847-4520-b236-a9725f810f3f"
+                            },
+                            {
+                              "id": "4b254846-877d-4571-8266-debeaf150b32",
+                              "name": "Forbidden.",
+                              "originalRequest": {
+                                "method": "PATCH",
+                                "header": [
+                                  {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "body": {
+                                  "mode": "raw",
+                                  "raw": "{\n  \"realm\": {\n    \"id\": \"<string>\",\n    \"tenant_id\": \"<string>\",\n    \"display_name\": \"qU'gOdmNo\",\n    \"classification\": \"<string>\",\n    \"create_time\": \"<dateTime>\",\n    \"update_time\": \"<dateTime>\"\n  }\n}",
+                                  "options": {
+                                    "raw": {
+                                      "headerFamily": "json",
+                                      "language": "json"
+                                    }
+                                  }
+                                },
+                                "url": {
+                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v1",
+                                    "tenants",
+                                    ":tenant_id",
+                                    "realms",
+                                    ":realm_id"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "tenant_id"
+                                    },
+                                    {
+                                      "key": "realm_id"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "Forbidden",
+                              "code": 403,
+                              "_postman_previewlanguage": "json",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "application/json"
+                                }
+                              ],
+                              "cookie": [],
+                              "responseTime": null,
+                              "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                              "createdAt": "2026-07-28T01:13:00.000Z",
+                              "updatedAt": "2026-07-28T01:13:00.000Z",
+                              "uid": "35240-4b254846-877d-4571-8266-debeaf150b32"
+                            },
+                            {
+                              "id": "73e72be5-5d86-4cdc-a727-eea149cbc524",
+                              "name": "The resource was not found.",
+                              "originalRequest": {
+                                "method": "PATCH",
+                                "header": [
+                                  {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "body": {
+                                  "mode": "raw",
+                                  "raw": "{\n  \"realm\": {\n    \"id\": \"<string>\",\n    \"tenant_id\": \"<string>\",\n    \"display_name\": \"qU'gOdmNo\",\n    \"classification\": \"<string>\",\n    \"create_time\": \"<dateTime>\",\n    \"update_time\": \"<dateTime>\"\n  }\n}",
+                                  "options": {
+                                    "raw": {
+                                      "headerFamily": "json",
+                                      "language": "json"
+                                    }
+                                  }
+                                },
+                                "url": {
+                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v1",
+                                    "tenants",
+                                    ":tenant_id",
+                                    "realms",
+                                    ":realm_id"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "tenant_id"
+                                    },
+                                    {
+                                      "key": "realm_id"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "Not Found",
+                              "code": 404,
+                              "_postman_previewlanguage": "json",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "application/json"
+                                }
+                              ],
+                              "cookie": [],
+                              "responseTime": null,
+                              "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                              "createdAt": "2026-07-28T01:13:00.000Z",
+                              "updatedAt": "2026-07-28T01:13:00.000Z",
+                              "uid": "35240-73e72be5-5d86-4cdc-a727-eea149cbc524"
+                            },
+                            {
+                              "id": "97fc83aa-0013-4f8e-a238-487a28108eea",
+                              "name": "Server error.",
+                              "originalRequest": {
+                                "method": "PATCH",
+                                "header": [
+                                  {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "body": {
+                                  "mode": "raw",
+                                  "raw": "{\n  \"realm\": {\n    \"id\": \"<string>\",\n    \"tenant_id\": \"<string>\",\n    \"display_name\": \"qU'gOdmNo\",\n    \"classification\": \"<string>\",\n    \"create_time\": \"<dateTime>\",\n    \"update_time\": \"<dateTime>\"\n  }\n}",
+                                  "options": {
+                                    "raw": {
+                                      "headerFamily": "json",
+                                      "language": "json"
+                                    }
+                                  }
+                                },
+                                "url": {
+                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v1",
+                                    "tenants",
+                                    ":tenant_id",
+                                    "realms",
+                                    ":realm_id"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "tenant_id"
+                                    },
+                                    {
+                                      "key": "realm_id"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "Internal Server Error",
+                              "code": 500,
+                              "_postman_previewlanguage": "json",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "application/json"
+                                }
+                              ],
+                              "cookie": [],
+                              "responseTime": null,
+                              "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                              "createdAt": "2026-07-28T01:13:00.000Z",
+                              "updatedAt": "2026-07-28T01:13:00.000Z",
+                              "uid": "35240-97fc83aa-0013-4f8e-a238-487a28108eea"
+                            }
+                          ],
+                          "createdAt": "2026-07-28T01:13:00.000Z",
+                          "updatedAt": "2026-07-28T01:13:00.000Z",
+                          "uid": "35240-aa794d5f-a0fe-46ad-9e8f-bf834910a6bd"
+                        },
+                        {
+                          "name": "Delete a Realm",
+                          "id": "927efa5b-f8d3-40dd-8986-dd03b7ceb005",
+                          "protocolProfileBehavior": {
+                            "disableBodyPruning": true
+                          },
+                          "request": {
+                            "auth": {
+                              "type": "bearer",
+                              "bearer": [
+                                {
+                                  "key": "token",
+                                  "value": "{{bearerToken}}",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "method": "DELETE",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "v1",
+                                "tenants",
+                                ":tenant_id",
+                                "realms",
+                                ":realm_id"
+                              ],
+                              "variable": [
+                                {
+                                  "id": "b594d273-c98c-4802-95ac-6af0dbe19a7b",
+                                  "key": "tenant_id",
+                                  "value": "<string>",
+                                  "description": "(Required) A unique identifier for a tenant."
+                                },
+                                {
+                                  "id": "f293b461-6832-4143-bcf0-f5ee1152597a",
+                                  "key": "realm_id",
+                                  "value": "<string>",
+                                  "description": "(Required) A unique identifier for a realm."
+                                }
+                              ]
+                            },
+                            "description": "To delete a realm, send a DELETE request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID`. To be deleted, a realm must not have any identities, groups, or roles. All associated resources must first be deleted or you will receive a 409 error.\nA successful request will receive a 200 status code with no body in the response. This indicates that the request was processed successfully.\n"
+                          },
+                          "response": [
+                            {
+                              "id": "9fff37a4-7803-467f-b77e-71105f0e2b07",
+                              "name": "The action was successful and the response body is empty.",
+                              "originalRequest": {
+                                "method": "DELETE",
+                                "header": [
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v1",
+                                    "tenants",
+                                    ":tenant_id",
+                                    "realms",
+                                    ":realm_id"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "tenant_id"
+                                    },
+                                    {
+                                      "key": "realm_id"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "OK",
+                              "code": 200,
+                              "_postman_previewlanguage": "text",
+                              "header": [],
+                              "cookie": [],
+                              "responseTime": null,
+                              "body": null,
+                              "createdAt": "2026-07-28T01:13:00.000Z",
+                              "updatedAt": "2026-07-28T01:13:00.000Z",
+                              "uid": "35240-9fff37a4-7803-467f-b77e-71105f0e2b07"
+                            },
+                            {
+                              "id": "165d5cb0-4e92-4a3f-a0d7-c9d479b42bd5",
+                              "name": "Unauthorized.",
+                              "originalRequest": {
+                                "method": "DELETE",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v1",
+                                    "tenants",
+                                    ":tenant_id",
+                                    "realms",
+                                    ":realm_id"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "tenant_id"
+                                    },
+                                    {
+                                      "key": "realm_id"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "Unauthorized",
+                              "code": 401,
+                              "_postman_previewlanguage": "json",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "application/json"
+                                }
+                              ],
+                              "cookie": [],
+                              "responseTime": null,
+                              "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                              "createdAt": "2026-07-28T01:13:00.000Z",
+                              "updatedAt": "2026-07-28T01:13:00.000Z",
+                              "uid": "35240-165d5cb0-4e92-4a3f-a0d7-c9d479b42bd5"
+                            },
+                            {
+                              "id": "ec4b09b3-f492-4536-9afb-42ffc7162706",
+                              "name": "Forbidden.",
+                              "originalRequest": {
+                                "method": "DELETE",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v1",
+                                    "tenants",
+                                    ":tenant_id",
+                                    "realms",
+                                    ":realm_id"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "tenant_id"
+                                    },
+                                    {
+                                      "key": "realm_id"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "Forbidden",
+                              "code": 403,
+                              "_postman_previewlanguage": "json",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "application/json"
+                                }
+                              ],
+                              "cookie": [],
+                              "responseTime": null,
+                              "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                              "createdAt": "2026-07-28T01:13:00.000Z",
+                              "updatedAt": "2026-07-28T01:13:00.000Z",
+                              "uid": "35240-ec4b09b3-f492-4536-9afb-42ffc7162706"
+                            },
+                            {
+                              "id": "d5b7a93a-dd83-4251-9844-f8b1ddf491e1",
+                              "name": "The resource was not found.",
+                              "originalRequest": {
+                                "method": "DELETE",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v1",
+                                    "tenants",
+                                    ":tenant_id",
+                                    "realms",
+                                    ":realm_id"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "tenant_id"
+                                    },
+                                    {
+                                      "key": "realm_id"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "Not Found",
+                              "code": 404,
+                              "_postman_previewlanguage": "json",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "application/json"
+                                }
+                              ],
+                              "cookie": [],
+                              "responseTime": null,
+                              "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                              "createdAt": "2026-07-28T01:13:00.000Z",
+                              "updatedAt": "2026-07-28T01:13:00.000Z",
+                              "uid": "35240-d5b7a93a-dd83-4251-9844-f8b1ddf491e1"
+                            },
+                            {
+                              "id": "d90ec22d-516d-41d7-88a1-d3184dea2316",
+                              "name": "Conflict.",
+                              "originalRequest": {
+                                "method": "DELETE",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v1",
+                                    "tenants",
+                                    ":tenant_id",
+                                    "realms",
+                                    ":realm_id"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "tenant_id"
+                                    },
+                                    {
+                                      "key": "realm_id"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "Conflict",
+                              "code": 409,
+                              "_postman_previewlanguage": "json",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "application/json"
+                                }
+                              ],
+                              "cookie": [],
+                              "responseTime": null,
+                              "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                              "createdAt": "2026-07-28T01:13:00.000Z",
+                              "updatedAt": "2026-07-28T01:13:00.000Z",
+                              "uid": "35240-d90ec22d-516d-41d7-88a1-d3184dea2316"
+                            },
+                            {
+                              "id": "6f9c486e-ce8a-4688-b8e1-4a7cdb215981",
+                              "name": "Server error.",
+                              "originalRequest": {
+                                "method": "DELETE",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "application/json"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms/:realm_id",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "v1",
+                                    "tenants",
+                                    ":tenant_id",
+                                    "realms",
+                                    ":realm_id"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "tenant_id"
+                                    },
+                                    {
+                                      "key": "realm_id"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "Internal Server Error",
+                              "code": 500,
+                              "_postman_previewlanguage": "json",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "application/json"
+                                }
+                              ],
+                              "cookie": [],
+                              "responseTime": null,
+                              "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                              "createdAt": "2026-07-28T01:13:00.000Z",
+                              "updatedAt": "2026-07-28T01:13:00.000Z",
+                              "uid": "35240-6f9c486e-ce8a-4688-b8e1-4a7cdb215981"
+                            }
+                          ],
+                          "createdAt": "2026-07-28T01:13:00.000Z",
+                          "updatedAt": "2026-07-28T01:13:00.000Z",
+                          "uid": "35240-927efa5b-f8d3-40dd-8986-dd03b7ceb005"
+                        }
+                      ],
+                      "id": "96e5dfb7-4e4a-424c-a507-3b147da533bf",
+                      "createdAt": "2026-07-28T01:13:00.000Z",
+                      "updatedAt": "2026-07-28T01:13:00.000Z",
+                      "uid": "35240-96e5dfb7-4e4a-424c-a507-3b147da533bf"
+                    },
+                    {
+                      "name": "Create a New Realm",
+                      "id": "868d0eeb-de93-4da1-930e-a3417ae4e7da",
+                      "protocolProfileBehavior": {
+                        "disableBodyPruning": true
+                      },
+                      "request": {
+                        "auth": {
+                          "type": "bearer",
+                          "bearer": [
+                            {
+                              "key": "token",
+                              "value": "{{bearerToken}}",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"realm\": {\n    \"id\": \"<string>\",\n    \"tenant_id\": \"<string>\",\n    \"display_name\": \"g\",\n    \"classification\": \"<string>\",\n    \"create_time\": \"<dateTime>\",\n    \"update_time\": \"<dateTime>\"\n  }\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v1",
+                            "tenants",
+                            ":tenant_id",
+                            "realms"
+                          ],
+                          "variable": [
+                            {
+                              "id": "fa42e2c3-a111-4644-ad89-09b1f2cfadae",
+                              "key": "tenant_id",
+                              "value": "<string>",
+                              "description": "(Required) A unique identifier for a tenant."
+                            }
+                          ]
+                        },
+                        "description": "To create a realm, send a POST request to `/v1/tenants/$TENANT_ID/realms`. Values in the request body for read-only fields will be ignored.\n"
+                      },
+                      "response": [
+                        {
+                          "id": "9a5c6eeb-f459-4c7e-b2f7-997cf55f3396",
+                          "name": "The response will be a JSON object containing the standard attributes associated with a realm.\n",
+                          "originalRequest": {
+                            "method": "POST",
+                            "header": [
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"realm\": {\n    \"id\": \"<string>\",\n    \"tenant_id\": \"<string>\",\n    \"display_name\": \"g\",\n    \"classification\": \"<string>\",\n    \"create_time\": \"<dateTime>\",\n    \"update_time\": \"<dateTime>\"\n  }\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "v1",
+                                "tenants",
+                                ":tenant_id",
+                                "realms"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "tenant_id"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "responseTime": null,
+                          "body": "{\n  \"id\": \"<string>\",\n  \"tenant_id\": \"<string>\",\n  \"display_name\": \"nq'ikZl4e\",\n  \"classification\": \"<string>\",\n  \"create_time\": \"<dateTime>\",\n  \"update_time\": \"<dateTime>\"\n}",
+                          "createdAt": "2026-07-28T01:13:00.000Z",
+                          "updatedAt": "2026-07-28T01:13:00.000Z",
+                          "uid": "35240-9a5c6eeb-f459-4c7e-b2f7-997cf55f3396"
+                        },
+                        {
+                          "id": "b60bfa89-e33d-4010-9485-2ced8d85c932",
+                          "name": "Bad request.",
+                          "originalRequest": {
+                            "method": "POST",
+                            "header": [
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"realm\": {\n    \"id\": \"<string>\",\n    \"tenant_id\": \"<string>\",\n    \"display_name\": \"g\",\n    \"classification\": \"<string>\",\n    \"create_time\": \"<dateTime>\",\n    \"update_time\": \"<dateTime>\"\n  }\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "v1",
+                                "tenants",
+                                ":tenant_id",
+                                "realms"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "tenant_id"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "Bad Request",
+                          "code": 400,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "responseTime": null,
+                          "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                          "createdAt": "2026-07-28T01:13:00.000Z",
+                          "updatedAt": "2026-07-28T01:13:00.000Z",
+                          "uid": "35240-b60bfa89-e33d-4010-9485-2ced8d85c932"
+                        },
+                        {
+                          "id": "49716c30-d806-4f50-806c-677fddeb42cf",
+                          "name": "Unauthorized.",
+                          "originalRequest": {
+                            "method": "POST",
+                            "header": [
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"realm\": {\n    \"id\": \"<string>\",\n    \"tenant_id\": \"<string>\",\n    \"display_name\": \"g\",\n    \"classification\": \"<string>\",\n    \"create_time\": \"<dateTime>\",\n    \"update_time\": \"<dateTime>\"\n  }\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "v1",
+                                "tenants",
+                                ":tenant_id",
+                                "realms"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "tenant_id"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "Unauthorized",
+                          "code": 401,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "responseTime": null,
+                          "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                          "createdAt": "2026-07-28T01:13:00.000Z",
+                          "updatedAt": "2026-07-28T01:13:00.000Z",
+                          "uid": "35240-49716c30-d806-4f50-806c-677fddeb42cf"
+                        },
+                        {
+                          "id": "d34c46ce-181f-44e0-9e5d-e021d2bfe4f8",
+                          "name": "Forbidden.",
+                          "originalRequest": {
+                            "method": "POST",
+                            "header": [
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"realm\": {\n    \"id\": \"<string>\",\n    \"tenant_id\": \"<string>\",\n    \"display_name\": \"g\",\n    \"classification\": \"<string>\",\n    \"create_time\": \"<dateTime>\",\n    \"update_time\": \"<dateTime>\"\n  }\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "v1",
+                                "tenants",
+                                ":tenant_id",
+                                "realms"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "tenant_id"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "Forbidden",
+                          "code": 403,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "responseTime": null,
+                          "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                          "createdAt": "2026-07-28T01:13:00.000Z",
+                          "updatedAt": "2026-07-28T01:13:00.000Z",
+                          "uid": "35240-d34c46ce-181f-44e0-9e5d-e021d2bfe4f8"
+                        },
+                        {
+                          "id": "13210a0d-b99c-4298-87c8-8d92aadc56cb",
+                          "name": "Server error.",
+                          "originalRequest": {
+                            "method": "POST",
+                            "header": [
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"realm\": {\n    \"id\": \"<string>\",\n    \"tenant_id\": \"<string>\",\n    \"display_name\": \"g\",\n    \"classification\": \"<string>\",\n    \"create_time\": \"<dateTime>\",\n    \"update_time\": \"<dateTime>\"\n  }\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "v1",
+                                "tenants",
+                                ":tenant_id",
+                                "realms"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "tenant_id"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "Internal Server Error",
+                          "code": 500,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "responseTime": null,
+                          "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                          "createdAt": "2026-07-28T01:13:00.000Z",
+                          "updatedAt": "2026-07-28T01:13:00.000Z",
+                          "uid": "35240-13210a0d-b99c-4298-87c8-8d92aadc56cb"
+                        }
+                      ],
+                      "createdAt": "2026-07-28T01:13:00.000Z",
+                      "updatedAt": "2026-07-28T01:13:00.000Z",
+                      "uid": "35240-868d0eeb-de93-4da1-930e-a3417ae4e7da"
+                    },
+                    {
+                      "name": "List Realms for a Tenant",
+                      "id": "95f366f6-c3fe-4a05-8210-266b3f2624dc",
+                      "protocolProfileBehavior": {
+                        "disableBodyPruning": true
+                      },
+                      "request": {
+                        "auth": {
+                          "type": "bearer",
+                          "bearer": [
+                            {
+                              "key": "token",
+                              "value": "{{bearerToken}}",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms?page_size=<integer>&page_token=<string>&skip=0",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "v1",
+                            "tenants",
+                            ":tenant_id",
+                            "realms"
+                          ],
+                          "query": [
+                            {
+                              "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n",
+                              "key": "page_size",
+                              "value": "<integer>"
+                            },
+                            {
+                              "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n",
+                              "key": "page_token",
+                              "value": "<string>"
+                            },
+                            {
+                              "description": "Number of items to skip. This is the zero-based index of the first result.\n",
+                              "key": "skip",
+                              "value": "0"
+                            }
+                          ],
+                          "variable": [
+                            {
+                              "id": "a2f79ad3-b509-4262-a05b-b212d92b6045",
+                              "key": "tenant_id",
+                              "value": "<string>",
+                              "description": "(Required) A unique identifier for a tenant."
+                            }
+                          ]
+                        },
+                        "description": "To list all realms for a tenant, send a GET request to\n`/v1/tenants/$TENANT_ID/realms`.\n\nThe response will contain at most 200 items and may contain a page token to\nquery the remaining items. If page size is not specified, the response will\ncontain 20 items. There is no defined ordering of the list of realms in the\nresponse. Note that the maximum and default page sizes are subject to\nchange.\n\nWhen paginating, the page size is maintained by the page token but may be\noverridden on subsequent requests. The skip is not maintained by the page\ntoken and must be specified on each subsequent request.\n\nPage tokens expire after one week. Requests which specify an expired page\ntoken will result in undefined behavior.\n"
+                      },
+                      "response": [
+                        {
+                          "id": "de7d3688-f729-4c3c-a425-25a6d8bb28f7",
+                          "name": "The response will be a JSON object with keys for `realms` and `total_size`. `realms` will be set to an array of realm objects, each of which contain the standard realm attributes. `total_size` will be set to the total number of items matched by the list r",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms?page_size=<integer>&page_token=<string>&skip=0",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "v1",
+                                "tenants",
+                                ":tenant_id",
+                                "realms"
+                              ],
+                              "query": [
+                                {
+                                  "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n",
+                                  "key": "page_size",
+                                  "value": "<integer>"
+                                },
+                                {
+                                  "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n",
+                                  "key": "page_token",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "description": "Number of items to skip. This is the zero-based index of the first result.\n",
+                                  "key": "skip",
+                                  "value": "0"
+                                }
+                              ],
+                              "variable": [
+                                {
+                                  "key": "tenant_id"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "responseTime": null,
+                          "body": "{\n  \"realms\": [\n    {\n      \"id\": \"<string>\",\n      \"tenant_id\": \"<string>\",\n      \"display_name\": \"7-uXJ)7g6.\",\n      \"classification\": \"<string>\",\n      \"create_time\": \"<dateTime>\",\n      \"update_time\": \"<dateTime>\"\n    },\n    {\n      \"id\": \"<string>\",\n      \"tenant_id\": \"<string>\",\n      \"display_name\": \"pxrjK\",\n      \"classification\": \"<string>\",\n      \"create_time\": \"<dateTime>\",\n      \"update_time\": \"<dateTime>\"\n    }\n  ],\n  \"total_size\": \"<integer>\",\n  \"next_page_token\": \"<string>\"\n}",
+                          "createdAt": "2026-07-28T01:13:00.000Z",
+                          "updatedAt": "2026-07-28T01:13:00.000Z",
+                          "uid": "35240-de7d3688-f729-4c3c-a425-25a6d8bb28f7"
+                        },
+                        {
+                          "id": "7a90bf81-aba2-4d60-9874-fd8ed3672bed",
+                          "name": "Bad request.",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms?page_size=<integer>&page_token=<string>&skip=0",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "v1",
+                                "tenants",
+                                ":tenant_id",
+                                "realms"
+                              ],
+                              "query": [
+                                {
+                                  "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n",
+                                  "key": "page_size",
+                                  "value": "<integer>"
+                                },
+                                {
+                                  "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n",
+                                  "key": "page_token",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "description": "Number of items to skip. This is the zero-based index of the first result.\n",
+                                  "key": "skip",
+                                  "value": "0"
+                                }
+                              ],
+                              "variable": [
+                                {
+                                  "key": "tenant_id"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "Bad Request",
+                          "code": 400,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "responseTime": null,
+                          "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                          "createdAt": "2026-07-28T01:13:00.000Z",
+                          "updatedAt": "2026-07-28T01:13:00.000Z",
+                          "uid": "35240-7a90bf81-aba2-4d60-9874-fd8ed3672bed"
+                        },
+                        {
+                          "id": "9804b66b-45db-42be-ae7d-96a667eaf6e7",
+                          "name": "Unauthorized.",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms?page_size=<integer>&page_token=<string>&skip=0",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "v1",
+                                "tenants",
+                                ":tenant_id",
+                                "realms"
+                              ],
+                              "query": [
+                                {
+                                  "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n",
+                                  "key": "page_size",
+                                  "value": "<integer>"
+                                },
+                                {
+                                  "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n",
+                                  "key": "page_token",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "description": "Number of items to skip. This is the zero-based index of the first result.\n",
+                                  "key": "skip",
+                                  "value": "0"
+                                }
+                              ],
+                              "variable": [
+                                {
+                                  "key": "tenant_id"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "Unauthorized",
+                          "code": 401,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "responseTime": null,
+                          "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                          "createdAt": "2026-07-28T01:13:00.000Z",
+                          "updatedAt": "2026-07-28T01:13:00.000Z",
+                          "uid": "35240-9804b66b-45db-42be-ae7d-96a667eaf6e7"
+                        },
+                        {
+                          "id": "ca767563-095d-4272-9e62-bef26083659c",
+                          "name": "Forbidden.",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms?page_size=<integer>&page_token=<string>&skip=0",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "v1",
+                                "tenants",
+                                ":tenant_id",
+                                "realms"
+                              ],
+                              "query": [
+                                {
+                                  "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n",
+                                  "key": "page_size",
+                                  "value": "<integer>"
+                                },
+                                {
+                                  "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n",
+                                  "key": "page_token",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "description": "Number of items to skip. This is the zero-based index of the first result.\n",
+                                  "key": "skip",
+                                  "value": "0"
+                                }
+                              ],
+                              "variable": [
+                                {
+                                  "key": "tenant_id"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "Forbidden",
+                          "code": 403,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "responseTime": null,
+                          "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                          "createdAt": "2026-07-28T01:13:00.000Z",
+                          "updatedAt": "2026-07-28T01:13:00.000Z",
+                          "uid": "35240-ca767563-095d-4272-9e62-bef26083659c"
+                        },
+                        {
+                          "id": "d9c3d698-93d7-402a-92a7-ad2f2962f000",
+                          "name": "Server error.",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/v1/tenants/:tenant_id/realms?page_size=<integer>&page_token=<string>&skip=0",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "v1",
+                                "tenants",
+                                ":tenant_id",
+                                "realms"
+                              ],
+                              "query": [
+                                {
+                                  "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n",
+                                  "key": "page_size",
+                                  "value": "<integer>"
+                                },
+                                {
+                                  "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n",
+                                  "key": "page_token",
+                                  "value": "<string>"
+                                },
+                                {
+                                  "description": "Number of items to skip. This is the zero-based index of the first result.\n",
+                                  "key": "skip",
+                                  "value": "0"
+                                }
+                              ],
+                              "variable": [
+                                {
+                                  "key": "tenant_id"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "Internal Server Error",
+                          "code": 500,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "responseTime": null,
+                          "body": "{\n  \"code\": \"<string>\",\n  \"message\": \"<string>\",\n  \"details\": [\n    {\n      \"type\": \"<string>\"\n    },\n    {\n      \"type\": \"<string>\"\n    }\n  ]\n}",
+                          "createdAt": "2026-07-28T01:13:00.000Z",
+                          "updatedAt": "2026-07-28T01:13:00.000Z",
+                          "uid": "35240-d9c3d698-93d7-402a-92a7-ad2f2962f000"
+                        }
+                      ],
+                      "createdAt": "2026-07-28T01:13:00.000Z",
+                      "updatedAt": "2026-07-28T01:13:00.000Z",
+                      "uid": "35240-95f366f6-c3fe-4a05-8210-266b3f2624dc"
+                    }
+                  ],
+                  "id": "854c3121-d2df-4773-8d32-28eb960983f1",
+                  "createdAt": "2026-07-28T01:13:00.000Z",
+                  "updatedAt": "2026-07-28T01:13:00.000Z",
+                  "uid": "35240-854c3121-d2df-4773-8d32-28eb960983f1"
+                }
+              ],
+              "id": "85706687-8440-448a-b0f7-70edf92b5680",
+              "createdAt": "2026-07-28T01:13:00.000Z",
+              "updatedAt": "2026-07-28T01:13:00.000Z",
+              "uid": "35240-85706687-8440-448a-b0f7-70edf92b5680"
+            }
+          ],
+          "id": "15577a43-28a3-46bc-a316-8fda1cf97604",
+          "createdAt": "2026-07-28T01:13:00.000Z",
+          "updatedAt": "2026-07-28T01:13:00.000Z",
+          "uid": "35240-15577a43-28a3-46bc-a316-8fda1cf97604"
+        }
+      ],
+      "id": "e79032b6-fd86-4af6-b7ff-eb3aea59a1c7",
+      "createdAt": "2026-07-28T01:13:00.000Z",
+      "updatedAt": "2026-07-28T01:13:00.000Z",
+      "uid": "35240-e79032b6-fd86-4af6-b7ff-eb3aea59a1c7"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{bearerToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api-us.beyondidentity.com"
+    }
+  ]
+}
