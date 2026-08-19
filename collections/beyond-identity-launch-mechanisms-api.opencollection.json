@@ -1,0 +1,78 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Beyond Identity Secure Access Applications Launch Mechanisms API",
+    "version": "1.7.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Launch Mechanisms",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get flow type configuration",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/flow-type-config",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              }
+            ]
+          },
+          "docs": "Retrieves the flow type configuration for a tenant or creates a default configuration if one does not exist"
+        },
+        {
+          "info": {
+            "name": "Update flow type configuration",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/flow-type-config",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates the flow type configuration for a tenant, note that this will also create a default configuration if one does not exist"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

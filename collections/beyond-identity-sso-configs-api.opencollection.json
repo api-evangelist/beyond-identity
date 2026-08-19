@@ -1,0 +1,513 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Beyond Identity Secure Access Applications SSO Configs API",
+    "version": "1.7.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "SSO Configs",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List SSO Configs for a Realm.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/sso-configs",
+            "headers": [
+              {
+                "name": "x-correlation_id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "page_size",
+                "value": "",
+                "type": "query",
+                "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n"
+              },
+              {
+                "name": "page_token",
+                "value": "",
+                "type": "query",
+                "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n"
+              },
+              {
+                "name": "type",
+                "value": "",
+                "type": "query",
+                "description": "The type of sso config to filter by. You may query with multiple types for example \"/sso-configs?type=generic_oidc&type=generic_oid_idp\""
+              },
+              {
+                "name": "is_migrated",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "order_by",
+                "value": "",
+                "type": "query"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To list SSO Configs for a Realm, send a GET request to\n`/v1/tenants/$TENANT_ID/realms/$REALM_ID/sso-configs`.\n\nThe response will contain at most 200 items and may contain a page token to\nquery the remaining items. If page size is not specified, the response will\ncontain 20 items. There is no defined ordering of the list of identities in\nthe response. Note that the maximum and default page sizes are subject to\nchange.\n\nWhen paginating, the page size is maintained by the page token but may be\nover"
+        },
+        {
+          "info": {
+            "name": "Create a new SSO Config.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/sso-configs",
+            "headers": [
+              {
+                "name": "x-correlation_id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To create a new SSO Config, send a POST request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/sso-configs`.\n"
+        },
+        {
+          "info": {
+            "name": "Retrieves an existing SSO Config.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/sso-configs/:sso_config_id",
+            "headers": [
+              {
+                "name": "x-correlation_id",
+                "value": ""
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To retrieve an existing SSO Config, send a GET request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/sso-configs/$SSO_CONFIG_ID`.\n"
+        },
+        {
+          "info": {
+            "name": "Updates an SSO Config by its ID.",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/sso-configs/:sso_config_id",
+            "headers": [
+              {
+                "name": "x-correlation_id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Updates an SSO Config by its ID."
+        },
+        {
+          "info": {
+            "name": "Deletes an SSO Config by its ID.",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/sso-configs/:sso_config_id",
+            "headers": [
+              {
+                "name": "x-correlation_id",
+                "value": ""
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Deletes an SSO Config by its ID."
+        },
+        {
+          "info": {
+            "name": "Associate Identities with an SSO Config",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/sso-configs/:sso_config_id:addIdentities",
+            "headers": [
+              {
+                "name": "x-correlation_id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To associate identities to an sso config. The request must contain at least one and no more than 1000 identity IDs.\n"
+        },
+        {
+          "info": {
+            "name": "Delete Identities from an SSO Config",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/sso-configs/:sso_config_id:deleteIdentities",
+            "headers": [
+              {
+                "name": "x-correlation_id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To delete identities from an sso config. The request must contain at least one and no more than 1000 identities IDs.\n"
+        },
+        {
+          "info": {
+            "name": "List Identities Directly and Indirectly Associated With an SSO Config.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/sso-configs/:sso_config_id:listIdentityAssociations",
+            "headers": [
+              {
+                "name": "x-correlation_id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "page_size",
+                "value": "",
+                "type": "query",
+                "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n"
+              },
+              {
+                "name": "page_token",
+                "value": "",
+                "type": "query",
+                "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To list identities belonging to an sso config.\nNote that there may be duplicate identities or an empty array in the response, but as long as there is a `page_token` then pagination should continue.\n"
+        },
+        {
+          "info": {
+            "name": "Returns if an identity is assigned to the SSO config id.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/identities/:identity_id/sso-configs/:sso_config_id/is-identity-assigned",
+            "headers": [
+              {
+                "name": "x-correlation_id",
+                "value": ""
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To check if an identity is assigned to the SSO config id, send a GET request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/identities/$IDENTITY_ID/sso-configs/$SSO_CONFIG_ID/is-identity-assigned`.\n"
+        },
+        {
+          "info": {
+            "name": "List SSO configs directly and indirectly associated with an identity.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/identities/:identity_id/sso-configs",
+            "headers": [
+              {
+                "name": "x-correlation_id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "page_size",
+                "value": "",
+                "type": "query",
+                "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n"
+              },
+              {
+                "name": "page_token",
+                "value": "",
+                "type": "query",
+                "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n"
+              },
+              {
+                "name": "identity_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for an identity."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To list sso configs associated with an identity.\n\nThis will return all SSO configs that have an association with the specified identity ID.\nNote that there may be duplicate SSO configs or an empty array in the response, but as long as there is a `page_token` pagination should continue.\n"
+        },
+        {
+          "info": {
+            "name": "Associate Groups with an SSOConfig",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/sso-configs/:sso_config_id:addGroups",
+            "headers": [
+              {
+                "name": "x-correlation_id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To associate groups to an sso config. The request must contain at least one and no more than 1000 group IDs.\n"
+        },
+        {
+          "info": {
+            "name": "Delete Groups from an SSO Config",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/sso-configs/:sso_config_id:deleteGroups",
+            "headers": [
+              {
+                "name": "x-correlation_id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To delete groups from an sso config. The request must contain at least one and no more than 1000 group IDs.\n"
+        },
+        {
+          "info": {
+            "name": "List Groups associated with an SSO config.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/sso-configs/:sso_config_id:listGroupAssociations",
+            "headers": [
+              {
+                "name": "x-correlation_id",
+                "value": ""
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To list groups associated with an SSO config, send a GET request to\n`/v1/tenants/$TENANT_ID/realms/$REALM_ID/sso-configs/$SSO_CONFIG_ID/groups`.\n"
+        },
+        {
+          "info": {
+            "name": "List SSO Configs associated with a Group.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/groups/:group_id/sso-configs",
+            "headers": [
+              {
+                "name": "x-correlation_id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "page_size",
+                "value": "",
+                "type": "query",
+                "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n"
+              },
+              {
+                "name": "page_token",
+                "value": "",
+                "type": "query",
+                "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n"
+              },
+              {
+                "name": "group_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a group."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To list sso configs associated with a group.\n\nThis will return all SSO configs that have an association with the specified group ID.\n"
+        },
+        {
+          "info": {
+            "name": "Check if any of the groups provided are associated with the SSO Config ID.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/sso-configs/:sso_config_id/is-group-assigned",
+            "headers": [
+              {
+                "name": "x-correlation_id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Check if any of the groups provided are associated with the SSO Config ID."
+        },
+        {
+          "info": {
+            "name": "Returns the ID of the SSO Config associated with the Application.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/applications/:application_id/sso-configs-id",
+            "headers": [
+              {
+                "name": "x-correlation_id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for an application."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Returns the ID of the SSO Config associated with the application."
+        },
+        {
+          "info": {
+            "name": "Tests an SSO Config.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/sso-configs/:sso_config_id/test",
+            "headers": [
+              {
+                "name": "x-correlation_id",
+                "value": ""
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Tests an SSO Config."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

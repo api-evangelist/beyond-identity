@@ -1,0 +1,112 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Beyond Identity Secure Access Applications Tokens API",
+    "version": "1.7.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Tokens",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Tokens",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/applications/:application_id/tokens",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for an application."
+              },
+              {
+                "name": "principal_type",
+                "value": "",
+                "type": "query",
+                "description": "Type of the principal. Allowable values are:\n  - `application`\n  - `identity`\n"
+              },
+              {
+                "name": "principal_id",
+                "value": "",
+                "type": "query",
+                "description": "A unique identifier for a principal. This might be an application ID or an identity ID depending on the type of principal."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To list all tokens issued by an application, send a GET request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/applications/$APPLICATION_ID/tokens`.\nThe `$APPLICATION_ID` in path corresponds to the application that is the issuer of the token.\nTo filter the list of tokens by a principal, set `principal_type` and `principal_id`. These parameters are optional.\nThe response will contain at most 100 items and may contain a page token to query the remaining items. If page size is not specified, the respo"
+        },
+        {
+          "info": {
+            "name": "Revoke a Token",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/applications/:application_id/tokens/:token_id",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "application_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for an application."
+              },
+              {
+                "name": "token_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a token. For JWS tokens, this corresponds to the value of the `jti` token claim."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To revoke a token, send a DELETE request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/applications/$APPLICATION_ID/tokens/$TOKEN_ID`.\nThe `$APPLICATION_ID` in path corresponds to the application that is the issuer of the token.\nA successful request will receive a 200 status code with no body in the response. This indicates that the request was processed successfully.\nIf the token ID is not available, the access token must be revoked via the [RFC-7009 revoke endpoint](https://developer.beyondident"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

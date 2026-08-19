@@ -1,0 +1,213 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Beyond Identity Secure Access Applications Authenticator Configurations API",
+    "version": "1.7.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Authenticator Configurations",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Authenticator Configurations for a Realm",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/authenticator-configs",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "page_size",
+                "value": "",
+                "type": "query",
+                "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n"
+              },
+              {
+                "name": "page_token",
+                "value": "",
+                "type": "query",
+                "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n"
+              },
+              {
+                "name": "filter",
+                "value": "",
+                "type": "query",
+                "description": "Filter to constrain the response. The response will only include resources matching this filter. Filters follow the SCIM grammar from [RFC-7644 Section 3.4.2.2](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.2).\n"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To list all authenticator configurations for a realm, send a GET request to\n`/v1/tenants/$TENANT_ID/realms/$REALM_ID/authenticator-configs`.\n\nThe response will contain at most 100 items and may contain a page token to\nquery the remaining items. If page size is not specified, the response will\ncontain 100 items. There is no defined ordering of the list of authenticator\nconfigurations in the response. Note that the maximum and default page sizes\nare subject to change.\n\nWhen paginating, the page si"
+        },
+        {
+          "info": {
+            "name": "Create a New Authenticator Configuration",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/authenticator-configs",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To create an authenticator configuration, send a POST request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/authenticator-configs`. Values in the request body for read-only fields will be ignored.\n"
+        },
+        {
+          "info": {
+            "name": "Retrieve an Existing Authenticator Configuration",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/authenticator-configs/:authenticator_config_id",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "authenticator_config_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for an authenticator configuration."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To retrieve an existing authenticator configuration, send a GET request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/authenticator-configs/$AUTHENTICATOR_CONFIG_ID`.\n"
+        },
+        {
+          "info": {
+            "name": "Patch an Authenticator Configuration",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/authenticator-configs/:authenticator_config_id",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "authenticator_config_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for an authenticator configuration."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To update only specific attributes of an existing authenticator configuration, send a PATCH request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/authenticator-configs/$AUTHENTICATOR_CONFIG_ID`. Values in the request body for immutable or read-only fields will be ignored. Fields that are omitted from the request body will be left unchanged.\n"
+        },
+        {
+          "info": {
+            "name": "Delete an Authenticator Configuration",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/authenticator-configs/:authenticator_config_id",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "authenticator_config_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for an authenticator configuration."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To delete an authenticator configuration, send a DELETE request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/authenticator-configs/$AUTHENTICATOR_CONFIG_ID`.\nA successful request will receive a 200 status code with no body in the response. This indicates that the request was processed successfully.\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

@@ -1,0 +1,338 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Beyond Identity Secure Access Applications SCIM API",
+    "version": "1.7.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "SCIM",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List All Users",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/scim/v2/Users",
+            "params": [
+              {
+                "name": "filter",
+                "value": "",
+                "type": "query",
+                "description": "Filter for list methods.\n\nFilters follow the SCIM grammar from\n[RFC 7644 Section 3.4.2.2](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.2).\n"
+              },
+              {
+                "name": "count",
+                "value": "",
+                "type": "query",
+                "description": "Specifies the desired maximum number of query results per page. A negative value is treated as 0, which indicates that the response should not contain any resources. Note that the response may include fewer results than the requested count.\n"
+              },
+              {
+                "name": "startIndex",
+                "value": "",
+                "type": "query",
+                "description": "The 1-based index of the first query result."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To list all users, send a GET request to `/Users`.\n\nCurrently, filtering on users only supports the `eq` and `ne` operators and\nthe `userName` and `externalId` attributes.\n\nThe response will contain at most 1000 items. If count is not specified or\nis zero, the response will not contain any resources. There is no defined\nordering of the list of users in the response. Note that the maximum page\nsize is subject to change.\n"
+        },
+        {
+          "info": {
+            "name": "Create a New User",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/scim/v2/Users",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To create a user, send a POST request to `/Users`. Values in the request body for read-only fields will be ignored.\n"
+        },
+        {
+          "info": {
+            "name": "Retrieve an Existing User",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/scim/v2/Users/:user_id",
+            "params": [
+              {
+                "name": "user_id",
+                "value": "",
+                "type": "path",
+                "description": "ID of the user. This corresponds to the identity ID."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To retrieve an existing user, send a GET request to `/Users/$USER_ID`.\n"
+        },
+        {
+          "info": {
+            "name": "Replace a User",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/scim/v2/Users/:user_id",
+            "params": [
+              {
+                "name": "user_id",
+                "value": "",
+                "type": "path",
+                "description": "ID of the user. This corresponds to the identity ID."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To replace all attributes of an existing user, send a PUT request to `/Users/$USER_ID`. Values in the request body for immutable or read-only fields will be ignored.\n"
+        },
+        {
+          "info": {
+            "name": "Patch a User",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/scim/v2/Users/:user_id",
+            "params": [
+              {
+                "name": "user_id",
+                "value": "",
+                "type": "path",
+                "description": "ID of the user. This corresponds to the identity ID."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To update only specific attributes of an existing user, send a PATCH\nrequest to `/Users/$USER_ID`. Values in the request body for immutable or\nread-only fields will be ignored. Fields that are omitted from the request\nbody will be left unchanged.\n\nNote that the Beyond Identity SCIM server currently does not support atomic\nPATCH operations. If a request contains multiple operations, the request\nmay be partially applied.\n\nCurrently, only \"add\" and \"replace\" operations are supported for users.\n"
+        },
+        {
+          "info": {
+            "name": "Delete a User",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/scim/v2/Users/:user_id",
+            "params": [
+              {
+                "name": "user_id",
+                "value": "",
+                "type": "path",
+                "description": "ID of the user. This corresponds to the identity ID."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To delete a user, send a DELETE request to `/Users/$USER_ID`."
+        },
+        {
+          "info": {
+            "name": "List All Groups",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/scim/v2/Groups/",
+            "params": [
+              {
+                "name": "filter",
+                "value": "",
+                "type": "query",
+                "description": "Filter for list methods.\n\nFilters follow the SCIM grammar from\n[RFC 7644 Section 3.4.2.2](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.2).\n"
+              },
+              {
+                "name": "count",
+                "value": "",
+                "type": "query",
+                "description": "Specifies the desired maximum number of query results per page. A negative value is treated as 0, which indicates that the response should not contain any resources. Note that the response may include fewer results than the requested count.\n"
+              },
+              {
+                "name": "startIndex",
+                "value": "",
+                "type": "query",
+                "description": "The 1-based index of the first query result."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To list all groups, send a GET request to `/Groups`.\n\nCurrently, filtering on groups only supports the `eq` and `ne` operators\nand the `displayName` attribute.\n\nThe response will contain at most 1000 items. If count is not specified or\nis zero, the response will not contain any resources. There is no defined\nordering of the list of groups in the response. Note that the maximum page\nsize is subject to change.\n\nMembers will not be returned with the group.\n"
+        },
+        {
+          "info": {
+            "name": "Create a New Group",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/scim/v2/Groups/",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To create a group, send a POST request to `/Groups`. Values in the request body for read-only fields will be ignored.\n"
+        },
+        {
+          "info": {
+            "name": "Retrieve an existing group",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/scim/v2/Groups/:group_id",
+            "params": [
+              {
+                "name": "group_id",
+                "value": "",
+                "type": "path",
+                "description": "ID of the group."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To retrieve an existing group, send a GET request to `/Groups/$GROUP_ID`.\n"
+        },
+        {
+          "info": {
+            "name": "Patch a Group",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/scim/v2/Groups/:group_id",
+            "params": [
+              {
+                "name": "group_id",
+                "value": "",
+                "type": "path",
+                "description": "ID of the group."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To update only specific attributes of an existing group, send a PATCH\nrequest to `/Groups/$GROUP_ID`. Values in the request body for immutable or\nread-only fields will be ignored. Fields that are omitted from the request\nbody will be left unchanged.\n\nNote that the Beyond Identity SCIM server currently does not support atomic\nPATCH operations. If a request contains multiple operations, the request\nmay be partially applied.\n\nThe Beyond Identity SCIM server also does not support modifying both a\ngr"
+        },
+        {
+          "info": {
+            "name": "Delete a Group",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/scim/v2/Groups/:group_id",
+            "params": [
+              {
+                "name": "group_id",
+                "value": "",
+                "type": "path",
+                "description": "ID of the group."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To delete a group, send a DELETE request to `/Groups/$GROUP_ID`.\n"
+        },
+        {
+          "info": {
+            "name": "List All Resource Types",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/scim/v2/ResourceTypes"
+          },
+          "docs": "To list all supported resource types, send a GET request to\n`/ResourceTypes`.\n"
+        },
+        {
+          "info": {
+            "name": "List All Schemas",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/scim/v2/Schemas"
+          },
+          "docs": "To list all supported resource schemas, send a GET request to `/Schemas`.\n"
+        },
+        {
+          "info": {
+            "name": "Retrieve the Service Provider Configuration",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/scim/v2/ServiceProviderConfig"
+          },
+          "docs": "To retrieve the service provider configuration, send a GET request to `/ServiceProviderConfig`.\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

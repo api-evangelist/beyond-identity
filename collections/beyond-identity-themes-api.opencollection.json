@@ -1,0 +1,160 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Beyond Identity Secure Access Applications Themes API",
+    "version": "1.7.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Themes",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Create a New Theme",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/themes",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To create a theme, send a POST request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/themes/$THEME_ID`. Values in the request body for read-only fields will be ignored. All non-read-only fields are optional and will be populated with defaults if unspecified.\nCurrently, each realm only supports a single theme. If a theme already exists for the realm, you will receive a 409 error.\n"
+        },
+        {
+          "info": {
+            "name": "Get the Active Theme",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/themes/active",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To retrieve the active theme for a realm, send a GET request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/themes/active`. If the realm has not specified the active theme, a default theme will be returned.\n"
+        },
+        {
+          "info": {
+            "name": "Retrive an Existing Theme",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/themes/:theme_id",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "theme_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a theme."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To retrieve an existing theme, send a GET request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/themes/$THEME_ID`.\n"
+        },
+        {
+          "info": {
+            "name": "Patch a Theme",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/themes/:theme_id",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "theme_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a theme."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To update only specific attributes of an existing theme, send a PATCH request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/themes/$THEME_ID`. Values in the request body for immutable or read-only fields will be ignored. Fields that are omitted from the request body will be left unchanged.\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

@@ -1,0 +1,145 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Beyond Identity Secure Access Applications Identity Provider API",
+    "version": "1.7.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Identity Provider",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Lists Identity Providers by Realm.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/identity-providers",
+            "headers": [
+              {
+                "name": "x-correlation_id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "sso_config_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier of the sso configuration"
+              },
+              {
+                "name": "page_size",
+                "value": "",
+                "type": "query",
+                "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n"
+              },
+              {
+                "name": "page_token",
+                "value": "",
+                "type": "query",
+                "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n"
+              }
+            ]
+          },
+          "docs": "Lists Identity Providers by Realm."
+        },
+        {
+          "info": {
+            "name": "Creates a new identity provider.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/identity-providers",
+            "headers": [
+              {
+                "name": "x-correlation_id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new identity provider."
+        },
+        {
+          "info": {
+            "name": "Retrieves data about an Identity Provider.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/identity-providers/:identity_provider_id",
+            "headers": [
+              {
+                "name": "x-correlation_id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "identity_provider_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for an identity provider."
+              }
+            ]
+          },
+          "docs": "Retrieves data about an identity provider."
+        },
+        {
+          "info": {
+            "name": "Updates an identity provider.",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/identity-providers/:identity_provider_id",
+            "headers": [
+              {
+                "name": "x-correlation_id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates an identity provider."
+        },
+        {
+          "info": {
+            "name": "Deletes an Identity Provider.",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/identity-providers/:identity_provider_id",
+            "headers": [
+              {
+                "name": "x-correlation_id",
+                "value": ""
+              }
+            ]
+          },
+          "docs": "Deletes an identity provider."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

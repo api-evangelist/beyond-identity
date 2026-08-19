@@ -1,0 +1,364 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Beyond Identity Secure Access Applications Identities API",
+    "version": "1.7.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Identities",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Identities for a Realm",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/identities",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "filter",
+                "value": "",
+                "type": "query",
+                "description": "Filter to constrain the response. The response will only include resources matching this filter. Filters follow the SCIM grammar from [RFC-7644 Section 3.4.2.2](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.2).\n"
+              },
+              {
+                "name": "page_size",
+                "value": "",
+                "type": "query",
+                "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n"
+              },
+              {
+                "name": "page_token",
+                "value": "",
+                "type": "query",
+                "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n"
+              },
+              {
+                "name": "skip",
+                "value": "",
+                "type": "query",
+                "description": "Number of items to skip. This is the zero-based index of the first result.\n"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To list identities for a realm, send a GET request to\n`/v1/tenants/$TENANT_ID/realms/$REALM_ID/identities`.\n\nThe response will only contain identities matching the filter in the\nrequest. If no filter is provided, the request will match all identities in\nthe realm. Currently, the only supported filter is\n`traits.username eq \"$USERNAME\"`.\n\nThe response will contain at most 200 items and may contain a page token to\nquery the remaining items. If page size is not specified, the response will\ncontain "
+        },
+        {
+          "info": {
+            "name": "Create a New Identity",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/identities",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To create an identity, send a POST request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/identities`. Values in the request body for read-only fields will be ignored.\nIf the request conflicts with an existing resource, you will receive a 409 error.\n"
+        },
+        {
+          "info": {
+            "name": "Batch delete identities.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/identities:batchDelete",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To delete multiple identities in a realm, send a POST request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/identities:batchDelete`.\nThe request must contain at least one and no more than 1000 identity IDs. If there are any repeating identity IDs, the request will fail. If there are any invalid identity IDs, the request will fail and no identities will be deleted.\nA successful request will receive a 200 status code with no body in the response. This indicates that the request was processed success"
+        },
+        {
+          "info": {
+            "name": "Retrieve an Existing Identity",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/identities/:identity_id",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "identity_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for an identity."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To retrieve an existing identity, send a GET request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/identities/$IDENTITY_ID`.\n"
+        },
+        {
+          "info": {
+            "name": "Patch an Identity",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/identities/:identity_id",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "identity_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for an identity."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To update only specific attributes of an existing identity, send a PATCH request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/identities/$IDENTITY_ID`. Values in the request body for immutable or read-only fields will be ignored. Fields that are omitted from the request body will be left unchanged.\nIf the request conflicts with an existing resource, you will receive a 409 error.\n"
+        },
+        {
+          "info": {
+            "name": "Delete an Identity",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/identities/:identity_id",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "identity_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for an identity."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To delete an identity, send a DELETE request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/identities/$IDENTITY_ID`.\nA successful request will receive a 200 status code with no body in the response. This indicates that the request was processed successfully.\n"
+        },
+        {
+          "info": {
+            "name": "List Group Memberships for an Identity",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/identities/:identity_id:listGroups",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "identity_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for an identity."
+              },
+              {
+                "name": "page_size",
+                "value": "",
+                "type": "query",
+                "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n"
+              },
+              {
+                "name": "page_token",
+                "value": "",
+                "type": "query",
+                "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n"
+              },
+              {
+                "name": "skip",
+                "value": "",
+                "type": "query",
+                "description": "Number of items to skip. This is the zero-based index of the first result.\n"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To list the groups to which an identity belongs, send a GET request to\n`/v1/tenants/$TENANT_ID/realms/$REALM_ID/identities/$IDENTITY_ID:listGroups`.\n\nThe response will contain at most 200 items and may contain a page token to\nquery the remaining items. If page size is not specified, the response will\ncontain 20 items. There is no defined ordering of the list of groups in the\nresponse. Note that the maximum and default page sizes are subject to\nchange.\n\nWhen paginating, the page size is maintaine"
+        },
+        {
+          "info": {
+            "name": "List Role Memberships for an Identity",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/identities/:identity_id:listRoles",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "identity_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for an identity."
+              },
+              {
+                "name": "resource_server_id",
+                "value": "",
+                "type": "query",
+                "description": "The unique identifier of the resource server used to filter roles."
+              },
+              {
+                "name": "page_size",
+                "value": "",
+                "type": "query",
+                "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n"
+              },
+              {
+                "name": "page_token",
+                "value": "",
+                "type": "query",
+                "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n"
+              },
+              {
+                "name": "skip",
+                "value": "",
+                "type": "query",
+                "description": "Number of items to skip. This is the zero-based index of the first result.\n"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To list the roles to which an identity is assigned, send a GET request to\n`/v1/tenants/$TENANT_ID/realms/$REALM_ID/identities/$IDENTITY_ID:listRoles`.\n\nThe request must include the `resource_server_id` query parameter specifying\nthe resource server on which to filter the roles. If the specified resource\nserver does not exist, you will receive a 409 error.\n\nThe response will contain at most 200 items and may contain a page token to\nquery the remaining items. If page size is not specified, the res"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

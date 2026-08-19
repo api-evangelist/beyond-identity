@@ -1,0 +1,553 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Beyond Identity Secure Access Applications Roles API",
+    "version": "1.7.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Roles",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Roles for a Resource Server",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/resource-servers/:resource_server_id/roles",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "resource_server_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a resource server."
+              },
+              {
+                "name": "page_size",
+                "value": "",
+                "type": "query",
+                "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n"
+              },
+              {
+                "name": "page_token",
+                "value": "",
+                "type": "query",
+                "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n"
+              },
+              {
+                "name": "skip",
+                "value": "",
+                "type": "query",
+                "description": "Number of items to skip. This is the zero-based index of the first result.\n"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To list all roles for a resource server, send a GET request to\n`/v1/tenants/$TENANT_ID/realms/$REALM_ID/resource-servers/$RESOURCE_SERVER_ID/roles`.\n\nThe response will contain at most 200 items and may contain a page token to\nquery the remaining items. If page size is not specified, the response will\ncontain 20 items. There is no defined ordering of the list of roles in the\nresponse. Note that the maximum and default page sizes are subject to\nchange.\n\nWhen paginating, the page size is maintained"
+        },
+        {
+          "info": {
+            "name": "Create a New Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/resource-servers/:resource_server_id/roles",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "resource_server_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a resource server."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To create a role, send a POST request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/resource-servers/$RESOURCE_SERVER_ID/roles`. Values in the request body for read-only fields will be ignored.\n"
+        },
+        {
+          "info": {
+            "name": "Retrieve an Existing Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/resource-servers/:resource_server_id/roles/:role_id",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "resource_server_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a resource server."
+              },
+              {
+                "name": "role_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a role."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To retrieve an existing role, send a GET request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/resource-servers/$RESOURCE_SERVER_ID/roles/$ROLE_ID`.\n"
+        },
+        {
+          "info": {
+            "name": "Patch a Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/resource-servers/:resource_server_id/roles/:role_id",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "resource_server_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a resource server."
+              },
+              {
+                "name": "role_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a role."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To update only specific attributes of an existing role, send a PATCH request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/resource-servers/$RESOURCE_SERVER_ID/roles/$ROLE_ID`. Values in the request body for immutable or read-only fields will be ignored. Fields that are omitted from the request body will be left unchanged.\n"
+        },
+        {
+          "info": {
+            "name": "Delete a Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/resource-servers/:resource_server_id/roles/:role_id",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "resource_server_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a resource server."
+              },
+              {
+                "name": "role_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a role."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To delete a role, send a DELETE request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/resource-servers/$RESOURCE_SERVER_ID/roles/$ROLE_ID`. To be deleted, a role must not have any scopes or members. Any existing scopes and members must first be deleted or you will receive a 409 error.\nA successful request will receive a 200 status code with no body in the response. This indicates that the request was processed successfully.\n"
+        },
+        {
+          "info": {
+            "name": "Assign Members to a Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/resource-servers/:resource_server_id/roles/:role_id:addMembers",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "resource_server_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a resource server."
+              },
+              {
+                "name": "role_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a role."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To assign members to a role, send a POST request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/resource-servers/$RESOURCE_SERVER_ID/roles/$ROLE_ID:addMembers`. The request must contain at least one group ID or identity ID and must not contain more than 1000 group IDs or 1000 identity IDs.\n"
+        },
+        {
+          "info": {
+            "name": "Unassign Members from a Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/resource-servers/:resource_server_id/roles/:role_id:deleteMembers",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "resource_server_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a resource server."
+              },
+              {
+                "name": "role_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a role."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To unassign members from a role, send a POST request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/resource-servers/$RESOURCE_SERVER_ID/roles/$ROLE_ID:deleteMembers`. The request must contain at least one group ID or identity ID and must not contain more than 1000 group IDs or 1000 identity IDs.\n"
+        },
+        {
+          "info": {
+            "name": "List Members for a Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/resource-servers/:resource_server_id/roles/:role_id:listMembers",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "resource_server_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a resource server."
+              },
+              {
+                "name": "role_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a role."
+              },
+              {
+                "name": "groups_page_size",
+                "value": "",
+                "type": "query",
+                "description": "Number of groups returned per page for ListRoleMembers. The response will include at most this many groups but may include fewer. If this value is omitted, the response will return the default number of groups allowed by ListRoleMembers.\n"
+              },
+              {
+                "name": "groups_skip",
+                "value": "",
+                "type": "query",
+                "description": "Number of groups to skip for ListRoleMembers. This is the zero-based index of the first group result.\n"
+              },
+              {
+                "name": "identities_page_size",
+                "value": "",
+                "type": "query",
+                "description": "Number of identities returned per page for ListRoleMembers. The response will include at most this many identities but may include fewer. If this value is omitted, the response will return the default number of identities allowed by ListRoleMembers.\n"
+              },
+              {
+                "name": "identities_skip",
+                "value": "",
+                "type": "query",
+                "description": "Number of identities to skip for ListRoleMembers. This is the zero-based index of the first identity result.\n"
+              },
+              {
+                "name": "page_token",
+                "value": "",
+                "type": "query",
+                "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To list members assigned to a role, send a GET request to\n`/v1/tenants/$TENANT_ID/realms/$REALM_ID/resource-servers/$RESOURCE_SERVER_ID/roles/$ROLE_ID:listMembers`.\n\nThe response will contain at most 200 items and may contain a page token to\nquery the remaining items. If page size is not specified, the response will\ncontain 20 items. There is no defined ordering of the list of members in the\nresponse. Note that the maximum and default page sizes are subject to\nchange.\n\nWhen paginating, the page "
+        },
+        {
+          "info": {
+            "name": "Assign Scopes to a Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/resource-servers/:resource_server_id/roles/:role_id:addScopes",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "resource_server_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a resource server."
+              },
+              {
+                "name": "role_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a role."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To assign scopes to a role, send a POST request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/resource-servers/$RESOURCE_SERVER_ID/roles/$ROLE_ID:addScopes`. The request must contain at least one and no more than 1000 scopes.\n"
+        },
+        {
+          "info": {
+            "name": "Unassign Scopes from a Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/resource-servers/:resource_server_id/roles/:role_id:deleteScopes",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "resource_server_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a resource server."
+              },
+              {
+                "name": "role_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a role."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To unassign scopes from a role, send a POST request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/resource-servers/$RESOURCE_SERVER_ID/roles/$ROLE_ID:deleteScopes`. The request must contain at least one and no more than 1000 scopes.\n"
+        },
+        {
+          "info": {
+            "name": "List Scopes for a Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api-us.beyondidentity.com/v1/tenants/:tenant_id/realms/:realm_id/resource-servers/:resource_server_id/roles/:role_id:listScopes",
+            "params": [
+              {
+                "name": "tenant_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a tenant."
+              },
+              {
+                "name": "realm_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a realm."
+              },
+              {
+                "name": "resource_server_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a resource server."
+              },
+              {
+                "name": "role_id",
+                "value": "",
+                "type": "path",
+                "description": "A unique identifier for a role."
+              },
+              {
+                "name": "page_size",
+                "value": "",
+                "type": "query",
+                "description": "Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.\n"
+              },
+              {
+                "name": "page_token",
+                "value": "",
+                "type": "query",
+                "description": "Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.\n"
+              },
+              {
+                "name": "skip",
+                "value": "",
+                "type": "query",
+                "description": "Number of items to skip. This is the zero-based index of the first result.\n"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "To list scopes assigned to a role, send a GET request to\n`/v1/tenants/$TENANT_ID/realms/$REALM_ID/resource-servers/$RESOURCE_SERVER_ID/roles/$ROLE_ID:listScopes`.\n\nThe response will contain at most 200 items and may contain a page token to\nquery the remaining items. If page size is not specified, the response will\ncontain 20 items. There is no defined ordering of the list of scopes in the\nresponse. Note that the maximum and default page sizes are subject to\nchange.\n\nWhen paginating, the page siz"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}
