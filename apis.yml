@@ -32,6 +32,16 @@ tags:
   - Passkeys
   - MFA
   - Device Security
+  - OIDC
+  - SCIM
+tags_raw:
+  - Authentication
+  - Passwordless
+  - Zero Trust
+  - Identity
+  - Passkeys
+  - MFA
+  - Device Security
   - OAuth 2.0
   - OIDC
   - SCIM
@@ -69,6 +79,8 @@ apis:
   humanURL: https://developer.beyondidentity.com/api/v1
   baseURL: https://api-us.beyondidentity.com
   tags:
+  - Application
+  tags_raw:
   - Applications
   properties:
   - type: OpenAPI
@@ -158,6 +170,8 @@ apis:
   humanURL: https://developer.beyondidentity.com/api/v1
   baseURL: https://api-us.beyondidentity.com
   tags:
+  - Group
+  tags_raw:
   - Groups
   properties:
   - type: OpenAPI
