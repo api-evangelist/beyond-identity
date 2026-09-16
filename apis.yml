@@ -60,7 +60,7 @@ tags_raw:
 - SCIM
 url: https://raw.githubusercontent.com/api-evangelist/beyond-identity/refs/heads/main/apis.yml
 created: '2026-06-12'
-modified: '2026-06-12'
+modified: '2026-09-16'
 specificationVersion: '0.23'
 apis:
 - aid: beyond-identity:beyond-identity-next-gen-api
@@ -218,7 +218,7 @@ apis:
   - type: Examples
     url: examples/beyond-identity-credential-binding-job-example.json
 - aid: beyond-identity:beyond-identity-identity-provider-api
-  name: Beyond Identity Identity Provider API
+  name: Beyond Identity Provider API
   description: Identity providers enable integration with external systems to support IdP-authorized workflows,
     such as passkey enrollment. They serve as the counterpart to SSO applications, focusing on initiating
     authentication workflows and enabling secure interactions.
