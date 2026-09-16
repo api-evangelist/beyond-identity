@@ -47,6 +47,7 @@ tags:
 - Device Security
 - OIDC
 - SCIM
+- Identity Federation
 tags_raw:
 - Authentication
 - Passwordless
@@ -58,6 +59,7 @@ tags_raw:
 - OAuth 2.0
 - OIDC
 - SCIM
+- Identity Federation
 url: https://raw.githubusercontent.com/api-evangelist/beyond-identity/refs/heads/main/apis.yml
 created: '2026-06-12'
 modified: '2026-09-16'
