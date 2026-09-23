@@ -1,10 +1,13 @@
-openapi: 3.0.1
+openapi: 3.2.0
 info:
   title: Beyond Identity Secure Access Applications API
   version: 1.7.0
   contact:
     email: support@beyondidentity.com
-  description: "# Introduction\n\n**NOTE:** To determine if you are accessing the Secure Access Platform, check the URL of your Admin Console.\nIf it looks like one of the following, you are using the Secure Access Platform:\n- `https://console.beyondidentity.com` (Localized to your region)\n- `https://console-us.beyondidentity.com` (US region)\n- `https://console-eu.beyondidentity.com` (EU region)\n- `https://console.us1.beyondidentity-gov.com` (US FedRAMP)\n\nIf your Admin Console URL does not look like one of the above, you are using the Secure Workforce Platform. Please refer to the [Secure Workforce API documentation](https://docs.beyondidentity.com/api/v0). <br /><br />\n\nThe Beyond Identity Secure Access API defines methods for managing resources in the Beyond Identity Secure Access platform.<br /><br />\n\nAll of the functionality available in the Beyond Identity Admin Console is\nalso available through the API. <br /><br />\n\nThis API is currently in the early-access stage and is under active\ndevelopment. Feedback and suggestions are encouraged and should be directed\nto the\n[Beyond Identity Developer Slack Channel](https://join.slack.com/t/byndid/shared_invite/zt-1anns8n83-NQX4JvW7coi9dksADxgeBQ).\n\n# Base API URLs\n\nThe base API URLs is determined by the region your tenant is hosted in OR if you are a FedRAMP customer. <br><br>\n\n### US Region\n\nIf you are a US region customer, your base API URLs will be:\n- `https://api-us.beyondidentity.com`\n- `https://auth-us.beyondidentity.com`\n\n### EU Region\n\nIf you are a EU region customer, your base API URLs will be:\n- `https://api-eu.beyondidentity.com`\n- `https://auth-eu.beyondidentity.com`\n\n### US FedRAMP\n\n**NOTE**: The FedRAMP version of Secure Access is released approximately *two weeks* after the commercial version, so some API endpoints may not be available immediately. <br><br>\n\nIf you are a FedRAMP customer in the US region, your base API URLs will be:\n- `https://api.us1.beyondidentity-gov.com`\n- `https://auth.us1.beyondidentity-gov.com`\n\nFor all the examples in this document, we will use the US region API base URL. You can always replace `https://api-us.beyondidentity.com`\nand `https://auth-us.beyondidentity.com` in the examples to use the proper base URL for your tenant.\n\n# Authentication\n\nAll Beyond Identity API endpoints require authentication using an access\ntoken. The access token is generated through OAuth 2.0 or OIDC, using the\nauthorization code flow or the client credentials flow. <br /><br />\n\nThe simplest way to acquire an access token is through the Beyond Identity Admin Console. Under the \"Applications\" tab, select the \"Beyond Identity Management API\" application, navigate to the \"API Tokens\" tab, and then click on \"Create token\". <br /><br />\n\nAlternatively, an access token may also be generated directly via the API by\nrequesting a token for the \"Beyond Identity Management API\" Application. <br><br>\n\n```\ncurl https://auth-us.beyondidentity.com/v1/tenants/$TENANT_ID/realms/$REALM_ID/applications/$APPLICATION_ID/token \\\n  -X POST \\\n  -u \"$CLIENT_ID:$CLIENT_SECRET\" --basic \\\n  -H \"Content-Type: application/x-www-form-urlencoded\" \\\n  -d \"grant_type=client_credentials&scope=$SCOPES\"\n```\n\nThis will work for any application that you have configured to provide\naccess to the Beyond Identity Management API Resource Server. The \"Beyond\nIdentity Management API\" application is provided by default as part of the\ntenant onboarding process.\n\nThe access token must be provided in the `Authorization` header of the\nAPI request. <br><br>\n\n```\ncurl https://api-us.beyondidentity.com/v1/... \\\n  -X $HTTP_METHOD -H \"Authorization: Bearer $TOKEN\"\n```\n\n## Requests and Responses\n\nTo interact with the Beyond Identity API, all requests should be made over\nHTTPS. <br /><br />\n\nThe Beyond Identity API is generally structured as a resource-oriented API.\nResources are represented as JSON objects and are used as both inputs to\nand outputs from API methods. <br /><br />\n\nResource fields may be described as read-only and immutable. A read-only\nfield is only provided on the response. An immutable field is only assigned\nonce and may not be changed after. For example, system-generated IDs are\ndescribed as both read-only and immutable. <br /><br />\n\nTo create a new resource, requests should use the `POST` method. Create\nrequests include all of the necessary attributes to create a new resource.\nCreate operations return the created resource in the response. <br /><br />\n\nTo retrieve a single resource or a collection of resources, requests should\nuse the `GET` method. When retrieving a collection of resources, the\nresponse will include an array of JSON objects keyed on the plural name of\nthe requested resource. <br /><br />\n\nTo update an resource, requests should use the `PATCH` method. Update\noperations support partial updating so requests may specify only the\nattributes which should be updated. Update operations return the updated\nresource in the response. <br /><br />\n\nTo delete a resource, requests should use the `DELETE` method. Note that\ndelete operations return an empty response instead of returning the\nresource in the response. <br /><br />\n\n### Example Response for a Realm\n\n```\n{\n  \"id\": \"a448fe493e02fa9f\",\n  \"tenant_id\": \"000168dc50bdce49\",\n  \"display_name\": \"Test Realm\",\n  \"create_time\": \"2022-06-22T21:46:08.930278Z\",\n  \"update_time\": \"2022-06-22T21:46:08.930278Z\"\n}\n```\n\n### Example Response for a Collection of Realms\n\n```\n{\n  \"realms\": [\n    {\n      \"id\": \"a448fe493e02fa9f\",\n      \"tenant_id\": \"000168dc50bdce49\",\n      \"display_name\": \"Test Realm\",\n      \"create_time\": \"2022-06-22T21:46:08.930278Z\",\n      \"update_time\": \"2022-06-22T21:46:08.930278Z\"\n    }\n  ],\n  \"total_size\": 1\n}\n```\n\n## HTTP Statuses\n\nThe API returns standard HTTP statuses and error codes.\n\nStatuses in the 200 range indicate that the request was successfully\nfulfilled and there were no errors. <br><br>\n\nStatuses in the 400 range indicate that there was an issue with the request\nthat may be addressed by the client. For example, client errors may\nindicate that the request was missing proper authorization or that the\nrequest was malformed. <br><br>\n\nStatuses in the 500 range indicate that the server encountered an internal\nissue and was unable to fulfill the request. <br><br>\n\nAll error responses include a JSON object with a `code` field and a\n`message` field. `code` contains a human-readable name for the HTTP status\ncode and `message` contains a high-level description of the error. The\nerror object may also contain additional error details which may be used by\nthe client to determine the exact cause of the error. Refer to each API\nmethod's examples to determine the specific error detail types supported\nfor that method. <br><br>\n\n### Invalid Access Token Example\n\nIf the provided access token is invalid, you will receive a 401 error.\nThis error indicates that the token is not recognized and was not generated\nby Beyond Identity. <br><br>\n\n```\nHTTP/1.1 401 Unauthorized\n{\n  \"code\": \"unauthorized\",\n  \"message\": \"unauthorized\"\n}\n```\n\n### Permission Denied Example\n\nIf the provided access token does not have access to the requested resource,\nyou will receive a 403 error. Access tokens are scoped at a minimum to your\ntenant. Any request for resources outside of your tenant will result in this\nerror. <br><br>\n\n```\nHTTP/1.1 403 Forbidden\n{\n  \"code\": \"forbidden\",\n  \"message\": \"forbidden\"\n}\n```\n\n### Missing Resource Example\n\nIf the requested resource does not exist, you will receive a 404 error. The\nspecific API method may return additional details about the missing\nresource. <br><br>\n\n```\nHTTP/1.1 404 Not Found\n{\n  \"code\": \"not_found\",\n  \"message\": \"group not found\"\n  \"details\": [\n    {\n      \"type\": \"ResourceInfo\",\n      \"resource_type\": \"Group\",\n      \"id\": \"4822738be6b7f658\",\n      \"description\": \"group not found\"\n    }\n  ],\n}\n```\n\n### Invalid Parameters Example\n\nIf the request body contains invalid parameters, you will receive a 400\nerror. The specific API method may return additional details about the\ninvalid parameter. <br><br>\n\n```\nHTTP/1.1 400 Bad Request\n{\n  \"code\": \"bad_request\",\n  \"message\": \"invalid parameters\"\n  \"details\": [\n    {\n      \"type\": \"FieldViolations\"\n      \"field_violations\": [\n        {\n          \"description\": \"missing\",\n          \"field\": \"group.display_name\"\n        }\n      ],\n    }\n  ],\n}\n```\n"
+  description: '# Introduction
+
+
+    **NOTE:** To determine if you are accessing the Secure Access Platform, check the URL of your Admin Console.'
 servers:
 - url: https://api-us.beyondidentity.com
   description: US region API base URL
@@ -16,9 +19,7 @@ security:
 - BearerAuth: []
 tags:
 - name: Applications
-  description: 'An application represents a client application that uses Beyond Identity for authentication. This could be a native app, a single-page application, regular web application, or machine-to-machine application credentials.
-
-    '
+  description: An application represents a client application that uses Beyond Identity for authentication. This could be a native app, a single-page application, regular web application, or machine-to-machine application credentials.
 paths:
   /v1/tenants/{tenant_id}/realms/{realm_id}/applications:
     post:
@@ -28,9 +29,7 @@ paths:
       summary: Create a New Application
       description: 'To create an application, send a POST request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/applications`. Values in the request body for read-only fields will be ignored.
 
-        At present, there are only two supported protocol types for applications, `oauth2` and `oidc`.
-
-        '
+        At present, there are only two supported protocol types for applications, `oauth2` and `oidc`.'
       security:
       - BearerAuth:
         - applications:create
@@ -172,7 +171,7 @@ paths:
 
         contain 100 items. There is no defined ordering of the list of applications
 
-        in the response.  Note that the maximum and default page sizes are subject
+        in the response. Note that the maximum and default page sizes are subject
 
         to change.
 
@@ -186,9 +185,7 @@ paths:
 
         Page tokens expire after one week. Requests which specify an expired page
 
-        token will result in undefined behavior.
-
-        '
+        token will result in undefined behavior.'
       security:
       - BearerAuth:
         - applications:read
@@ -291,9 +288,7 @@ paths:
       tags:
       - Applications
       summary: Retrieve an Existing Application
-      description: 'To retrieve an existing application, send a GET request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/applications/$APPLICATION_ID`.
-
-        '
+      description: To retrieve an existing application, send a GET request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/applications/$APPLICATION_ID`.
       security:
       - BearerAuth:
         - applications:read
@@ -354,9 +349,7 @@ paths:
       tags:
       - Applications
       summary: Patch an Application
-      description: 'To update only specific attributes of an existing application, send a PATCH request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/applications/$APPLICATION_ID`. Values in the request body for immutable or read-only fields will be ignored. Fields that are omitted from the request body will be left unchanged.
-
-        '
+      description: To update only specific attributes of an existing application, send a PATCH request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/applications/$APPLICATION_ID`. Values in the request body for immutable or read-only fields will be ignored. Fields that are omitted from the request body will be left unchanged.
       security:
       - BearerAuth:
         - applications:update
@@ -447,9 +440,7 @@ paths:
       summary: Delete an Application
       description: 'To delete an application, send a DELETE request to `/v1/tenants/$TENANT_ID/realms/$REALM_ID/applications/$APPLICATION_ID`.
 
-        A successful request will receive a 200 status code with no body in the response. This indicates that the request was processed successfully.
-
-        '
+        A successful request will receive a 200 status code with no body in the response. This indicates that the request was processed successfully.'
       security:
       - BearerAuth:
         - applications:delete
@@ -497,7 +488,78 @@ paths:
                 Internal Error:
                   $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
 components:
+  parameters:
+    page_size:
+      name: page_size
+      in: query
+      description: 'Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.
+
+        '
+      schema:
+        type: integer
+        format: uint32
+        minimum: 0
+    realm_id:
+      name: realm_id
+      in: path
+      description: A unique identifier for a realm.
+      required: true
+      schema:
+        type: string
+        example: 19a95130480dfa79
+    page_token:
+      name: page_token
+      in: query
+      description: 'Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.
+
+        '
+      schema:
+        type: string
+    application_id:
+      name: application_id
+      in: path
+      description: A unique identifier for an application.
+      required: true
+      schema:
+        type: string
+        example: 38833c36-6f47-4992-9329-ea0a00915137
+    tenant_id:
+      name: tenant_id
+      in: path
+      description: A unique identifier for a tenant.
+      required: true
+      schema:
+        type: string
+        example: 000176d94fd7b4d1
   schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
+
+            '
+        message:
+          type: string
+          description: 'Human-readable message describing the error.
+
+            '
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      required:
+      - code
+      - message
+    PkceConfig:
+      type: string
+      enum:
+      - disabled
+      - plain
+      - s256
+      description: "PKCE code challenge methods supported for applications, as defined by\n[RFC-7636](https://datatracker.ietf.org/doc/html/rfc7636). Allowable values are:\n  - `disabled` : PKCE is disabled for this application. This is the default state if\n    the `pkce` field is left blank. Please note that public OIDC and OAuth2 configured\n    applications MUST enable PKCE support. Confidential clients can leave PKCE disabled\n    if they choose.\n  - `plain` : PKCE is enabled for this application. The server will correlate the `code_challenge` and\n    `code_verifier` between the `authorize` and `token` requests. In this configuration, those fields are\n    required to be identical. This is the lower security option for PKCE support and should only be used\n    by legacy clients, or clients that don't support `s256`.\n  - `s256` : PKCE is enabled for this application, and the server will correlate the `code_challenge` and\n    `code_verifier` between the `authorize` and `token` requests. In this configuration, those fields are\n    required to equate as follows: `code_challenge` = `base64url(sha256(ascii(code_verifier)))`. This is\n    the higher security option and should always be preferred if it is supported by the client.\n"
+      example: s256
     SsoConfigPayload:
       oneOf:
       - $ref: '#/components/schemas/SsoConfigBookmark'
@@ -888,8 +950,9 @@ components:
             type: string
           client_secret:
             description: The client secret to authenticate as the idp application.
-            type: string
-            nullable: true
+            type:
+            - string
+            - 'null'
           pkce:
             default: null
             allOf:
@@ -911,6 +974,31 @@ components:
       - $ref: '#/components/schemas/SsoConfigOktaBiIdp'
       - $ref: '#/components/schemas/SsoConfigRealityCheck'
       - $ref: '#/components/schemas/SsoConfigWsFed'
+    Confidentiality:
+      description: "The confidentiality of the client, as prescribed by OAuth 2.0 and\nOIDC. Confidentiality is based on a client's ability to authenticate\nsecurely with the authorization server (i.e., ability to\nmaintain the confidentiality of their client credentials). Allowable\nvalues are:\n- `confidential`: Clients capable of maintaining the confidentiality\n  of their credentials (e.g., client implemented on a secure server with\n  restricted access to the client credentials), or capable of secure\n  client authentication using other means.\n- `public`: Clients incapable of maintaining the confidentiality of their\n  credentials (e.g., clients executing on the device used by the\n  resource owner, such as an installed native application or a web\n  browser-based application), and incapable of secure client\n  authentication via any other means.\n"
+      type: string
+      enum:
+      - confidential
+      - public
+      example: confidential
+    TokenEndpointAuthMethod:
+      description: "Indicator of the requested authentication method for the token endpoint.\nAllowable values are: - `client_secret_post`: The client uses the HTTP POST\nparameters\n   as defined in OAuth 2.0, Section 2.3.1. Namely, `client_id`\n   and `client_secret` are sent in the body of the POST request.\n- `client_secret_basic`: The client uses HTTP Basic as defined in\n   OAuth 2.0, Section 2.3.1. Namely, `client_id` and `client_secret`\n   are sent in the Basic Authorization header.\n- `none`: The `client_secret` is not part of the request body and there is no\nauthorization header.\n   This endpoint authentication method is only allowed if the application has\n`confidentiality` set to `confidential`.\n\nDeprecation Notice: This field is deprecated. The API will ignore the value\nof this field in requests. In responses, confidential applications will\nalways have `client_secret_basic` and public applications will always have\n`none`. On authentication, confidential applications may use both\n`client_secret_post` and `client_secret_basic`. Public applications may only\nuse `none`. **This field is scheduled for removal on August 1, 2023**\n"
+      type: string
+      deprecated: true
+      enum:
+      - client_secret_basic
+      - client_secret_post
+      - none
+      example: client_secret_basic
+    GrantType:
+      type: array
+      items:
+        type: string
+        enum:
+        - authorization_code
+        - client_credentials
+        example: authorization_code
+      description: "Grant types supported by this application's `token` endpoint. Allowable values\nare:\n- `authorization_code`: The authorization code grant type defined\n  in OAuth 2.0, Section 4.1. Namely, the client may authorize to the\n  `token` endpoint with a grant code which it obtains via the `authorize`\n  endpoint.\n- `client_credentials`: The client credentials grant type defined\n  in OAuth 2.0, Section 4.4. Namely, the client may authorize to the\n  `token` endpoint with a client credentials tuple of `client_id` and\n  `client_secret`.\n"
     SsoConfigSamlPartialUpdate:
       type: object
       required:
@@ -1196,6 +1284,54 @@ components:
           default: false
           type: boolean
           description: Changes the EntityID in the SAML response to a shorter version. This is to support applications with URL restrictions.
+    TokenConfiguration:
+      description: Properties of a token issued for an application.
+      type: object
+      required:
+      - expires_after
+      properties:
+        expires_after:
+          type: integer
+          format: uint32
+          description: 'Time after minting, in seconds, for which the token will be considered valid.
+
+            '
+          minimum: 0
+          example: 86400
+        token_signing_algorithm:
+          type: string
+          enum:
+          - RS256
+          description: 'Signing algorithm to use for an application token. The only allowable value at present is `RS256`.
+
+            '
+          default: RS256
+          example: RS256
+        subject_field:
+          type: string
+          enum:
+          - id
+          - email
+          - username
+          description: 'Property of a principal which is used to fill the subject of a token issued for this application.
+
+            '
+          default: id
+          example: id
+    ErrorDetail:
+      title: Error Detail
+      description: 'Additional details for errors designed to support client applications.
+
+        '
+      type: object
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          type: string
+          description: Type of the error detail.
+      required:
+      - type
     Application:
       title: Application
       type: object
@@ -1363,91 +1499,6 @@ components:
               token_format:
                 $ref: '#/components/schemas/Application/properties/protocol_config/oneOf/0/properties/token_format'
           - $ref: '#/components/schemas/SsoConfigPayload/oneOf/4'
-    ErrorDetail:
-      title: Error Detail
-      description: 'Additional details for errors designed to support client applications.
-
-        '
-      type: object
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          type: string
-          description: Type of the error detail.
-      required:
-      - type
-    Error:
-      type: object
-      properties:
-        code:
-          type: string
-          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
-
-            '
-        message:
-          type: string
-          description: 'Human-readable message describing the error.
-
-            '
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-      required:
-      - code
-      - message
-    GrantType:
-      type: array
-      items:
-        type: string
-        enum:
-        - authorization_code
-        - client_credentials
-        example: authorization_code
-      description: "Grant types supported by this application's `token` endpoint. Allowable values\nare:\n- `authorization_code`: The authorization code grant type defined\n  in OAuth 2.0, Section 4.1. Namely, the client may authorize to the\n  `token` endpoint with a grant code which it obtains via the `authorize`\n  endpoint.\n- `client_credentials`: The client credentials grant type defined\n  in OAuth 2.0, Section 4.4. Namely, the client may authorize to the\n  `token` endpoint with a client credentials tuple of `client_id` and\n  `client_secret`.\n"
-    PkceConfig:
-      type: string
-      enum:
-      - disabled
-      - plain
-      - s256
-      description: "PKCE code challenge methods supported for applications, as defined by\n[RFC-7636](https://datatracker.ietf.org/doc/html/rfc7636). Allowable values are:\n  - `disabled` : PKCE is disabled for this application. This is the default state if\n    the `pkce` field is left blank. Please note that public OIDC and OAuth2 configured\n    applications MUST enable PKCE support. Confidential clients can leave PKCE disabled\n    if they choose.\n  - `plain` : PKCE is enabled for this application. The server will correlate the `code_challenge` and\n    `code_verifier` between the `authorize` and `token` requests. In this configuration, those fields are\n    required to be identical. This is the lower security option for PKCE support and should only be used\n    by legacy clients, or clients that don't support `s256`.\n  - `s256` : PKCE is enabled for this application, and the server will correlate the `code_challenge` and\n    `code_verifier` between the `authorize` and `token` requests. In this configuration, those fields are\n    required to equate as follows: `code_challenge` = `base64url(sha256(ascii(code_verifier)))`. This is\n    the higher security option and should always be preferred if it is supported by the client.\n"
-      example: s256
-    TokenConfiguration:
-      description: Properties of a token issued for an application.
-      type: object
-      required:
-      - expires_after
-      properties:
-        expires_after:
-          type: integer
-          format: uint32
-          description: 'Time after minting, in seconds, for which the token will be considered valid.
-
-            '
-          minimum: 0
-          example: 86400
-        token_signing_algorithm:
-          type: string
-          enum:
-          - RS256
-          description: 'Signing algorithm to use for an application token. The only allowable value at present is `RS256`.
-
-            '
-          default: RS256
-          example: RS256
-        subject_field:
-          type: string
-          enum:
-          - id
-          - email
-          - username
-          description: 'Property of a principal which is used to fill the subject of a token issued for this application.
-
-            '
-          default: id
-          example: id
     ListApplicationsResponse:
       title: List Applications Response
       description: Response for ListApplications.
@@ -1476,65 +1527,6 @@ components:
       required:
       - applications
       - total_size
-    TokenEndpointAuthMethod:
-      description: "Indicator of the requested authentication method for the token endpoint.\nAllowable values are: - `client_secret_post`: The client uses the HTTP POST\nparameters\n   as defined in OAuth 2.0, Section 2.3.1. Namely, `client_id`\n   and `client_secret` are sent in the body of the POST request.\n- `client_secret_basic`: The client uses HTTP Basic as defined in\n   OAuth 2.0, Section 2.3.1. Namely, `client_id` and `client_secret`\n   are sent in the Basic Authorization header.\n- `none`: The `client_secret` is not part of the request body and there is no\nauthorization header.\n   This endpoint authentication method is only allowed if the application has\n`confidentiality` set to `confidential`.\n\nDeprecation Notice: This field is deprecated. The API will ignore the value\nof this field in requests. In responses, confidential applications will\nalways have `client_secret_basic` and public applications will always have\n`none`. On authentication, confidential applications may use both\n`client_secret_post` and `client_secret_basic`. Public applications may only\nuse `none`. **This field is scheduled for removal on August 1, 2023**\n"
-      type: string
-      deprecated: true
-      enum:
-      - client_secret_basic
-      - client_secret_post
-      - none
-      example: client_secret_basic
-    Confidentiality:
-      description: "The confidentiality of the client, as prescribed by OAuth 2.0 and\nOIDC. Confidentiality is based on a client's ability to authenticate\nsecurely with the authorization server (i.e., ability to\nmaintain the confidentiality of their client credentials). Allowable\nvalues are:\n- `confidential`: Clients capable of maintaining the confidentiality\n  of their credentials (e.g., client implemented on a secure server with\n  restricted access to the client credentials), or capable of secure\n  client authentication using other means.\n- `public`: Clients incapable of maintaining the confidentiality of their\n  credentials (e.g., clients executing on the device used by the\n  resource owner, such as an installed native application or a web\n  browser-based application), and incapable of secure client\n  authentication via any other means.\n"
-      type: string
-      enum:
-      - confidential
-      - public
-      example: confidential
-  parameters:
-    realm_id:
-      name: realm_id
-      in: path
-      description: A unique identifier for a realm.
-      required: true
-      schema:
-        type: string
-        example: 19a95130480dfa79
-    page_size:
-      name: page_size
-      in: query
-      description: 'Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.
-
-        '
-      schema:
-        type: integer
-        format: uint32
-        minimum: 0
-    page_token:
-      name: page_token
-      in: query
-      description: 'Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.
-
-        '
-      schema:
-        type: string
-    application_id:
-      name: application_id
-      in: path
-      description: A unique identifier for an application.
-      required: true
-      schema:
-        type: string
-        example: 38833c36-6f47-4992-9329-ea0a00915137
-    tenant_id:
-      name: tenant_id
-      in: path
-      description: A unique identifier for a tenant.
-      required: true
-      schema:
-        type: string
-        example: 000176d94fd7b4d1
   securitySchemes:
     BearerAuth:
       type: http
