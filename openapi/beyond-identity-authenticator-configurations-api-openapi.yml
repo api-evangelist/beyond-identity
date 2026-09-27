@@ -460,58 +460,21 @@ paths:
                 Internal Error:
                   $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
 components:
-  parameters:
-    authenticator_config_id:
-      name: authenticator_config_id
-      in: path
-      description: A unique identifier for an authenticator configuration.
-      required: true
-      schema:
-        type: string
-        example: 73731b7f-eb76-4143-9b4b-81a720385f5a
-    page_size:
-      name: page_size
-      in: query
-      description: 'Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.
-
-        '
-      schema:
-        type: integer
-        format: uint32
-        minimum: 0
-    realm_id:
-      name: realm_id
-      in: path
-      description: A unique identifier for a realm.
-      required: true
-      schema:
-        type: string
-        example: 19a95130480dfa79
-    tenant_id:
-      name: tenant_id
-      in: path
-      description: A unique identifier for a tenant.
-      required: true
-      schema:
-        type: string
-        example: 000176d94fd7b4d1
-    page_token:
-      name: page_token
-      in: query
-      description: 'Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.
-
-        '
-      schema:
-        type: string
-    filter:
-      name: filter
-      in: query
-      description: 'Filter to constrain the response. The response will only include resources matching this filter. Filters follow the SCIM grammar from [RFC-7644 Section 3.4.2.2](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.2).
-
-        '
-      schema:
-        type: string
   schemas:
+    ErrorDetail:
+      title: Error Detail
+      description: 'Additional details for errors designed to support client applications.
+
+        '
+      type: object
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          type: string
+          description: Type of the error detail.
+      required:
+      - type
     ListAuthenticatorConfigsResponse:
       title: List Authenticator Configurations Response
       description: Response for ListAuthenticatorConfigs.
@@ -540,40 +503,6 @@ components:
       required:
       - authenticator_configs
       - total_size
-    Error:
-      type: object
-      properties:
-        code:
-          type: string
-          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
-
-            '
-        message:
-          type: string
-          description: 'Human-readable message describing the error.
-
-            '
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-      required:
-      - code
-      - message
-    ErrorDetail:
-      title: Error Detail
-      description: 'Additional details for errors designed to support client applications.
-
-        '
-      type: object
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          type: string
-          description: Type of the error detail.
-      required:
-      - type
     AuthenticatorConfig:
       title: Authenticator Configuration
       type: object
@@ -833,6 +762,77 @@ components:
                     type: array
                     items:
                       type: string
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
+
+            '
+        message:
+          type: string
+          description: 'Human-readable message describing the error.
+
+            '
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      required:
+      - code
+      - message
+  parameters:
+    tenant_id:
+      name: tenant_id
+      in: path
+      description: A unique identifier for a tenant.
+      required: true
+      schema:
+        type: string
+        example: 000176d94fd7b4d1
+    filter:
+      name: filter
+      in: query
+      description: 'Filter to constrain the response. The response will only include resources matching this filter. Filters follow the SCIM grammar from [RFC-7644 Section 3.4.2.2](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.2).
+
+        '
+      schema:
+        type: string
+    realm_id:
+      name: realm_id
+      in: path
+      description: A unique identifier for a realm.
+      required: true
+      schema:
+        type: string
+        example: 19a95130480dfa79
+    page_token:
+      name: page_token
+      in: query
+      description: 'Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.
+
+        '
+      schema:
+        type: string
+    page_size:
+      name: page_size
+      in: query
+      description: 'Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.
+
+        '
+      schema:
+        type: integer
+        format: uint32
+        minimum: 0
+    authenticator_config_id:
+      name: authenticator_config_id
+      in: path
+      description: A unique identifier for an authenticator configuration.
+      required: true
+      schema:
+        type: string
+        example: 73731b7f-eb76-4143-9b4b-81a720385f5a
   securitySchemes:
     BearerAuth:
       type: http

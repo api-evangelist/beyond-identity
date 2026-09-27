@@ -488,78 +488,49 @@ paths:
                 Internal Error:
                   $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
 components:
-  parameters:
-    page_size:
-      name: page_size
-      in: query
-      description: 'Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.
-
-        '
-      schema:
-        type: integer
-        format: uint32
-        minimum: 0
-    realm_id:
-      name: realm_id
-      in: path
-      description: A unique identifier for a realm.
-      required: true
-      schema:
-        type: string
-        example: 19a95130480dfa79
-    page_token:
-      name: page_token
-      in: query
-      description: 'Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.
-
-        '
-      schema:
-        type: string
-    application_id:
-      name: application_id
-      in: path
-      description: A unique identifier for an application.
-      required: true
-      schema:
-        type: string
-        example: 38833c36-6f47-4992-9329-ea0a00915137
-    tenant_id:
-      name: tenant_id
-      in: path
-      description: A unique identifier for a tenant.
-      required: true
-      schema:
-        type: string
-        example: 000176d94fd7b4d1
   schemas:
-    Error:
+    ErrorDetail:
+      title: Error Detail
+      description: 'Additional details for errors designed to support client applications.
+
+        '
+      type: object
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          type: string
+          description: Type of the error detail.
+      required:
+      - type
+    ListApplicationsResponse:
+      title: List Applications Response
+      description: Response for ListApplications.
       type: object
       properties:
-        code:
-          type: string
-          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
-
-            '
-        message:
-          type: string
-          description: 'Human-readable message describing the error.
-
-            '
-        details:
+        applications:
           type: array
           items:
-            $ref: '#/components/schemas/ErrorDetail'
+            $ref: '#/components/schemas/Application'
+          maxItems: 100
+          description: 'An unordered array of applications corresponding to the request.
+
+            '
+        total_size:
+          type: integer
+          format: uint32
+          description: 'Total number of results returned by the operation. This value may be larger than the number of resources returned, such as when returning a single page where multiple pages are available.
+
+            '
+          example: 1000
+        next_page_token:
+          type: string
+          description: 'Token used to fetch the next set of results. If this field is omitted, there are no subsequent pages.
+
+            '
       required:
-      - code
-      - message
-    PkceConfig:
-      type: string
-      enum:
-      - disabled
-      - plain
-      - s256
-      description: "PKCE code challenge methods supported for applications, as defined by\n[RFC-7636](https://datatracker.ietf.org/doc/html/rfc7636). Allowable values are:\n  - `disabled` : PKCE is disabled for this application. This is the default state if\n    the `pkce` field is left blank. Please note that public OIDC and OAuth2 configured\n    applications MUST enable PKCE support. Confidential clients can leave PKCE disabled\n    if they choose.\n  - `plain` : PKCE is enabled for this application. The server will correlate the `code_challenge` and\n    `code_verifier` between the `authorize` and `token` requests. In this configuration, those fields are\n    required to be identical. This is the lower security option for PKCE support and should only be used\n    by legacy clients, or clients that don't support `s256`.\n  - `s256` : PKCE is enabled for this application, and the server will correlate the `code_challenge` and\n    `code_verifier` between the `authorize` and `token` requests. In this configuration, those fields are\n    required to equate as follows: `code_challenge` = `base64url(sha256(ascii(code_verifier)))`. This is\n    the higher security option and should always be preferred if it is supported by the client.\n"
-      example: s256
+      - applications
+      - total_size
     SsoConfigPayload:
       oneOf:
       - $ref: '#/components/schemas/SsoConfigBookmark'
@@ -974,13 +945,227 @@ components:
       - $ref: '#/components/schemas/SsoConfigOktaBiIdp'
       - $ref: '#/components/schemas/SsoConfigRealityCheck'
       - $ref: '#/components/schemas/SsoConfigWsFed'
-    Confidentiality:
-      description: "The confidentiality of the client, as prescribed by OAuth 2.0 and\nOIDC. Confidentiality is based on a client's ability to authenticate\nsecurely with the authorization server (i.e., ability to\nmaintain the confidentiality of their client credentials). Allowable\nvalues are:\n- `confidential`: Clients capable of maintaining the confidentiality\n  of their credentials (e.g., client implemented on a secure server with\n  restricted access to the client credentials), or capable of secure\n  client authentication using other means.\n- `public`: Clients incapable of maintaining the confidentiality of their\n  credentials (e.g., clients executing on the device used by the\n  resource owner, such as an installed native application or a web\n  browser-based application), and incapable of secure client\n  authentication via any other means.\n"
-      type: string
-      enum:
-      - confidential
-      - public
-      example: confidential
+    TokenConfiguration:
+      description: Properties of a token issued for an application.
+      type: object
+      required:
+      - expires_after
+      properties:
+        expires_after:
+          type: integer
+          format: uint32
+          description: 'Time after minting, in seconds, for which the token will be considered valid.
+
+            '
+          minimum: 0
+          example: 86400
+        token_signing_algorithm:
+          type: string
+          enum:
+          - RS256
+          description: 'Signing algorithm to use for an application token. The only allowable value at present is `RS256`.
+
+            '
+          default: RS256
+          example: RS256
+        subject_field:
+          type: string
+          enum:
+          - id
+          - email
+          - username
+          description: 'Property of a principal which is used to fill the subject of a token issued for this application.
+
+            '
+          default: id
+          example: id
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
+
+            '
+        message:
+          type: string
+          description: 'Human-readable message describing the error.
+
+            '
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      required:
+      - code
+      - message
+    Application:
+      title: Application
+      type: object
+      description: 'An application represents a client application that uses Beyond Identity for authentication. This could be a native app, a single-page application, regular web application, or machine-to-machine application credentials.
+
+        '
+      properties:
+        id:
+          type: string
+          description: 'A unique identifier for an application. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the realm.
+
+            '
+          readOnly: true
+          example: 38833c36-6f47-4992-9329-ea0a00915137
+        realm_id:
+          type: string
+          description: 'A unique identifier for the application''s realm. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: caf2ff640497591a
+        tenant_id:
+          type: string
+          description: 'A unique identifier for the application''s tenant. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 00011f1183c67b69
+        resource_server_id:
+          type: string
+          description: 'A unique identifier for the application''s resource server. At present, the only available resource server is for the Beyond Identity Management API. Referencing this resource server from an application will allow that application to grant access to Beyond Identity''s APIs. When not present, this application may provide authentication (identity) but not authorization (access).
+
+            '
+          example: 84db69f5-48a8-4c11-8cda-1bae3a73f07e
+        authenticator_config_id:
+          type: string
+          description: 'A unique identifier for the application''s authenticator configuration. This field is unused for `oidc` and `oauth2` applications when `grant_type=client_credentials`.
+
+            '
+          example: 73731b7f-eb76-4143-9b4b-81a720385f5a
+        display_name:
+          type: string
+          description: 'A human-readable name for the application. This name is used for display purposes.
+
+            '
+          example: Pet Application
+        is_managed:
+          type: boolean
+          description: 'A boolean indicating whether the application is managed by Beyond Identity. Managed applications may not be modified by the user. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: false
+        protocol_config:
+          description: Represents an application protocol configuration.
+          oneOf:
+          - title: OAuth 2.0
+            description: OAuth2 protocol configuration.
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                enum:
+                - oauth2
+              allowed_scopes:
+                type: array
+                items:
+                  type: string
+                  example: pets:read
+                description: 'Scopes to which this application can grant access. If this application references a resource server, this set of scopes must be a subset of the resource server''s available scopes. If this application does not reference a resource server, then this application can only be used for authentication and thereby `scopes` must necessarily be empty.
+
+                  '
+              client_id:
+                type: string
+                description: 'The client ID for this application. This is automatically set on creation. This field is output-only.
+
+                  '
+                readOnly: true
+                example: AYYNcuOSpfqIf33JeegCzDIT
+              client_secret:
+                type: string
+                description: 'The client secret to authenticate as this application; typically, as a Basic Authorization header. This is automatically set on creation. This field is output-only. This field is present only when confidentiality is `confidential`.
+
+                  '
+                readOnly: true
+                example: wWD4mPzdsjms1LPekQSo0v9scOHLWy5wmMtKAR2JNhJPAKXv
+              confidentiality:
+                $ref: '#/components/schemas/Confidentiality'
+              token_endpoint_auth_method:
+                $ref: '#/components/schemas/TokenEndpointAuthMethod'
+              grant_type:
+                $ref: '#/components/schemas/GrantType'
+              redirect_uris:
+                type: array
+                items:
+                  type: string
+                  example: https://auth.mypetapp.com/callback
+                description: 'A list of valid URIs to redirect the resource owner''s user-agent to after completing its interaction with the authorization server. See https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.2 for more information.
+
+                  '
+              token_configuration:
+                $ref: '#/components/schemas/TokenConfiguration'
+              pkce:
+                $ref: '#/components/schemas/PkceConfig'
+              token_format:
+                description: "Allowed access token formats for this application.\ntoken type. Allowable values are:\n- `self_contained`: token in JWT format.\n- `referential`: Encoded token which requires /introspect\n   call in order to retrieve token claims.\n"
+                type: string
+                enum:
+                - self_contained
+                - referential
+                example: self_contained
+                default: self_contained
+          - title: OIDC
+            description: OIDC protocol configuration.
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                enum:
+                - oidc
+              allowed_scopes:
+                type: array
+                items:
+                  type: string
+                  example: pets:read
+                description: 'Scopes to which this application can grant access. If this application references a resource server, this set of scopes must be a subset of the resource server''s available scopes. If this application does not reference a resource server, then this application can only be used for authentication and thereby `scopes` must necessarily be empty. Note that OIDC requests may accept OpenID Connect standard scopes as well as resource server scopes, but the OpenID Connect scopes should not be defined on the application itself. Currently, the only OpenID Connect supported scope is `openid`.
+
+                  '
+              client_id:
+                type: string
+                description: 'The client ID for this application. This is automatically set on creation. This field is output-only.
+
+                  '
+                readOnly: true
+                example: AYYNcuOSpfqIf33JeegCzDIT
+              client_secret:
+                type: string
+                description: 'The client secret to authenticate as this application; typically, as a Basic Authorization header. This is automatically set on creation. This field is output-only. This field is present only when confidentiality is `confidential`.
+
+                  '
+                readOnly: true
+                example: wWD4mPzdsjms1LPekQSo0v9scOHLWy5wmMtKAR2JNhJPAKXv
+              confidentiality:
+                $ref: '#/components/schemas/Confidentiality'
+              token_endpoint_auth_method:
+                $ref: '#/components/schemas/TokenEndpointAuthMethod'
+              grant_type:
+                $ref: '#/components/schemas/GrantType'
+              redirect_uris:
+                type: array
+                items:
+                  type: string
+                  example: https://auth.mypetapp.com/callback
+                description: 'A list of valid URIs to redirect the resource owner''s user-agent to after completing its interaction with the authorization server. See https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.2 for more information.
+
+                  '
+              token_configuration:
+                $ref: '#/components/schemas/TokenConfiguration'
+              pkce:
+                $ref: '#/components/schemas/PkceConfig'
+              token_format:
+                $ref: '#/components/schemas/Application/properties/protocol_config/oneOf/0/properties/token_format'
+          - $ref: '#/components/schemas/SsoConfigPayload/oneOf/4'
     TokenEndpointAuthMethod:
       description: "Indicator of the requested authentication method for the token endpoint.\nAllowable values are: - `client_secret_post`: The client uses the HTTP POST\nparameters\n   as defined in OAuth 2.0, Section 2.3.1. Namely, `client_id`\n   and `client_secret` are sent in the body of the POST request.\n- `client_secret_basic`: The client uses HTTP Basic as defined in\n   OAuth 2.0, Section 2.3.1. Namely, `client_id` and `client_secret`\n   are sent in the Basic Authorization header.\n- `none`: The `client_secret` is not part of the request body and there is no\nauthorization header.\n   This endpoint authentication method is only allowed if the application has\n`confidentiality` set to `confidential`.\n\nDeprecation Notice: This field is deprecated. The API will ignore the value\nof this field in requests. In responses, confidential applications will\nalways have `client_secret_basic` and public applications will always have\n`none`. On authentication, confidential applications may use both\n`client_secret_post` and `client_secret_basic`. Public applications may only\nuse `none`. **This field is scheduled for removal on August 1, 2023**\n"
       type: string
@@ -990,15 +1175,14 @@ components:
       - client_secret_post
       - none
       example: client_secret_basic
-    GrantType:
-      type: array
-      items:
-        type: string
-        enum:
-        - authorization_code
-        - client_credentials
-        example: authorization_code
-      description: "Grant types supported by this application's `token` endpoint. Allowable values\nare:\n- `authorization_code`: The authorization code grant type defined\n  in OAuth 2.0, Section 4.1. Namely, the client may authorize to the\n  `token` endpoint with a grant code which it obtains via the `authorize`\n  endpoint.\n- `client_credentials`: The client credentials grant type defined\n  in OAuth 2.0, Section 4.4. Namely, the client may authorize to the\n  `token` endpoint with a client credentials tuple of `client_id` and\n  `client_secret`.\n"
+    PkceConfig:
+      type: string
+      enum:
+      - disabled
+      - plain
+      - s256
+      description: "PKCE code challenge methods supported for applications, as defined by\n[RFC-7636](https://datatracker.ietf.org/doc/html/rfc7636). Allowable values are:\n  - `disabled` : PKCE is disabled for this application. This is the default state if\n    the `pkce` field is left blank. Please note that public OIDC and OAuth2 configured\n    applications MUST enable PKCE support. Confidential clients can leave PKCE disabled\n    if they choose.\n  - `plain` : PKCE is enabled for this application. The server will correlate the `code_challenge` and\n    `code_verifier` between the `authorize` and `token` requests. In this configuration, those fields are\n    required to be identical. This is the lower security option for PKCE support and should only be used\n    by legacy clients, or clients that don't support `s256`.\n  - `s256` : PKCE is enabled for this application, and the server will correlate the `code_challenge` and\n    `code_verifier` between the `authorize` and `token` requests. In this configuration, those fields are\n    required to equate as follows: `code_challenge` = `base64url(sha256(ascii(code_verifier)))`. This is\n    the higher security option and should always be preferred if it is supported by the client.\n"
+      example: s256
     SsoConfigSamlPartialUpdate:
       type: object
       required:
@@ -1284,249 +1468,65 @@ components:
           default: false
           type: boolean
           description: Changes the EntityID in the SAML response to a shorter version. This is to support applications with URL restrictions.
-    TokenConfiguration:
-      description: Properties of a token issued for an application.
-      type: object
-      required:
-      - expires_after
-      properties:
-        expires_after:
-          type: integer
-          format: uint32
-          description: 'Time after minting, in seconds, for which the token will be considered valid.
-
-            '
-          minimum: 0
-          example: 86400
-        token_signing_algorithm:
-          type: string
-          enum:
-          - RS256
-          description: 'Signing algorithm to use for an application token. The only allowable value at present is `RS256`.
-
-            '
-          default: RS256
-          example: RS256
-        subject_field:
-          type: string
-          enum:
-          - id
-          - email
-          - username
-          description: 'Property of a principal which is used to fill the subject of a token issued for this application.
-
-            '
-          default: id
-          example: id
-    ErrorDetail:
-      title: Error Detail
-      description: 'Additional details for errors designed to support client applications.
+    GrantType:
+      type: array
+      items:
+        type: string
+        enum:
+        - authorization_code
+        - client_credentials
+        example: authorization_code
+      description: "Grant types supported by this application's `token` endpoint. Allowable values\nare:\n- `authorization_code`: The authorization code grant type defined\n  in OAuth 2.0, Section 4.1. Namely, the client may authorize to the\n  `token` endpoint with a grant code which it obtains via the `authorize`\n  endpoint.\n- `client_credentials`: The client credentials grant type defined\n  in OAuth 2.0, Section 4.4. Namely, the client may authorize to the\n  `token` endpoint with a client credentials tuple of `client_id` and\n  `client_secret`.\n"
+    Confidentiality:
+      description: "The confidentiality of the client, as prescribed by OAuth 2.0 and\nOIDC. Confidentiality is based on a client's ability to authenticate\nsecurely with the authorization server (i.e., ability to\nmaintain the confidentiality of their client credentials). Allowable\nvalues are:\n- `confidential`: Clients capable of maintaining the confidentiality\n  of their credentials (e.g., client implemented on a secure server with\n  restricted access to the client credentials), or capable of secure\n  client authentication using other means.\n- `public`: Clients incapable of maintaining the confidentiality of their\n  credentials (e.g., clients executing on the device used by the\n  resource owner, such as an installed native application or a web\n  browser-based application), and incapable of secure client\n  authentication via any other means.\n"
+      type: string
+      enum:
+      - confidential
+      - public
+      example: confidential
+  parameters:
+    tenant_id:
+      name: tenant_id
+      in: path
+      description: A unique identifier for a tenant.
+      required: true
+      schema:
+        type: string
+        example: 000176d94fd7b4d1
+    page_size:
+      name: page_size
+      in: query
+      description: 'Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.
 
         '
-      type: object
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          type: string
-          description: Type of the error detail.
-      required:
-      - type
-    Application:
-      title: Application
-      type: object
-      description: 'An application represents a client application that uses Beyond Identity for authentication. This could be a native app, a single-page application, regular web application, or machine-to-machine application credentials.
+      schema:
+        type: integer
+        format: uint32
+        minimum: 0
+    application_id:
+      name: application_id
+      in: path
+      description: A unique identifier for an application.
+      required: true
+      schema:
+        type: string
+        example: 38833c36-6f47-4992-9329-ea0a00915137
+    realm_id:
+      name: realm_id
+      in: path
+      description: A unique identifier for a realm.
+      required: true
+      schema:
+        type: string
+        example: 19a95130480dfa79
+    page_token:
+      name: page_token
+      in: query
+      description: 'Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.
 
         '
-      properties:
-        id:
-          type: string
-          description: 'A unique identifier for an application. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the realm.
-
-            '
-          readOnly: true
-          example: 38833c36-6f47-4992-9329-ea0a00915137
-        realm_id:
-          type: string
-          description: 'A unique identifier for the application''s realm. This is automatically set on creation. This field is immutable and read-only.
-
-            '
-          readOnly: true
-          example: caf2ff640497591a
-        tenant_id:
-          type: string
-          description: 'A unique identifier for the application''s tenant. This is automatically set on creation. This field is immutable and read-only.
-
-            '
-          readOnly: true
-          example: 00011f1183c67b69
-        resource_server_id:
-          type: string
-          description: 'A unique identifier for the application''s resource server. At present, the only available resource server is for the Beyond Identity Management API. Referencing this resource server from an application will allow that application to grant access to Beyond Identity''s APIs. When not present, this application may provide authentication (identity) but not authorization (access).
-
-            '
-          example: 84db69f5-48a8-4c11-8cda-1bae3a73f07e
-        authenticator_config_id:
-          type: string
-          description: 'A unique identifier for the application''s authenticator configuration. This field is unused for `oidc` and `oauth2` applications when `grant_type=client_credentials`.
-
-            '
-          example: 73731b7f-eb76-4143-9b4b-81a720385f5a
-        display_name:
-          type: string
-          description: 'A human-readable name for the application. This name is used for display purposes.
-
-            '
-          example: Pet Application
-        is_managed:
-          type: boolean
-          description: 'A boolean indicating whether the application is managed by Beyond Identity. Managed applications may not be modified by the user. This is automatically set on creation. This field is immutable and read-only.
-
-            '
-          readOnly: true
-          example: false
-        protocol_config:
-          description: Represents an application protocol configuration.
-          oneOf:
-          - title: OAuth 2.0
-            description: OAuth2 protocol configuration.
-            type: object
-            required:
-            - type
-            properties:
-              type:
-                type: string
-                enum:
-                - oauth2
-              allowed_scopes:
-                type: array
-                items:
-                  type: string
-                  example: pets:read
-                description: 'Scopes to which this application can grant access. If this application references a resource server, this set of scopes must be a subset of the resource server''s available scopes. If this application does not reference a resource server, then this application can only be used for authentication and thereby `scopes` must necessarily be empty.
-
-                  '
-              client_id:
-                type: string
-                description: 'The client ID for this application. This is automatically set on creation. This field is output-only.
-
-                  '
-                readOnly: true
-                example: AYYNcuOSpfqIf33JeegCzDIT
-              client_secret:
-                type: string
-                description: 'The client secret to authenticate as this application; typically, as a Basic Authorization header. This is automatically set on creation. This field is output-only. This field is present only when confidentiality is `confidential`.
-
-                  '
-                readOnly: true
-                example: wWD4mPzdsjms1LPekQSo0v9scOHLWy5wmMtKAR2JNhJPAKXv
-              confidentiality:
-                $ref: '#/components/schemas/Confidentiality'
-              token_endpoint_auth_method:
-                $ref: '#/components/schemas/TokenEndpointAuthMethod'
-              grant_type:
-                $ref: '#/components/schemas/GrantType'
-              redirect_uris:
-                type: array
-                items:
-                  type: string
-                  example: https://auth.mypetapp.com/callback
-                description: 'A list of valid URIs to redirect the resource owner''s user-agent to after completing its interaction with the authorization server. See https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.2 for more information.
-
-                  '
-              token_configuration:
-                $ref: '#/components/schemas/TokenConfiguration'
-              pkce:
-                $ref: '#/components/schemas/PkceConfig'
-              token_format:
-                description: "Allowed access token formats for this application.\ntoken type. Allowable values are:\n- `self_contained`: token in JWT format.\n- `referential`: Encoded token which requires /introspect\n   call in order to retrieve token claims.\n"
-                type: string
-                enum:
-                - self_contained
-                - referential
-                example: self_contained
-                default: self_contained
-          - title: OIDC
-            description: OIDC protocol configuration.
-            type: object
-            required:
-            - type
-            properties:
-              type:
-                type: string
-                enum:
-                - oidc
-              allowed_scopes:
-                type: array
-                items:
-                  type: string
-                  example: pets:read
-                description: 'Scopes to which this application can grant access. If this application references a resource server, this set of scopes must be a subset of the resource server''s available scopes. If this application does not reference a resource server, then this application can only be used for authentication and thereby `scopes` must necessarily be empty. Note that OIDC requests may accept OpenID Connect standard scopes as well as resource server scopes, but the OpenID Connect scopes should not be defined on the application itself. Currently, the only OpenID Connect supported scope is `openid`.
-
-                  '
-              client_id:
-                type: string
-                description: 'The client ID for this application. This is automatically set on creation. This field is output-only.
-
-                  '
-                readOnly: true
-                example: AYYNcuOSpfqIf33JeegCzDIT
-              client_secret:
-                type: string
-                description: 'The client secret to authenticate as this application; typically, as a Basic Authorization header. This is automatically set on creation. This field is output-only. This field is present only when confidentiality is `confidential`.
-
-                  '
-                readOnly: true
-                example: wWD4mPzdsjms1LPekQSo0v9scOHLWy5wmMtKAR2JNhJPAKXv
-              confidentiality:
-                $ref: '#/components/schemas/Confidentiality'
-              token_endpoint_auth_method:
-                $ref: '#/components/schemas/TokenEndpointAuthMethod'
-              grant_type:
-                $ref: '#/components/schemas/GrantType'
-              redirect_uris:
-                type: array
-                items:
-                  type: string
-                  example: https://auth.mypetapp.com/callback
-                description: 'A list of valid URIs to redirect the resource owner''s user-agent to after completing its interaction with the authorization server. See https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.2 for more information.
-
-                  '
-              token_configuration:
-                $ref: '#/components/schemas/TokenConfiguration'
-              pkce:
-                $ref: '#/components/schemas/PkceConfig'
-              token_format:
-                $ref: '#/components/schemas/Application/properties/protocol_config/oneOf/0/properties/token_format'
-          - $ref: '#/components/schemas/SsoConfigPayload/oneOf/4'
-    ListApplicationsResponse:
-      title: List Applications Response
-      description: Response for ListApplications.
-      type: object
-      properties:
-        applications:
-          type: array
-          items:
-            $ref: '#/components/schemas/Application'
-          maxItems: 100
-          description: 'An unordered array of applications corresponding to the request.
-
-            '
-        total_size:
-          type: integer
-          format: uint32
-          description: 'Total number of results returned by the operation. This value may be larger than the number of resources returned, such as when returning a single page where multiple pages are available.
-
-            '
-          example: 1000
-        next_page_token:
-          type: string
-          description: 'Token used to fetch the next set of results. If this field is omitted, there are no subsequent pages.
-
-            '
-      required:
-      - applications
-      - total_size
+      schema:
+        type: string
   securitySchemes:
     BearerAuth:
       type: http

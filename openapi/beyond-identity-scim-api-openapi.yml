@@ -1760,56 +1760,6 @@ paths:
                 Internal Error:
                   $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1scim~1v2~1Users/get/responses/500/content/application~1json/examples/Internal%20Error'
 components:
-  parameters:
-    scim_count:
-      name: count
-      in: query
-      description: 'Specifies the desired maximum number of query results per page. A negative value is treated as 0, which indicates that the response should not contain any resources. Note that the response may include fewer results than the requested count.
-
-        '
-      schema:
-        type: integer
-        format: uint32
-        minimum: 0
-        default: 0
-    scim_start_index:
-      name: startIndex
-      in: query
-      description: The 1-based index of the first query result.
-      schema:
-        type: integer
-        format: uint32
-        minimum: 1
-        default: 1
-    scim_group_id:
-      name: group_id
-      in: path
-      description: ID of the group.
-      required: true
-      schema:
-        type: string
-        minLength: 1
-    scim_user_id:
-      name: user_id
-      in: path
-      description: ID of the user. This corresponds to the identity ID.
-      required: true
-      schema:
-        type: string
-        minLength: 1
-    scim_filter:
-      name: filter
-      in: query
-      description: 'Filter for list methods.
-
-
-        Filters follow the SCIM grammar from
-
-        [RFC 7644 Section 3.4.2.2](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.2).
-
-        '
-      schema:
-        type: string
   schemas:
     SCIMGroup:
       title: Group
@@ -1845,411 +1795,6 @@ components:
           $ref: '#/components/schemas/SCIMUser/properties/meta'
       required:
       - schemas
-    SCIMResourceType:
-      title: ResourceType
-      description: 'A resource type specifies the metadata about a resource type, as defined in [RFC 7643 Section 6](https://www.rfc-editor.org/rfc/rfc7643#section-6).
-
-        '
-      type: object
-      properties:
-        schemas:
-          type: array
-          description: 'The list of schemas used to define the resource type. This only contains the core ResourceType schema ("urn:ietf:params:scim:schemas:core:2.0:ResourceType").
-
-            '
-          items:
-            type: string
-            example: urn:ietf:params:scim:schemas:core:2.0:ResourceType
-        id:
-          type: string
-          description: 'ID of the resource type. This corresponds to the name of the type.
-
-            '
-          minLength: 1
-          readOnly: true
-          example: User
-        name:
-          type: string
-          minLength: 1
-          description: Name of the resource type.
-          readOnly: true
-          example: User
-        description:
-          type: string
-          description: Description of the resource type.
-          readOnly: true
-          example: User Account
-        endpoint:
-          type: string
-          description: The relative base URL of the resource type.
-          readOnly: true
-          example: /Users
-        schema:
-          type: string
-          description: The schema defining the resource type.
-          readOnly: true
-          example: urn:ietf:params:scim:schemas:core:2.0:User
-        schemaExtensions:
-          type: array
-          description: Schema extensions for the resource type.
-          items:
-            type: object
-            properties:
-              required:
-                type: boolean
-                description: 'Indicator specifying whether the extension is required for the resource type. If true, the extension is required.
-
-                  '
-                readOnly: true
-                example: false
-              schema:
-                type: string
-                description: URN of the schema extension.
-                readOnly: true
-                example: urn:scim:schemas:extension:byndid:1.0:Group
-            required:
-            - required
-            - schema
-          readOnly: true
-      required:
-      - schemas
-      - id
-      - name
-      - description
-      - endpoint
-      - schema
-      - schemaExtensions
-    SCIMSchema:
-      title: Schema
-      description: 'Definition of a schema which indicates what attributes are supported. This resource corresponds to [RFC 7643 Section 7](https://www.rfc-editor.org/rfc/rfc7643#section-7).
-
-        '
-      type: object
-      properties:
-        id:
-          type: string
-          description: 'ID of the schema defined as a URN.
-
-            '
-          minLength: 1
-          readOnly: true
-          example: urn:ietf:params:scim:schemas:core:2.0:User
-        name:
-          type: string
-          minLength: 1
-          description: Name of the resource type.
-          readOnly: true
-          example: User
-        description:
-          type: string
-          description: Description of the resource type.
-          readOnly: true
-          example: User resource
-        attributes:
-          type: array
-          description: List of attributes supported for this schema.
-          items:
-            type: object
-            description: The definition of an attribute.
-            properties:
-              name:
-                type: string
-                description: The attribute's name.
-                readOnly: true
-                example: id
-              type:
-                type: string
-                description: The attribute's type.
-                enum:
-                - string
-                - boolean
-                - decimal
-                - integer
-                - dateTime
-                - reference
-                - complex
-                readOnly: true
-                example: string
-              subAttributes:
-                type: array
-                description: 'A list of sub-attributes. This is defined only for complex attributes. Each sub-attribute is defined with the same schema as an attribute.
-
-                  '
-                items:
-                  type: object
-                readOnly: true
-              multiValued:
-                type: boolean
-                description: Indicator for the attribute's plurality.
-                readOnly: true
-                example: true
-              description:
-                type: string
-                description: The attribute's human-readable description.
-                readOnly: true
-                example: The display name of the user.
-              required:
-                type: boolean
-                description: Indicator for whether the attribute is required.
-                readOnly: true
-                example: true
-              caseExact:
-                type: boolean
-                description: 'Indicator for whether the attribute is case-sensitive. This only applies for string attributes.
-
-                  '
-                readOnly: true
-                example: true
-              mutability:
-                type: string
-                description: Definition of the attribute's mutability.
-                enum:
-                - readOnly
-                - readWrite
-                - immutable
-                - writeOnly
-                readOnly: true
-                example: readOnly
-              returned:
-                type: string
-                description: Definition of when the attribute is returned.
-                enum:
-                - always
-                - never
-                - default
-                - request
-                readOnly: true
-                example: default
-              uniqueness:
-                type: string
-                description: Definition of the attribute's uniqueness.
-                enum:
-                - none
-                - server
-                - global
-                readOnly: true
-                example: none
-              referenceTypes:
-                type: array
-                description: 'The list of types that may be referenced by this attribute. This only applies to attributes of type "reference".
-
-                  '
-                items:
-                  type: string
-                  example: User
-                readOnly: true
-            required:
-            - name
-            - type
-            - multiValued
-            - description
-            - required
-            - mutability
-            - returned
-          readOnly: true
-      required:
-      - id
-      - name
-      - description
-      - attributes
-    SCIMUser:
-      title: User
-      description: 'A user represents a human entity as defined by [RFC 7643 Section 4.1](https://www.rfc-editor.org/rfc/rfc7643#section-4.1). A user cooresponds to the identity resource in Beyond Identity.
-
-        '
-      type: object
-      properties:
-        schemas:
-          type: array
-          description: 'The list of schemas used to define the user. This must contain only the core User schema ("urn:ietf:params:scim:schemas:core:2.0:User").
-
-            '
-          items:
-            type: string
-            example: urn:ietf:params:scim:schemas:core:2.0:User
-        id:
-          type: string
-          description: 'The unique ID of the user. This is automatically generated on creation. This field is immutable and output-only.
-
-            '
-          minLength: 1
-          readOnly: true
-          example: ed9fcce6-ec82-458e-ae58-e2d975cfc32d
-        externalId:
-          type: string
-          description: The provisioning client's unique identifier for the resource.
-          example: external-id-abcdef
-        userName:
-          type: string
-          minLength: 1
-          description: 'The unique username of the user.
-
-            '
-          example: test_user
-        displayName:
-          type: string
-          minLength: 1
-          description: 'Display name of the User. This name is used for display purposes.
-
-            '
-          example: Test User
-        active:
-          type: boolean
-          description: 'Indicator for the user''s administrative status. If true, the user has administrative capabilities.
-
-            '
-          example: true
-        emails:
-          type: array
-          description: The list containing the user's emails.
-          items:
-            type: object
-            description: Definition of an email.
-            properties:
-              primary:
-                type: boolean
-                description: 'Indicator for the primary or preferred email address.
-
-
-                  Only the primary email address is included on the response. All
-
-                  other provided email addresses will be ignored.
-
-                  '
-                example: true
-              value:
-                type: string
-                description: The email address.
-                example: test@test.com
-        name:
-          type: object
-          description: Definition of the user's name.
-          properties:
-            givenName:
-              type: string
-              description: 'The given name of the user, or first name in most Western languages.
-
-                '
-              example: Barbara
-            familyName:
-              type: string
-              description: 'The family name of the user, or last name in most Western languages.
-
-                '
-              example: Jensen
-        urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:
-          title: EnterpriseUserExtension
-          description: 'Defines attributes commonly used in representing users that belong to, or act on behalf of, a business or enterprise. The enterprise User extension is identified using the following schema URI: "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User".
-
-            '
-          type: object
-          properties:
-            employeeNumber:
-              type: string
-              description: 'A string identifier, typically numeric or alphanumeric, assigned to a person, typically based on order of hire or association with an organization as defined in [RFC 7643](https://datatracker.ietf.org/doc/html/rfc7643#section-4.3).
-
-                '
-            costCenter:
-              type: string
-              description: 'Identifies the name of a cost center as defined in [RFC 7643](https://datatracker.ietf.org/doc/html/rfc7643#section-4.3).
-
-                '
-            organization:
-              type: string
-              description: 'Identifies the name of an organization as defined in [RFC 7643](https://datatracker.ietf.org/doc/html/rfc7643#section-4.3).
-
-                '
-            department:
-              type: string
-              description: 'Identifies the name of a department as defined in [RFC 7643](https://datatracker.ietf.org/doc/html/rfc7643#section-4.3).
-
-                '
-            division:
-              type: string
-              description: 'Identifies the name of a division as defined in [RFC 7643](https://datatracker.ietf.org/doc/html/rfc7643#section-4.3).
-
-                '
-            manager:
-              type: object
-              properties:
-                value:
-                  type: string
-                  description: 'The "id" of the SCIM resource representing the user''s manager as defined in [RFC 7643](https://datatracker.ietf.org/doc/html/rfc7643#section-4.3).
-
-                    '
-                displayName:
-                  type: string
-                  description: 'The displayName of the user''s manager. This attribute is OPTIONAL, and mutability is "readOnly" as defined in [RFC 7643](https://datatracker.ietf.org/doc/html/rfc7643#section-4.3).
-
-                    '
-        meta:
-          title: Meta
-          description: 'Resource metadata as defined in [RFC 7643 Section 3.1](https://www.rfc-editor.org/rfc/rfc7643#section-3.1). This attribute is only populated on responses and is ignored on requests.
-
-            '
-          type: object
-          properties:
-            resourceType:
-              type: string
-              description: The name of the resource type of the resource.
-              example: Group
-            created:
-              type: string
-              format: date-time
-              description: Timestamp of when the resource was created.
-              readOnly: true
-              example: '2022-04-07T07:23:33Z'
-            lastModified:
-              type: string
-              format: date-time
-              description: Timestamp of when the resource was last updated.
-              readOnly: true
-              example: '2023-03-30T07:00:14Z'
-            location:
-              type: string
-              description: The URI of the resource being returned.
-              readOnly: true
-              example: Groups/ed9fcce6-ec82-458e-ae58-e2d975cfc32d
-            version:
-              type: string
-              description: 'The version of the resource being returned. This is always "W/0".
-
-                '
-              readOnly: true
-              example: W/0
-          required:
-          - resourceType
-          - created
-          - lastModified
-          - location
-          - version
-      required:
-      - schemas
-    SCIMError:
-      type: object
-      properties:
-        schemas:
-          type: array
-          description: 'The list of schemas used to define the error. This only contains the Error schema ("urn:ietf:params:scim:api:messages:2.0:Error").
-
-            '
-          items:
-            type: string
-            example: urn:ietf:params:scim:api:messages:2.0:Error
-        status:
-          type: string
-          description: The HTTP status code of the error expressed as a JSON string.
-        scimType:
-          type: string
-          description: 'A SCIM detail error keyword corresponding to [RFC 7644 Section 3.12](https://datatracker.ietf.org/doc/html/rfc7644#section-3.12).
-
-            '
-        detail:
-          type: string
-          description: A detailed human-readable message.
-      required:
-      - schemas
-      - status
     SCIMServiceProviderConfig:
       title: ServiceProviderConfig
       description: 'The service provider configuration, as defined in [RFC 7643 Section 5](https://www.rfc-editor.org/rfc/rfc7643#section-5).
@@ -2439,6 +1984,461 @@ components:
       - sort
       - etag
       - authenticationSchemes
+    SCIMUser:
+      title: User
+      description: 'A user represents a human entity as defined by [RFC 7643 Section 4.1](https://www.rfc-editor.org/rfc/rfc7643#section-4.1). A user cooresponds to the identity resource in Beyond Identity.
+
+        '
+      type: object
+      properties:
+        schemas:
+          type: array
+          description: 'The list of schemas used to define the user. This must contain only the core User schema ("urn:ietf:params:scim:schemas:core:2.0:User").
+
+            '
+          items:
+            type: string
+            example: urn:ietf:params:scim:schemas:core:2.0:User
+        id:
+          type: string
+          description: 'The unique ID of the user. This is automatically generated on creation. This field is immutable and output-only.
+
+            '
+          minLength: 1
+          readOnly: true
+          example: ed9fcce6-ec82-458e-ae58-e2d975cfc32d
+        externalId:
+          type: string
+          description: The provisioning client's unique identifier for the resource.
+          example: external-id-abcdef
+        userName:
+          type: string
+          minLength: 1
+          description: 'The unique username of the user.
+
+            '
+          example: test_user
+        displayName:
+          type: string
+          minLength: 1
+          description: 'Display name of the User. This name is used for display purposes.
+
+            '
+          example: Test User
+        active:
+          type: boolean
+          description: 'Indicator for the user''s administrative status. If true, the user has administrative capabilities.
+
+            '
+          example: true
+        emails:
+          type: array
+          description: The list containing the user's emails.
+          items:
+            type: object
+            description: Definition of an email.
+            properties:
+              primary:
+                type: boolean
+                description: 'Indicator for the primary or preferred email address.
+
+
+                  Only the primary email address is included on the response. All
+
+                  other provided email addresses will be ignored.
+
+                  '
+                example: true
+              value:
+                type: string
+                description: The email address.
+                example: test@test.com
+        name:
+          type: object
+          description: Definition of the user's name.
+          properties:
+            givenName:
+              type: string
+              description: 'The given name of the user, or first name in most Western languages.
+
+                '
+              example: Barbara
+            familyName:
+              type: string
+              description: 'The family name of the user, or last name in most Western languages.
+
+                '
+              example: Jensen
+        urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:
+          title: EnterpriseUserExtension
+          description: 'Defines attributes commonly used in representing users that belong to, or act on behalf of, a business or enterprise. The enterprise User extension is identified using the following schema URI: "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User".
+
+            '
+          type: object
+          properties:
+            employeeNumber:
+              type: string
+              description: 'A string identifier, typically numeric or alphanumeric, assigned to a person, typically based on order of hire or association with an organization as defined in [RFC 7643](https://datatracker.ietf.org/doc/html/rfc7643#section-4.3).
+
+                '
+            costCenter:
+              type: string
+              description: 'Identifies the name of a cost center as defined in [RFC 7643](https://datatracker.ietf.org/doc/html/rfc7643#section-4.3).
+
+                '
+            organization:
+              type: string
+              description: 'Identifies the name of an organization as defined in [RFC 7643](https://datatracker.ietf.org/doc/html/rfc7643#section-4.3).
+
+                '
+            department:
+              type: string
+              description: 'Identifies the name of a department as defined in [RFC 7643](https://datatracker.ietf.org/doc/html/rfc7643#section-4.3).
+
+                '
+            division:
+              type: string
+              description: 'Identifies the name of a division as defined in [RFC 7643](https://datatracker.ietf.org/doc/html/rfc7643#section-4.3).
+
+                '
+            manager:
+              type: object
+              properties:
+                value:
+                  type: string
+                  description: 'The "id" of the SCIM resource representing the user''s manager as defined in [RFC 7643](https://datatracker.ietf.org/doc/html/rfc7643#section-4.3).
+
+                    '
+                displayName:
+                  type: string
+                  description: 'The displayName of the user''s manager. This attribute is OPTIONAL, and mutability is "readOnly" as defined in [RFC 7643](https://datatracker.ietf.org/doc/html/rfc7643#section-4.3).
+
+                    '
+        meta:
+          title: Meta
+          description: 'Resource metadata as defined in [RFC 7643 Section 3.1](https://www.rfc-editor.org/rfc/rfc7643#section-3.1). This attribute is only populated on responses and is ignored on requests.
+
+            '
+          type: object
+          properties:
+            resourceType:
+              type: string
+              description: The name of the resource type of the resource.
+              example: Group
+            created:
+              type: string
+              format: date-time
+              description: Timestamp of when the resource was created.
+              readOnly: true
+              example: '2022-04-07T07:23:33Z'
+            lastModified:
+              type: string
+              format: date-time
+              description: Timestamp of when the resource was last updated.
+              readOnly: true
+              example: '2023-03-30T07:00:14Z'
+            location:
+              type: string
+              description: The URI of the resource being returned.
+              readOnly: true
+              example: Groups/ed9fcce6-ec82-458e-ae58-e2d975cfc32d
+            version:
+              type: string
+              description: 'The version of the resource being returned. This is always "W/0".
+
+                '
+              readOnly: true
+              example: W/0
+          required:
+          - resourceType
+          - created
+          - lastModified
+          - location
+          - version
+      required:
+      - schemas
+    SCIMSchema:
+      title: Schema
+      description: 'Definition of a schema which indicates what attributes are supported. This resource corresponds to [RFC 7643 Section 7](https://www.rfc-editor.org/rfc/rfc7643#section-7).
+
+        '
+      type: object
+      properties:
+        id:
+          type: string
+          description: 'ID of the schema defined as a URN.
+
+            '
+          minLength: 1
+          readOnly: true
+          example: urn:ietf:params:scim:schemas:core:2.0:User
+        name:
+          type: string
+          minLength: 1
+          description: Name of the resource type.
+          readOnly: true
+          example: User
+        description:
+          type: string
+          description: Description of the resource type.
+          readOnly: true
+          example: User resource
+        attributes:
+          type: array
+          description: List of attributes supported for this schema.
+          items:
+            type: object
+            description: The definition of an attribute.
+            properties:
+              name:
+                type: string
+                description: The attribute's name.
+                readOnly: true
+                example: id
+              type:
+                type: string
+                description: The attribute's type.
+                enum:
+                - string
+                - boolean
+                - decimal
+                - integer
+                - dateTime
+                - reference
+                - complex
+                readOnly: true
+                example: string
+              subAttributes:
+                type: array
+                description: 'A list of sub-attributes. This is defined only for complex attributes. Each sub-attribute is defined with the same schema as an attribute.
+
+                  '
+                items:
+                  type: object
+                readOnly: true
+              multiValued:
+                type: boolean
+                description: Indicator for the attribute's plurality.
+                readOnly: true
+                example: true
+              description:
+                type: string
+                description: The attribute's human-readable description.
+                readOnly: true
+                example: The display name of the user.
+              required:
+                type: boolean
+                description: Indicator for whether the attribute is required.
+                readOnly: true
+                example: true
+              caseExact:
+                type: boolean
+                description: 'Indicator for whether the attribute is case-sensitive. This only applies for string attributes.
+
+                  '
+                readOnly: true
+                example: true
+              mutability:
+                type: string
+                description: Definition of the attribute's mutability.
+                enum:
+                - readOnly
+                - readWrite
+                - immutable
+                - writeOnly
+                readOnly: true
+                example: readOnly
+              returned:
+                type: string
+                description: Definition of when the attribute is returned.
+                enum:
+                - always
+                - never
+                - default
+                - request
+                readOnly: true
+                example: default
+              uniqueness:
+                type: string
+                description: Definition of the attribute's uniqueness.
+                enum:
+                - none
+                - server
+                - global
+                readOnly: true
+                example: none
+              referenceTypes:
+                type: array
+                description: 'The list of types that may be referenced by this attribute. This only applies to attributes of type "reference".
+
+                  '
+                items:
+                  type: string
+                  example: User
+                readOnly: true
+            required:
+            - name
+            - type
+            - multiValued
+            - description
+            - required
+            - mutability
+            - returned
+          readOnly: true
+      required:
+      - id
+      - name
+      - description
+      - attributes
+    SCIMResourceType:
+      title: ResourceType
+      description: 'A resource type specifies the metadata about a resource type, as defined in [RFC 7643 Section 6](https://www.rfc-editor.org/rfc/rfc7643#section-6).
+
+        '
+      type: object
+      properties:
+        schemas:
+          type: array
+          description: 'The list of schemas used to define the resource type. This only contains the core ResourceType schema ("urn:ietf:params:scim:schemas:core:2.0:ResourceType").
+
+            '
+          items:
+            type: string
+            example: urn:ietf:params:scim:schemas:core:2.0:ResourceType
+        id:
+          type: string
+          description: 'ID of the resource type. This corresponds to the name of the type.
+
+            '
+          minLength: 1
+          readOnly: true
+          example: User
+        name:
+          type: string
+          minLength: 1
+          description: Name of the resource type.
+          readOnly: true
+          example: User
+        description:
+          type: string
+          description: Description of the resource type.
+          readOnly: true
+          example: User Account
+        endpoint:
+          type: string
+          description: The relative base URL of the resource type.
+          readOnly: true
+          example: /Users
+        schema:
+          type: string
+          description: The schema defining the resource type.
+          readOnly: true
+          example: urn:ietf:params:scim:schemas:core:2.0:User
+        schemaExtensions:
+          type: array
+          description: Schema extensions for the resource type.
+          items:
+            type: object
+            properties:
+              required:
+                type: boolean
+                description: 'Indicator specifying whether the extension is required for the resource type. If true, the extension is required.
+
+                  '
+                readOnly: true
+                example: false
+              schema:
+                type: string
+                description: URN of the schema extension.
+                readOnly: true
+                example: urn:scim:schemas:extension:byndid:1.0:Group
+            required:
+            - required
+            - schema
+          readOnly: true
+      required:
+      - schemas
+      - id
+      - name
+      - description
+      - endpoint
+      - schema
+      - schemaExtensions
+    SCIMError:
+      type: object
+      properties:
+        schemas:
+          type: array
+          description: 'The list of schemas used to define the error. This only contains the Error schema ("urn:ietf:params:scim:api:messages:2.0:Error").
+
+            '
+          items:
+            type: string
+            example: urn:ietf:params:scim:api:messages:2.0:Error
+        status:
+          type: string
+          description: The HTTP status code of the error expressed as a JSON string.
+        scimType:
+          type: string
+          description: 'A SCIM detail error keyword corresponding to [RFC 7644 Section 3.12](https://datatracker.ietf.org/doc/html/rfc7644#section-3.12).
+
+            '
+        detail:
+          type: string
+          description: A detailed human-readable message.
+      required:
+      - schemas
+      - status
+  parameters:
+    scim_group_id:
+      name: group_id
+      in: path
+      description: ID of the group.
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    scim_user_id:
+      name: user_id
+      in: path
+      description: ID of the user. This corresponds to the identity ID.
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    scim_start_index:
+      name: startIndex
+      in: query
+      description: The 1-based index of the first query result.
+      schema:
+        type: integer
+        format: uint32
+        minimum: 1
+        default: 1
+    scim_filter:
+      name: filter
+      in: query
+      description: 'Filter for list methods.
+
+
+        Filters follow the SCIM grammar from
+
+        [RFC 7644 Section 3.4.2.2](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.2).
+
+        '
+      schema:
+        type: string
+    scim_count:
+      name: count
+      in: query
+      description: 'Specifies the desired maximum number of query results per page. A negative value is treated as 0, which indicates that the response should not contain any resources. Note that the response may include fewer results than the requested count.
+
+        '
+      schema:
+        type: integer
+        format: uint32
+        minimum: 0
+        default: 0
   securitySchemes:
     BearerAuth:
       type: http

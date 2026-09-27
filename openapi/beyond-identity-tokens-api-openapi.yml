@@ -262,53 +262,21 @@ paths:
                 Internal Error:
                   $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
 components:
-  parameters:
-    realm_id:
-      name: realm_id
-      in: path
-      description: A unique identifier for a realm.
-      required: true
-      schema:
-        type: string
-        example: 19a95130480dfa79
-    application_id:
-      name: application_id
-      in: path
-      description: A unique identifier for an application.
-      required: true
-      schema:
-        type: string
-        example: 38833c36-6f47-4992-9329-ea0a00915137
-    token_id:
-      name: token_id
-      in: path
-      description: A unique identifier for a token. For JWS tokens, this corresponds to the value of the `jti` token claim.
-      required: true
-      schema:
-        type: string
-    tenant_id:
-      name: tenant_id
-      in: path
-      description: A unique identifier for a tenant.
-      required: true
-      schema:
-        type: string
-        example: 000176d94fd7b4d1
-    principal_type:
-      name: principal_type
-      in: query
-      description: "Type of the principal. Allowable values are:\n  - `application`\n  - `identity`\n"
-      required: false
-      schema:
-        type: string
-    principal_id:
-      name: principal_id
-      in: query
-      description: A unique identifier for a principal. This might be an application ID or an identity ID depending on the type of principal.
-      required: false
-      schema:
-        type: string
   schemas:
+    ErrorDetail:
+      title: Error Detail
+      description: 'Additional details for errors designed to support client applications.
+
+        '
+      type: object
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          type: string
+          description: Type of the error detail.
+      required:
+      - type
     Error:
       type: object
       properties:
@@ -329,20 +297,52 @@ components:
       required:
       - code
       - message
-    ErrorDetail:
-      title: Error Detail
-      description: 'Additional details for errors designed to support client applications.
-
-        '
-      type: object
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          type: string
-          description: Type of the error detail.
-      required:
-      - type
+  parameters:
+    tenant_id:
+      name: tenant_id
+      in: path
+      description: A unique identifier for a tenant.
+      required: true
+      schema:
+        type: string
+        example: 000176d94fd7b4d1
+    principal_id:
+      name: principal_id
+      in: query
+      description: A unique identifier for a principal. This might be an application ID or an identity ID depending on the type of principal.
+      required: false
+      schema:
+        type: string
+    token_id:
+      name: token_id
+      in: path
+      description: A unique identifier for a token. For JWS tokens, this corresponds to the value of the `jti` token claim.
+      required: true
+      schema:
+        type: string
+    application_id:
+      name: application_id
+      in: path
+      description: A unique identifier for an application.
+      required: true
+      schema:
+        type: string
+        example: 38833c36-6f47-4992-9329-ea0a00915137
+    realm_id:
+      name: realm_id
+      in: path
+      description: A unique identifier for a realm.
+      required: true
+      schema:
+        type: string
+        example: 19a95130480dfa79
+    principal_type:
+      name: principal_type
+      in: query
+      description: "Type of the principal. Allowable values are:\n  - `application`\n  - `identity`\n"
+      required: false
+      schema:
+        type: string
   securitySchemes:
     BearerAuth:
       type: http

@@ -372,6 +372,274 @@ paths:
               $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
 components:
   schemas:
+    ErrorDetail:
+      title: Error Detail
+      description: 'Additional details for errors designed to support client applications.
+
+        '
+      type: object
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          type: string
+          description: Type of the error detail.
+      required:
+      - type
+    PkceConfig:
+      type: string
+      enum:
+      - disabled
+      - plain
+      - s256
+      description: "PKCE code challenge methods supported for applications, as defined by\n[RFC-7636](https://datatracker.ietf.org/doc/html/rfc7636). Allowable values are:\n  - `disabled` : PKCE is disabled for this application. This is the default state if\n    the `pkce` field is left blank. Please note that public OIDC and OAuth2 configured\n    applications MUST enable PKCE support. Confidential clients can leave PKCE disabled\n    if they choose.\n  - `plain` : PKCE is enabled for this application. The server will correlate the `code_challenge` and\n    `code_verifier` between the `authorize` and `token` requests. In this configuration, those fields are\n    required to be identical. This is the lower security option for PKCE support and should only be used\n    by legacy clients, or clients that don't support `s256`.\n  - `s256` : PKCE is enabled for this application, and the server will correlate the `code_challenge` and\n    `code_verifier` between the `authorize` and `token` requests. In this configuration, those fields are\n    required to equate as follows: `code_challenge` = `base64url(sha256(ascii(code_verifier)))`. This is\n    the higher security option and should always be preferred if it is supported by the client.\n"
+      example: s256
+    IdentityProviderResponse:
+      description: Represents an identity provider.
+      type: object
+      required:
+      - id
+      - tenant_id
+      - realm_id
+      - protocol_config
+      - display_name
+      properties:
+        id:
+          description: 'A unique identifier identifying an identity provider within a realm. This is
+
+            automatically set on creation. This field is immutable and read-only.
+
+            '
+          type: string
+          readOnly: true
+        tenant_id:
+          type: string
+          description: 'A unique identifier for the identity provider''s tenant. This is automatically
+
+            set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 0001f1f460b1ace6
+        realm_id:
+          type: string
+          description: 'A unique identifier for the identity provider''s realm. This is automatically
+
+            set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 8f5bec58229e6f29
+        display_name:
+          type: string
+          description: 'The human-readable name associated with the identity provider.
+
+            '
+        protocol_config:
+          $ref: '#/components/schemas/IdentityProviderProtocolConfigResponse'
+    IdentityProviderProtocolConfig:
+      description: 'Represents the protocol configuration that is used by the identity
+
+        provider.
+
+        '
+      oneOf:
+      - $ref: '#/components/schemas/IdentityProviderProtocolConfigOidcIdp'
+    IdentityProviderUpdateProtocolConfig:
+      description: 'Represents the protocol configuration that is used by the identity
+
+        provider.
+
+        '
+      oneOf:
+      - $ref: '#/components/schemas/IdentityProviderUpdateProtocolConfigOidcIdp'
+      discriminator:
+        propertyName: type
+    IdentityProviderProtocolConfigOidcIdp:
+      description: 'OIDC protocol configuration for connecting to an identity provider, and
+
+        validating the token we received.
+
+        '
+      type: object
+      required:
+      - client_id
+      - client_secret
+      - token_scopes
+      - identity_attribute
+      - pkce
+      - jwks_url
+      - token_url
+      - authorize_url
+      - identifying_claim_name
+      - type
+      properties:
+        type:
+          type: string
+          enum:
+          - oidc_idp
+        client_id:
+          description: 'The OIDC client id. This value is from the identity provider.
+
+            '
+          type: string
+        client_secret:
+          description: 'The OIDC client secret. This value is from the identity provider.
+
+            '
+          type: string
+        token_scopes:
+          description: 'The scopes which to assign to the generated Access token. Scopes will be checked against the identity before validating.
+
+            '
+          type: array
+          items:
+            type: string
+        identity_attribute:
+          $ref: '#/components/schemas/SubjectField'
+        pkce:
+          $ref: '#/components/schemas/PkceConfig'
+        jwks_url:
+          description: 'The URL that points to the ".well-known/jwks.json" of the identity
+
+            provider. Must be a URL.
+
+            '
+          type: string
+        token_url:
+          description: 'The URL that points to the "/token" endpoint of the identity
+
+            provider. Must be a URL.
+
+            '
+          type: string
+        authorize_url:
+          description: 'The "/authorize" URL to authenticate against inside of the identity
+
+            provider. Must be a URL.
+
+            '
+          type: string
+        identifying_claim_name:
+          description: 'The name of the claim that specifies the user''s identity inside of a
+
+            token.
+
+            '
+          type: string
+    IdentityProviderListResponse:
+      description: Represents a list of identity providers as a response body.
+      type: object
+      required:
+      - identity_providers
+      - total_size
+      properties:
+        identity_providers:
+          description: The identity providers that are in the list.
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityProviderResponse'
+        total_size:
+          description: The total number of identity providers contained by the Realm.
+          type: integer
+          format: uint
+          minimum: 0
+        next_page_token:
+          description: The value to be passed as the page_token parameter to retrieve the next page.
+          type:
+          - string
+          - 'null'
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
+
+            '
+        message:
+          type: string
+          description: 'Human-readable message describing the error.
+
+            '
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      required:
+      - code
+      - message
+    SubjectField:
+      description: 'Defines which field should be used to populate the subject field of an id token.
+
+        - `id` - The user ID is used.
+
+        - `email` - The user email is used.
+
+        - `username` - The username is used.
+
+        '
+      type: string
+      enum:
+      - id
+      - email
+      - username
+      - external_id
+    IdentityProviderUpdate:
+      description: Represents an identity provider.
+      type: object
+      properties:
+        identity_provider:
+          type: object
+          description: The identity provider object.
+          properties:
+            id:
+              description: 'A unique identifier identifying an identity provider. This is automatically
+
+                set on creation. This field is immutable and read-only.
+
+                '
+              type: string
+              readOnly: true
+            tenant_id:
+              type: string
+              description: 'A unique identifier for the identity provider''s tenant. This is automatically
+
+                set on creation. This field is immutable and read-only.
+
+                '
+              readOnly: true
+              example: 0001f1f460b1ace6
+            realm_id:
+              type: string
+              description: 'A unique identifier for the identity provider''s realm. This is automatically
+
+                set on creation. This field is immutable and read-only.
+
+                '
+              readOnly: true
+              example: 8f5bec58229e6f29
+            display_name:
+              type: string
+              description: 'The human-readable name associated with the identity provider.
+
+                '
+            protocol_config:
+              description: 'The kind of protocol we should use to communicate with the identity
+
+                provider.
+
+                '
+              allOf:
+              - $ref: '#/components/schemas/IdentityProviderUpdateProtocolConfig'
+    IdentityProviderProtocolConfigResponse:
+      description: 'Represents the protocol configuration that is used by the identity
+
+        provider.
+
+        '
+      oneOf:
+      - $ref: '#/components/schemas/IdentityProviderProtocolConfigOidcIdpResponse'
     IdentityProviderProtocolConfigOidcIdpResponse:
       description: 'OIDC protocol configuration for connecting to an identity provider, and
 
@@ -454,258 +722,6 @@ components:
 
             '
           type: string
-    IdentityProviderResponse:
-      description: Represents an identity provider.
-      type: object
-      required:
-      - id
-      - tenant_id
-      - realm_id
-      - protocol_config
-      - display_name
-      properties:
-        id:
-          description: 'A unique identifier identifying an identity provider within a realm. This is
-
-            automatically set on creation. This field is immutable and read-only.
-
-            '
-          type: string
-          readOnly: true
-        tenant_id:
-          type: string
-          description: 'A unique identifier for the identity provider''s tenant. This is automatically
-
-            set on creation. This field is immutable and read-only.
-
-            '
-          readOnly: true
-          example: 0001f1f460b1ace6
-        realm_id:
-          type: string
-          description: 'A unique identifier for the identity provider''s realm. This is automatically
-
-            set on creation. This field is immutable and read-only.
-
-            '
-          readOnly: true
-          example: 8f5bec58229e6f29
-        display_name:
-          type: string
-          description: 'The human-readable name associated with the identity provider.
-
-            '
-        protocol_config:
-          $ref: '#/components/schemas/IdentityProviderProtocolConfigResponse'
-    IdentityProviderUpdateProtocolConfig:
-      description: 'Represents the protocol configuration that is used by the identity
-
-        provider.
-
-        '
-      oneOf:
-      - $ref: '#/components/schemas/IdentityProviderUpdateProtocolConfigOidcIdp'
-      discriminator:
-        propertyName: type
-    Error:
-      type: object
-      properties:
-        code:
-          type: string
-          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
-
-            '
-        message:
-          type: string
-          description: 'Human-readable message describing the error.
-
-            '
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-      required:
-      - code
-      - message
-    PkceConfig:
-      type: string
-      enum:
-      - disabled
-      - plain
-      - s256
-      description: "PKCE code challenge methods supported for applications, as defined by\n[RFC-7636](https://datatracker.ietf.org/doc/html/rfc7636). Allowable values are:\n  - `disabled` : PKCE is disabled for this application. This is the default state if\n    the `pkce` field is left blank. Please note that public OIDC and OAuth2 configured\n    applications MUST enable PKCE support. Confidential clients can leave PKCE disabled\n    if they choose.\n  - `plain` : PKCE is enabled for this application. The server will correlate the `code_challenge` and\n    `code_verifier` between the `authorize` and `token` requests. In this configuration, those fields are\n    required to be identical. This is the lower security option for PKCE support and should only be used\n    by legacy clients, or clients that don't support `s256`.\n  - `s256` : PKCE is enabled for this application, and the server will correlate the `code_challenge` and\n    `code_verifier` between the `authorize` and `token` requests. In this configuration, those fields are\n    required to equate as follows: `code_challenge` = `base64url(sha256(ascii(code_verifier)))`. This is\n    the higher security option and should always be preferred if it is supported by the client.\n"
-      example: s256
-    IdentityProviderListResponse:
-      description: Represents a list of identity providers as a response body.
-      type: object
-      required:
-      - identity_providers
-      - total_size
-      properties:
-        identity_providers:
-          description: The identity providers that are in the list.
-          type: array
-          items:
-            $ref: '#/components/schemas/IdentityProviderResponse'
-        total_size:
-          description: The total number of identity providers contained by the Realm.
-          type: integer
-          format: uint
-          minimum: 0
-        next_page_token:
-          description: The value to be passed as the page_token parameter to retrieve the next page.
-          type:
-          - string
-          - 'null'
-    IdentityProviderProtocolConfig:
-      description: 'Represents the protocol configuration that is used by the identity
-
-        provider.
-
-        '
-      oneOf:
-      - $ref: '#/components/schemas/IdentityProviderProtocolConfigOidcIdp'
-    IdentityProviderUpdate:
-      description: Represents an identity provider.
-      type: object
-      properties:
-        identity_provider:
-          type: object
-          description: The identity provider object.
-          properties:
-            id:
-              description: 'A unique identifier identifying an identity provider. This is automatically
-
-                set on creation. This field is immutable and read-only.
-
-                '
-              type: string
-              readOnly: true
-            tenant_id:
-              type: string
-              description: 'A unique identifier for the identity provider''s tenant. This is automatically
-
-                set on creation. This field is immutable and read-only.
-
-                '
-              readOnly: true
-              example: 0001f1f460b1ace6
-            realm_id:
-              type: string
-              description: 'A unique identifier for the identity provider''s realm. This is automatically
-
-                set on creation. This field is immutable and read-only.
-
-                '
-              readOnly: true
-              example: 8f5bec58229e6f29
-            display_name:
-              type: string
-              description: 'The human-readable name associated with the identity provider.
-
-                '
-            protocol_config:
-              description: 'The kind of protocol we should use to communicate with the identity
-
-                provider.
-
-                '
-              allOf:
-              - $ref: '#/components/schemas/IdentityProviderUpdateProtocolConfig'
-    IdentityProviderProtocolConfigResponse:
-      description: 'Represents the protocol configuration that is used by the identity
-
-        provider.
-
-        '
-      oneOf:
-      - $ref: '#/components/schemas/IdentityProviderProtocolConfigOidcIdpResponse'
-    ErrorDetail:
-      title: Error Detail
-      description: 'Additional details for errors designed to support client applications.
-
-        '
-      type: object
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          type: string
-          description: Type of the error detail.
-      required:
-      - type
-    IdentityProviderProtocolConfigOidcIdp:
-      description: 'OIDC protocol configuration for connecting to an identity provider, and
-
-        validating the token we received.
-
-        '
-      type: object
-      required:
-      - client_id
-      - client_secret
-      - token_scopes
-      - identity_attribute
-      - pkce
-      - jwks_url
-      - token_url
-      - authorize_url
-      - identifying_claim_name
-      - type
-      properties:
-        type:
-          type: string
-          enum:
-          - oidc_idp
-        client_id:
-          description: 'The OIDC client id. This value is from the identity provider.
-
-            '
-          type: string
-        client_secret:
-          description: 'The OIDC client secret. This value is from the identity provider.
-
-            '
-          type: string
-        token_scopes:
-          description: 'The scopes which to assign to the generated Access token. Scopes will be checked against the identity before validating.
-
-            '
-          type: array
-          items:
-            type: string
-        identity_attribute:
-          $ref: '#/components/schemas/SubjectField'
-        pkce:
-          $ref: '#/components/schemas/PkceConfig'
-        jwks_url:
-          description: 'The URL that points to the ".well-known/jwks.json" of the identity
-
-            provider. Must be a URL.
-
-            '
-          type: string
-        token_url:
-          description: 'The URL that points to the "/token" endpoint of the identity
-
-            provider. Must be a URL.
-
-            '
-          type: string
-        authorize_url:
-          description: 'The "/authorize" URL to authenticate against inside of the identity
-
-            provider. Must be a URL.
-
-            '
-          type: string
-        identifying_claim_name:
-          description: 'The name of the claim that specifies the user''s identity inside of a
-
-            token.
-
-            '
-          type: string
     IdentityProviderUpdateProtocolConfigOidcIdp:
       description: 'OIDC protocol configuration for connecting to an identity provider, and
 
@@ -769,23 +785,22 @@ components:
 
             '
           type: string
-    SubjectField:
-      description: 'Defines which field should be used to populate the subject field of an id token.
-
-        - `id` - The user ID is used.
-
-        - `email` - The user email is used.
-
-        - `username` - The username is used.
+  parameters:
+    page_token:
+      name: page_token
+      in: query
+      description: 'Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.
 
         '
-      type: string
-      enum:
-      - id
-      - email
-      - username
-      - external_id
-  parameters:
+      schema:
+        type: string
+    correlation_id:
+      name: x-correlation_id
+      description: Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.
+      in: header
+      required: true
+      schema:
+        type: string
     page_size:
       name: page_size
       in: query
@@ -796,21 +811,6 @@ components:
         type: integer
         format: uint32
         minimum: 0
-    correlation_id:
-      name: x-correlation_id
-      description: Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.
-      in: header
-      required: true
-      schema:
-        type: string
-    page_token:
-      name: page_token
-      in: query
-      description: 'Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.
-
-        '
-      schema:
-        type: string
   securitySchemes:
     BearerAuth:
       type: http
