@@ -825,68 +825,76 @@ paths:
                 Internal Error:
                   $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
 components:
-  schemas:
-    Group:
-      title: Group
-      type: object
-      description: 'A group is a logical collection of identities. Groups are commonly used as a predicate in a policy rule.
+  parameters:
+    filter:
+      name: filter
+      in: query
+      description: 'Filter to constrain the response. The response will only include resources matching this filter. Filters follow the SCIM grammar from [RFC-7644 Section 3.4.2.2](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.2).
 
         '
-      properties:
-        id:
-          type: string
-          description: 'A unique identifier for a group. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the realm.
+      schema:
+        type: string
+    tenant_id:
+      name: tenant_id
+      in: path
+      description: A unique identifier for a tenant.
+      required: true
+      schema:
+        type: string
+        example: 000176d94fd7b4d1
+    resource_server_id_query:
+      name: resource_server_id
+      in: query
+      description: The unique identifier of the resource server used to filter roles.
+      schema:
+        type: string
+        minLength: 1
+    skip:
+      name: skip
+      in: query
+      description: 'Number of items to skip. This is the zero-based index of the first result.
 
-            '
-          readOnly: true
-          example: 81490afab171aef0
-        realm_id:
-          type: string
-          description: 'A unique identifier for the group''s realm. This is automatically set on creation. This field is immutable and read-only.
+        '
+      schema:
+        type: integer
+        format: uint32
+        minimum: 0
+        default: 0
+    identity_id:
+      name: identity_id
+      in: path
+      description: A unique identifier for an identity.
+      required: true
+      schema:
+        type: string
+        example: e372db224c06e850
+    page_token:
+      name: page_token
+      in: query
+      description: 'Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.
 
-            '
-          readOnly: true
-          example: 7df92e4a38ba0993
-        tenant_id:
-          type: string
-          description: 'A unique identifier for the group''s tenant. This is automatically set on creation. This field is immutable and read-only.
+        '
+      schema:
+        type: string
+    realm_id:
+      name: realm_id
+      in: path
+      description: A unique identifier for a realm.
+      required: true
+      schema:
+        type: string
+        example: 19a95130480dfa79
+    page_size:
+      name: page_size
+      in: query
+      description: 'Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.
 
-            '
-          readOnly: true
-          example: 0001b42d80372976
-        display_name:
-          type: string
-          minLength: 1
-          maxLength: 64
-          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
-          description: 'A human-readable name for the group. This name is used for display purposes.
-
-            '
-          example: Realm Administrators
-        description:
-          type: string
-          maxLength: 300
-          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
-          description: 'A free-form text field to describe a group.
-
-            '
-          example: A group of realm administrators.
-        create_time:
-          type: string
-          format: date-time
-          description: 'A time value given in ISO8601 combined date and time format that represents when the group was created. This is automatically generated on creation. This field is read-only.
-
-            '
-          readOnly: true
-          example: '2022-03-14T03:42:52.905657Z'
-        update_time:
-          type: string
-          format: date-time
-          description: 'A time value given in ISO8601 combined date and time format that represents when the group was last updated. This is automatically updated when the group is updated. This field is read-only.
-
-            '
-          readOnly: true
-          example: '2022-06-14T05:55:23.823187Z'
+        '
+      schema:
+        type: integer
+        format: uint32
+        minimum: 0
+  schemas:
     ErrorDetail:
       title: Error Detail
       description: 'Additional details for errors designed to support client applications.
@@ -901,6 +909,99 @@ components:
           description: Type of the error detail.
       required:
       - type
+    Identity:
+      title: Identity
+      type: object
+      description: 'An identity is a unique identifier that may be used by an end-user to gain access governed by Beyond Identity.
+
+        '
+      properties:
+        id:
+          type: string
+          description: 'A unique identifier for the identity. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the realm.
+
+            '
+          readOnly: true
+          example: e372db224c06e850
+        realm_id:
+          type: string
+          description: 'A unique identifier for the identity''s realm. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 8f5bec58229e6f29
+        tenant_id:
+          type: string
+          description: 'A unique identifier for the identity''s tenant. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 0001f1f460b1ace6
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
+          description: 'A human-readable name for the identity. This name is used for display purposes.
+
+            '
+          example: Test Display
+        create_time:
+          type: string
+          format: date-time
+          description: 'A time value given in ISO8601 combined date and time format that represents when the identity was created. This is automatically generated on creation. This field is read-only.
+
+            '
+          readOnly: true
+          example: '2022-04-12T05:53:07.119Z'
+        update_time:
+          type: string
+          format: date-time
+          description: 'A time value given in ISO8601 combined date and time format that represents when the identity was last updated. This is automatically updated when the identity is updated. This field is read-only.
+
+            '
+          readOnly: true
+          example: '2022-06-16T14:31:03.770Z'
+        status:
+          type: string
+          description: 'Indicator for the identity''s administrative status.  If ''active'', the identity is able to generate passkeys and login.  If ''suspended'', the identity is unable to generate passkeys or login.
+
+            '
+          example: active
+        traits:
+          description: 'A collection of properties to describe an identity. All traits contain a `type` key which describes the specific traits schema.
+
+            '
+          oneOf:
+          - $ref: '#/components/schemas/Traits_v0'
+          discriminator:
+            propertyName: type
+            mapping:
+              traits_v0: '#/components/schemas/Traits_v0'
+        enrollment_status:
+          type: string
+          enum:
+          - ENROLLED
+          - PENDING
+          - INVITE_FAILED
+          - UNENROLLED
+          description: 'Indicator for the identity''s enrollment status.
+
+
+            If ''ENROLLED'', the identity has 1 or more active passkeys.
+
+            If ''PENDING'', the identity has no active passkeys and 1 or more pending enrollments.
+
+            If ''INVITE_FAILED'', the identity has no active passkeys, no pending enrollments, and 1 or more failed enrollments.
+
+            If ''UNENROLLED'', the identity is not enrolled in the organization.
+
+
+            May be undefined. This field is output-only.
+
+            '
+          example: ENROLLED
+          readOnly: true
     Traits_v0:
       title: Traits_v0
       description: Set of traits associated with an identity.
@@ -1080,6 +1181,58 @@ components:
             '
       required:
       - type
+    ListIdentityGroupsResponse:
+      title: List Identity Groups Response
+      description: Response for ListIdentityGroups.
+      type: object
+      properties:
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/Group'
+          maxItems: 200
+          description: An unordered array of groups corresponding to the request.
+        total_size:
+          type: integer
+          format: uint32
+          description: 'Total number of results returned by the operation. This value may be larger than the number of resources returned, such as when returning a single page where multiple pages are available.
+
+            '
+          example: 1000
+        next_page_token:
+          type: string
+          description: 'Token used to fetch the next set of results. If this field is omitted, there are no subsequent pages.
+
+            '
+      required:
+      - groups
+      - total_size
+    ListIdentitiesResponse:
+      title: List Identities Response
+      description: Response for ListIdentities.
+      type: object
+      properties:
+        identities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Identity'
+          maxItems: 200
+          description: An unordered array of identities corresponding to the request.
+        total_size:
+          type: integer
+          format: uint32
+          description: 'Total number of results returned by the operation. This value may be larger than the number of resources returned, such as when returning a single page where multiple pages are available.
+
+            '
+          example: 1000
+        next_page_token:
+          type: string
+          description: 'Token used to fetch the next set of results. If this field is omitted, there are no subsequent pages.
+
+            '
+      required:
+      - identities
+      - total_size
     Role:
       title: Role
       type: object
@@ -1161,6 +1314,87 @@ components:
             '
           readOnly: true
           example: '2023-02-14T18:18:58.332247Z'
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
+
+            '
+        message:
+          type: string
+          description: 'Human-readable message describing the error.
+
+            '
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      required:
+      - code
+      - message
+    Group:
+      title: Group
+      type: object
+      description: 'A group is a logical collection of identities. Groups are commonly used as a predicate in a policy rule.
+
+        '
+      properties:
+        id:
+          type: string
+          description: 'A unique identifier for a group. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the realm.
+
+            '
+          readOnly: true
+          example: 81490afab171aef0
+        realm_id:
+          type: string
+          description: 'A unique identifier for the group''s realm. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 7df92e4a38ba0993
+        tenant_id:
+          type: string
+          description: 'A unique identifier for the group''s tenant. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 0001b42d80372976
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
+          description: 'A human-readable name for the group. This name is used for display purposes.
+
+            '
+          example: Realm Administrators
+        description:
+          type: string
+          maxLength: 300
+          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
+          description: 'A free-form text field to describe a group.
+
+            '
+          example: A group of realm administrators.
+        create_time:
+          type: string
+          format: date-time
+          description: 'A time value given in ISO8601 combined date and time format that represents when the group was created. This is automatically generated on creation. This field is read-only.
+
+            '
+          readOnly: true
+          example: '2022-03-14T03:42:52.905657Z'
+        update_time:
+          type: string
+          format: date-time
+          description: 'A time value given in ISO8601 combined date and time format that represents when the group was last updated. This is automatically updated when the group is updated. This field is read-only.
+
+            '
+          readOnly: true
+          example: '2022-06-14T05:55:23.823187Z'
     ListIdentityRolesResponse:
       title: List Identity Roles Response
       description: Response for ListIdentityRoles.
@@ -1187,240 +1421,6 @@ components:
       required:
       - roles
       - total_size
-    Error:
-      type: object
-      properties:
-        code:
-          type: string
-          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
-
-            '
-        message:
-          type: string
-          description: 'Human-readable message describing the error.
-
-            '
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-      required:
-      - code
-      - message
-    ListIdentityGroupsResponse:
-      title: List Identity Groups Response
-      description: Response for ListIdentityGroups.
-      type: object
-      properties:
-        groups:
-          type: array
-          items:
-            $ref: '#/components/schemas/Group'
-          maxItems: 200
-          description: An unordered array of groups corresponding to the request.
-        total_size:
-          type: integer
-          format: uint32
-          description: 'Total number of results returned by the operation. This value may be larger than the number of resources returned, such as when returning a single page where multiple pages are available.
-
-            '
-          example: 1000
-        next_page_token:
-          type: string
-          description: 'Token used to fetch the next set of results. If this field is omitted, there are no subsequent pages.
-
-            '
-      required:
-      - groups
-      - total_size
-    ListIdentitiesResponse:
-      title: List Identities Response
-      description: Response for ListIdentities.
-      type: object
-      properties:
-        identities:
-          type: array
-          items:
-            $ref: '#/components/schemas/Identity'
-          maxItems: 200
-          description: An unordered array of identities corresponding to the request.
-        total_size:
-          type: integer
-          format: uint32
-          description: 'Total number of results returned by the operation. This value may be larger than the number of resources returned, such as when returning a single page where multiple pages are available.
-
-            '
-          example: 1000
-        next_page_token:
-          type: string
-          description: 'Token used to fetch the next set of results. If this field is omitted, there are no subsequent pages.
-
-            '
-      required:
-      - identities
-      - total_size
-    Identity:
-      title: Identity
-      type: object
-      description: 'An identity is a unique identifier that may be used by an end-user to gain access governed by Beyond Identity.
-
-        '
-      properties:
-        id:
-          type: string
-          description: 'A unique identifier for the identity. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the realm.
-
-            '
-          readOnly: true
-          example: e372db224c06e850
-        realm_id:
-          type: string
-          description: 'A unique identifier for the identity''s realm. This is automatically set on creation. This field is immutable and read-only.
-
-            '
-          readOnly: true
-          example: 8f5bec58229e6f29
-        tenant_id:
-          type: string
-          description: 'A unique identifier for the identity''s tenant. This is automatically set on creation. This field is immutable and read-only.
-
-            '
-          readOnly: true
-          example: 0001f1f460b1ace6
-        display_name:
-          type: string
-          minLength: 1
-          maxLength: 64
-          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
-          description: 'A human-readable name for the identity. This name is used for display purposes.
-
-            '
-          example: Test Display
-        create_time:
-          type: string
-          format: date-time
-          description: 'A time value given in ISO8601 combined date and time format that represents when the identity was created. This is automatically generated on creation. This field is read-only.
-
-            '
-          readOnly: true
-          example: '2022-04-12T05:53:07.119Z'
-        update_time:
-          type: string
-          format: date-time
-          description: 'A time value given in ISO8601 combined date and time format that represents when the identity was last updated. This is automatically updated when the identity is updated. This field is read-only.
-
-            '
-          readOnly: true
-          example: '2022-06-16T14:31:03.770Z'
-        status:
-          type: string
-          description: 'Indicator for the identity''s administrative status.  If ''active'', the identity is able to generate passkeys and login.  If ''suspended'', the identity is unable to generate passkeys or login.
-
-            '
-          example: active
-        traits:
-          description: 'A collection of properties to describe an identity. All traits contain a `type` key which describes the specific traits schema.
-
-            '
-          oneOf:
-          - $ref: '#/components/schemas/Traits_v0'
-          discriminator:
-            propertyName: type
-            mapping:
-              traits_v0: '#/components/schemas/Traits_v0'
-        enrollment_status:
-          type: string
-          enum:
-          - ENROLLED
-          - PENDING
-          - INVITE_FAILED
-          - UNENROLLED
-          description: 'Indicator for the identity''s enrollment status.
-
-
-            If ''ENROLLED'', the identity has 1 or more active passkeys.
-
-            If ''PENDING'', the identity has no active passkeys and 1 or more pending enrollments.
-
-            If ''INVITE_FAILED'', the identity has no active passkeys, no pending enrollments, and 1 or more failed enrollments.
-
-            If ''UNENROLLED'', the identity is not enrolled in the organization.
-
-
-            May be undefined. This field is output-only.
-
-            '
-          example: ENROLLED
-          readOnly: true
-  parameters:
-    identity_id:
-      name: identity_id
-      in: path
-      description: A unique identifier for an identity.
-      required: true
-      schema:
-        type: string
-        example: e372db224c06e850
-    tenant_id:
-      name: tenant_id
-      in: path
-      description: A unique identifier for a tenant.
-      required: true
-      schema:
-        type: string
-        example: 000176d94fd7b4d1
-    page_size:
-      name: page_size
-      in: query
-      description: 'Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.
-
-        '
-      schema:
-        type: integer
-        format: uint32
-        minimum: 0
-    skip:
-      name: skip
-      in: query
-      description: 'Number of items to skip. This is the zero-based index of the first result.
-
-        '
-      schema:
-        type: integer
-        format: uint32
-        minimum: 0
-        default: 0
-    resource_server_id_query:
-      name: resource_server_id
-      in: query
-      description: The unique identifier of the resource server used to filter roles.
-      schema:
-        type: string
-        minLength: 1
-    realm_id:
-      name: realm_id
-      in: path
-      description: A unique identifier for a realm.
-      required: true
-      schema:
-        type: string
-        example: 19a95130480dfa79
-    page_token:
-      name: page_token
-      in: query
-      description: 'Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.
-
-        '
-      schema:
-        type: string
-    filter:
-      name: filter
-      in: query
-      description: 'Filter to constrain the response. The response will only include resources matching this filter. Filters follow the SCIM grammar from [RFC-7644 Section 3.4.2.2](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.2).
-
-        '
-      schema:
-        type: string
   securitySchemes:
     BearerAuth:
       type: http

@@ -466,54 +466,6 @@ components:
           description: Type of the error detail.
       required:
       - type
-    ListResourceServersResponse:
-      title: List Resource Servers Response
-      description: Response for ListResourceServers.
-      type: object
-      properties:
-        resource_servers:
-          type: array
-          items:
-            $ref: '#/components/schemas/ResourceServer'
-          maxItems: 100
-          description: 'An unordered array of resource servers corresponding to the request.
-
-            '
-        total_size:
-          type: integer
-          format: uint32
-          description: 'Total number of results returned by the operation. This value may be larger than the number of resources returned, such as when returning a single page where multiple pages are available.
-
-            '
-          example: 1000
-        next_page_token:
-          type: string
-          description: 'Token used to fetch the next set of results. If this field is omitted, there are no subsequent pages.
-
-            '
-      required:
-      - resource_servers
-      - total_size
-    Error:
-      type: object
-      properties:
-        code:
-          type: string
-          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
-
-            '
-        message:
-          type: string
-          description: 'Human-readable message describing the error.
-
-            '
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-      required:
-      - code
-      - message
     ResourceServer:
       title: Resource Server
       type: object
@@ -569,15 +521,55 @@ components:
           description: 'The list of scopes supported by this resource server. For the Beyond Identity Management API, this will include scopes for all publicly available endpoints.  Note that applications may not provide access to scopes that are not defined on a resource server that they reference; this is the superset of all allowable application scopes in a given realm.
 
             '
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
+
+            '
+        message:
+          type: string
+          description: 'Human-readable message describing the error.
+
+            '
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      required:
+      - code
+      - message
+    ListResourceServersResponse:
+      title: List Resource Servers Response
+      description: Response for ListResourceServers.
+      type: object
+      properties:
+        resource_servers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceServer'
+          maxItems: 100
+          description: 'An unordered array of resource servers corresponding to the request.
+
+            '
+        total_size:
+          type: integer
+          format: uint32
+          description: 'Total number of results returned by the operation. This value may be larger than the number of resources returned, such as when returning a single page where multiple pages are available.
+
+            '
+          example: 1000
+        next_page_token:
+          type: string
+          description: 'Token used to fetch the next set of results. If this field is omitted, there are no subsequent pages.
+
+            '
+      required:
+      - resource_servers
+      - total_size
   parameters:
-    resource_server_id:
-      name: resource_server_id
-      in: path
-      description: A unique identifier for a resource server.
-      required: true
-      schema:
-        type: string
-        example: 84db69f5-48a8-4c11-8cda-1bae3a73f07e
     tenant_id:
       name: tenant_id
       in: path
@@ -586,14 +578,14 @@ components:
       schema:
         type: string
         example: 000176d94fd7b4d1
-    realm_id:
-      name: realm_id
+    resource_server_id:
+      name: resource_server_id
       in: path
-      description: A unique identifier for a realm.
+      description: A unique identifier for a resource server.
       required: true
       schema:
         type: string
-        example: 19a95130480dfa79
+        example: 84db69f5-48a8-4c11-8cda-1bae3a73f07e
     page_token:
       name: page_token
       in: query
@@ -602,6 +594,14 @@ components:
         '
       schema:
         type: string
+    realm_id:
+      name: realm_id
+      in: path
+      description: A unique identifier for a realm.
+      required: true
+      schema:
+        type: string
+        example: 19a95130480dfa79
     page_size:
       name: page_size
       in: query

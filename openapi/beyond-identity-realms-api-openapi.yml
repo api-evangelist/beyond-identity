@@ -431,6 +431,56 @@ paths:
                   $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
 components:
   schemas:
+    Realm:
+      title: Realm
+      type: object
+      description: 'A realm is a unique administrative domain within a tenant. Realms may be used to define multiple development environments or for isolated administrative domains.
+
+        '
+      properties:
+        id:
+          type: string
+          description: 'A unique identifier for the realm. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the tenant.
+
+            '
+          readOnly: true
+          example: 19a95130480dfa79
+        tenant_id:
+          type: string
+          description: 'A unique identifier of the realm''s tenant. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 0001f1f460b1ace6
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
+          description: 'A human-readable name for the realm. This name is used for display purposes.
+
+            '
+          example: Test Realm
+        classification:
+          type: string
+          description: Classification of the realm. Can be either SECURE_WORFORCE or SECURE_CUSTOMER
+          example: SECURE_CUSTOMER
+        create_time:
+          type: string
+          format: date-time
+          description: 'A time value given in ISO8601 combined date and time format that represents when the realm was created. This is automatically generated on creation. This field is read-only.
+
+            '
+          readOnly: true
+          example: '2022-05-18T18:00:01.167Z'
+        update_time:
+          type: string
+          format: date-time
+          description: 'A time value given in ISO8601 combined date and time format that represents when the realm was last updated. This is automatically updated when the realm is updated. This field is read-only.
+
+            '
+          readOnly: true
+          example: '2022-05-19T14:23:01.327Z'
     ErrorDetail:
       title: Error Detail
       description: 'Additional details for errors designed to support client applications.
@@ -491,56 +541,6 @@ components:
       required:
       - code
       - message
-    Realm:
-      title: Realm
-      type: object
-      description: 'A realm is a unique administrative domain within a tenant. Realms may be used to define multiple development environments or for isolated administrative domains.
-
-        '
-      properties:
-        id:
-          type: string
-          description: 'A unique identifier for the realm. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the tenant.
-
-            '
-          readOnly: true
-          example: 19a95130480dfa79
-        tenant_id:
-          type: string
-          description: 'A unique identifier of the realm''s tenant. This is automatically set on creation. This field is immutable and read-only.
-
-            '
-          readOnly: true
-          example: 0001f1f460b1ace6
-        display_name:
-          type: string
-          minLength: 1
-          maxLength: 64
-          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
-          description: 'A human-readable name for the realm. This name is used for display purposes.
-
-            '
-          example: Test Realm
-        classification:
-          type: string
-          description: Classification of the realm. Can be either SECURE_WORFORCE or SECURE_CUSTOMER
-          example: SECURE_CUSTOMER
-        create_time:
-          type: string
-          format: date-time
-          description: 'A time value given in ISO8601 combined date and time format that represents when the realm was created. This is automatically generated on creation. This field is read-only.
-
-            '
-          readOnly: true
-          example: '2022-05-18T18:00:01.167Z'
-        update_time:
-          type: string
-          format: date-time
-          description: 'A time value given in ISO8601 combined date and time format that represents when the realm was last updated. This is automatically updated when the realm is updated. This field is read-only.
-
-            '
-          readOnly: true
-          example: '2022-05-19T14:23:01.327Z'
   parameters:
     tenant_id:
       name: tenant_id
@@ -561,14 +561,6 @@ components:
         format: uint32
         minimum: 0
         default: 0
-    realm_id:
-      name: realm_id
-      in: path
-      description: A unique identifier for a realm.
-      required: true
-      schema:
-        type: string
-        example: 19a95130480dfa79
     page_token:
       name: page_token
       in: query
@@ -577,6 +569,14 @@ components:
         '
       schema:
         type: string
+    realm_id:
+      name: realm_id
+      in: path
+      description: A unique identifier for a realm.
+      required: true
+      schema:
+        type: string
+        example: 19a95130480dfa79
     page_size:
       name: page_size
       in: query

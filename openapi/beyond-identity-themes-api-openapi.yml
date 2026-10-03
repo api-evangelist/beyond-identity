@@ -474,14 +474,6 @@ components:
           description: Hexadecimal color code to use for button text.
           example: '#FFFFFF'
   parameters:
-    tenant_id:
-      name: tenant_id
-      in: path
-      description: A unique identifier for a tenant.
-      required: true
-      schema:
-        type: string
-        example: 000176d94fd7b4d1
     theme_id:
       name: theme_id
       in: path
@@ -490,6 +482,14 @@ components:
       schema:
         type: string
         example: 88ef08fb-c3f9-44e2-b174-fbb239e1dc47
+    tenant_id:
+      name: tenant_id
+      in: path
+      description: A unique identifier for a tenant.
+      required: true
+      schema:
+        type: string
+        example: 000176d94fd7b4d1
     realm_id:
       name: realm_id
       in: path

@@ -1761,229 +1761,6 @@ paths:
                   $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1scim~1v2~1Users/get/responses/500/content/application~1json/examples/Internal%20Error'
 components:
   schemas:
-    SCIMGroup:
-      title: Group
-      description: 'A group is a collection of users corresponding to [RFC 7643 Section 4.2](https://www.rfc-editor.org/rfc/rfc7643#section-4.2).
-
-        '
-      type: object
-      properties:
-        schemas:
-          type: array
-          description: 'The list of schemas used to define the group. This must contain the core Group schema ("urn:ietf:params:scim:schemas:core:2.0:Group") and may include the custom Beyond Identity Group schema extension ("urn:scim:schemas:extension:byndid:1.0:Group").
-
-            '
-          items:
-            type: string
-            example: urn:ietf:params:scim:schemas:core:2.0:Group
-        id:
-          type: string
-          description: 'The unique ID of the group. This is automatically generated on creation. This field is immutable and output-only.
-
-            '
-          minLength: 1
-          readOnly: true
-          example: ed9fcce6-ec82-458e-ae58-e2d975cfc32d
-        displayName:
-          type: string
-          minLength: 1
-          description: 'The unique display name of the group. This name is used for display purposes.
-
-            '
-          example: Help Desk
-        meta:
-          $ref: '#/components/schemas/SCIMUser/properties/meta'
-      required:
-      - schemas
-    SCIMServiceProviderConfig:
-      title: ServiceProviderConfig
-      description: 'The service provider configuration, as defined in [RFC 7643 Section 5](https://www.rfc-editor.org/rfc/rfc7643#section-5).
-
-        '
-      type: object
-      properties:
-        schemas:
-          type: array
-          description: 'The list of schemas used to define the resource type. This only contains the core ServiceProviderConfig schema ("urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig").
-
-            '
-          items:
-            type: string
-            example: urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig
-        documentationUri:
-          type: string
-          description: 'URL pointing to the service provider''s human-consumable help documentation.
-
-            '
-          readOnly: true
-        patch:
-          type: object
-          properties:
-            supported:
-              type: boolean
-              description: 'Indicator specifying whether PATCH operations are supported.
-
-
-                The Beyond Identity SCIM server supports PATCH operations.
-
-                '
-              example: true
-              readOnly: true
-          required:
-          - supported
-        bulk:
-          type: object
-          description: Configuration for bulk operations.
-          properties:
-            supported:
-              type: boolean
-              description: 'Indicator specifying whether PATCH operations are supported.
-
-
-                The Beyond Identity SCIM server does not support bulk operations.
-
-                '
-              example: false
-              readOnly: true
-            maxOperations:
-              type: integer
-              format: uint32
-              description: Maximum number of operations allowed per bulk operation.
-              example: 1000
-              readOnly: true
-            maxPayloadSize:
-              type: integer
-              format: uint32
-              description: Maximum payload size in bytes.
-              example: 1048576
-              readOnly: true
-          required:
-          - supported
-          - maxOperations
-          - maxPayloadSize
-        filter:
-          type: object
-          description: Configuration for query filters.
-          properties:
-            supported:
-              type: boolean
-              description: 'Indicator specifying whether filters are supported for querying.
-
-
-                The Beyond Identity SCIM server supports filters for querying.
-
-                '
-              example: true
-              readOnly: true
-            maxResults:
-              type: integer
-              format: uint32
-              description: Maximum number of resources returned in a response.
-              example: 1000
-              readOnly: true
-          required:
-          - supported
-          - maxResults
-        changePassword:
-          type: object
-          description: Configuration for password support.
-          properties:
-            supported:
-              type: boolean
-              description: 'Indicator specifying whether changing a password is supported.
-
-
-                The Beyond Identity SCIM server does not support passwords.
-
-                '
-              example: true
-              readOnly: true
-          required:
-          - supported
-        sort:
-          type: object
-          description: Configuration for sort support in queries.
-          properties:
-            supported:
-              type: boolean
-              description: 'Indicator specifying whether sorting is supported for querying.
-
-
-                The Beyond Identity SCIM server does not support sorting.
-
-                '
-              example: false
-              readOnly: true
-          required:
-          - supported
-        etag:
-          type: object
-          description: Configuration for ETag support.
-          properties:
-            supported:
-              type: boolean
-              description: 'Indicator specifying whether ETags are supported.
-
-
-                The Beyond Identity SCIM server does not support ETags.
-
-                '
-              example: true
-              readOnly: true
-          required:
-          - supported
-        authenticationSchemes:
-          type: array
-          description: Supported authentication schemes.
-          items:
-            type: object
-            properties:
-              type:
-                type: string
-                description: The authentication scheme.
-                enum:
-                - oauth
-                - oauth2
-                - oauthbearertoken
-                - httpbasic
-                - httpdigest
-                readOnly: true
-                example: oauthbearertoken
-              name:
-                type: string
-                description: The common authentication scheme name.
-                readOnly: true
-              description:
-                type: string
-                description: A description of the authentication scheme.
-                readOnly: true
-              specUri:
-                type: string
-                description: URL pointing to the authentication scheme specification.
-                readOnly: true
-              documentationUri:
-                type: string
-                description: 'URL pointing to the authentication scheme''s usage documentation.
-
-                  '
-                readOnly: true
-          required:
-          - type
-          - name
-          - description
-          - specUri
-          - documentationUri
-          readOnly: true
-      required:
-      - schemas
-      - documentationUri
-      - patch
-      - bulk
-      - filter
-      - changePassword
-      - sort
-      - etag
-      - authenticationSchemes
     SCIMUser:
       title: User
       description: 'A user represents a human entity as defined by [RFC 7643 Section 4.1](https://www.rfc-editor.org/rfc/rfc7643#section-4.1). A user cooresponds to the identity resource in Beyond Identity.
@@ -2364,6 +2141,229 @@ components:
       - endpoint
       - schema
       - schemaExtensions
+    SCIMGroup:
+      title: Group
+      description: 'A group is a collection of users corresponding to [RFC 7643 Section 4.2](https://www.rfc-editor.org/rfc/rfc7643#section-4.2).
+
+        '
+      type: object
+      properties:
+        schemas:
+          type: array
+          description: 'The list of schemas used to define the group. This must contain the core Group schema ("urn:ietf:params:scim:schemas:core:2.0:Group") and may include the custom Beyond Identity Group schema extension ("urn:scim:schemas:extension:byndid:1.0:Group").
+
+            '
+          items:
+            type: string
+            example: urn:ietf:params:scim:schemas:core:2.0:Group
+        id:
+          type: string
+          description: 'The unique ID of the group. This is automatically generated on creation. This field is immutable and output-only.
+
+            '
+          minLength: 1
+          readOnly: true
+          example: ed9fcce6-ec82-458e-ae58-e2d975cfc32d
+        displayName:
+          type: string
+          minLength: 1
+          description: 'The unique display name of the group. This name is used for display purposes.
+
+            '
+          example: Help Desk
+        meta:
+          $ref: '#/components/schemas/SCIMUser/properties/meta'
+      required:
+      - schemas
+    SCIMServiceProviderConfig:
+      title: ServiceProviderConfig
+      description: 'The service provider configuration, as defined in [RFC 7643 Section 5](https://www.rfc-editor.org/rfc/rfc7643#section-5).
+
+        '
+      type: object
+      properties:
+        schemas:
+          type: array
+          description: 'The list of schemas used to define the resource type. This only contains the core ServiceProviderConfig schema ("urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig").
+
+            '
+          items:
+            type: string
+            example: urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig
+        documentationUri:
+          type: string
+          description: 'URL pointing to the service provider''s human-consumable help documentation.
+
+            '
+          readOnly: true
+        patch:
+          type: object
+          properties:
+            supported:
+              type: boolean
+              description: 'Indicator specifying whether PATCH operations are supported.
+
+
+                The Beyond Identity SCIM server supports PATCH operations.
+
+                '
+              example: true
+              readOnly: true
+          required:
+          - supported
+        bulk:
+          type: object
+          description: Configuration for bulk operations.
+          properties:
+            supported:
+              type: boolean
+              description: 'Indicator specifying whether PATCH operations are supported.
+
+
+                The Beyond Identity SCIM server does not support bulk operations.
+
+                '
+              example: false
+              readOnly: true
+            maxOperations:
+              type: integer
+              format: uint32
+              description: Maximum number of operations allowed per bulk operation.
+              example: 1000
+              readOnly: true
+            maxPayloadSize:
+              type: integer
+              format: uint32
+              description: Maximum payload size in bytes.
+              example: 1048576
+              readOnly: true
+          required:
+          - supported
+          - maxOperations
+          - maxPayloadSize
+        filter:
+          type: object
+          description: Configuration for query filters.
+          properties:
+            supported:
+              type: boolean
+              description: 'Indicator specifying whether filters are supported for querying.
+
+
+                The Beyond Identity SCIM server supports filters for querying.
+
+                '
+              example: true
+              readOnly: true
+            maxResults:
+              type: integer
+              format: uint32
+              description: Maximum number of resources returned in a response.
+              example: 1000
+              readOnly: true
+          required:
+          - supported
+          - maxResults
+        changePassword:
+          type: object
+          description: Configuration for password support.
+          properties:
+            supported:
+              type: boolean
+              description: 'Indicator specifying whether changing a password is supported.
+
+
+                The Beyond Identity SCIM server does not support passwords.
+
+                '
+              example: true
+              readOnly: true
+          required:
+          - supported
+        sort:
+          type: object
+          description: Configuration for sort support in queries.
+          properties:
+            supported:
+              type: boolean
+              description: 'Indicator specifying whether sorting is supported for querying.
+
+
+                The Beyond Identity SCIM server does not support sorting.
+
+                '
+              example: false
+              readOnly: true
+          required:
+          - supported
+        etag:
+          type: object
+          description: Configuration for ETag support.
+          properties:
+            supported:
+              type: boolean
+              description: 'Indicator specifying whether ETags are supported.
+
+
+                The Beyond Identity SCIM server does not support ETags.
+
+                '
+              example: true
+              readOnly: true
+          required:
+          - supported
+        authenticationSchemes:
+          type: array
+          description: Supported authentication schemes.
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                description: The authentication scheme.
+                enum:
+                - oauth
+                - oauth2
+                - oauthbearertoken
+                - httpbasic
+                - httpdigest
+                readOnly: true
+                example: oauthbearertoken
+              name:
+                type: string
+                description: The common authentication scheme name.
+                readOnly: true
+              description:
+                type: string
+                description: A description of the authentication scheme.
+                readOnly: true
+              specUri:
+                type: string
+                description: URL pointing to the authentication scheme specification.
+                readOnly: true
+              documentationUri:
+                type: string
+                description: 'URL pointing to the authentication scheme''s usage documentation.
+
+                  '
+                readOnly: true
+          required:
+          - type
+          - name
+          - description
+          - specUri
+          - documentationUri
+          readOnly: true
+      required:
+      - schemas
+      - documentationUri
+      - patch
+      - bulk
+      - filter
+      - changePassword
+      - sort
+      - etag
+      - authenticationSchemes
     SCIMError:
       type: object
       properties:
@@ -2394,14 +2394,6 @@ components:
       name: group_id
       in: path
       description: ID of the group.
-      required: true
-      schema:
-        type: string
-        minLength: 1
-    scim_user_id:
-      name: user_id
-      in: path
-      description: ID of the user. This corresponds to the identity ID.
       required: true
       schema:
         type: string
@@ -2439,6 +2431,14 @@ components:
         format: uint32
         minimum: 0
         default: 0
+    scim_user_id:
+      name: user_id
+      in: path
+      description: ID of the user. This corresponds to the identity ID.
+      required: true
+      schema:
+        type: string
+        minLength: 1
   securitySchemes:
     BearerAuth:
       type: http
