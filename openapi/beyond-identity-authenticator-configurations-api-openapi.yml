@@ -461,6 +461,54 @@ paths:
                   $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
 components:
   schemas:
+    ListAuthenticatorConfigsResponse:
+      title: List Authenticator Configurations Response
+      description: Response for ListAuthenticatorConfigs.
+      type: object
+      properties:
+        authenticator_configs:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthenticatorConfig'
+          maxItems: 100
+          description: 'An unordered array of authenticator configurations corresponding to the request.
+
+            '
+        total_size:
+          type: integer
+          format: uint32
+          description: 'Total number of results returned by the operation. This value may be larger than the number of resources returned, such as when returning a single page where multiple pages are available.
+
+            '
+          example: 1000
+        next_page_token:
+          type: string
+          description: 'Token used to fetch the next set of results. If this field is omitted, there are no subsequent pages.
+
+            '
+      required:
+      - authenticator_configs
+      - total_size
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
+
+            '
+        message:
+          type: string
+          description: 'Human-readable message describing the error.
+
+            '
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      required:
+      - code
+      - message
     AuthenticatorConfig:
       title: Authenticator Configuration
       type: object
@@ -734,79 +782,7 @@ components:
           description: Type of the error detail.
       required:
       - type
-    Error:
-      type: object
-      properties:
-        code:
-          type: string
-          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
-
-            '
-        message:
-          type: string
-          description: 'Human-readable message describing the error.
-
-            '
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-      required:
-      - code
-      - message
-    ListAuthenticatorConfigsResponse:
-      title: List Authenticator Configurations Response
-      description: Response for ListAuthenticatorConfigs.
-      type: object
-      properties:
-        authenticator_configs:
-          type: array
-          items:
-            $ref: '#/components/schemas/AuthenticatorConfig'
-          maxItems: 100
-          description: 'An unordered array of authenticator configurations corresponding to the request.
-
-            '
-        total_size:
-          type: integer
-          format: uint32
-          description: 'Total number of results returned by the operation. This value may be larger than the number of resources returned, such as when returning a single page where multiple pages are available.
-
-            '
-          example: 1000
-        next_page_token:
-          type: string
-          description: 'Token used to fetch the next set of results. If this field is omitted, there are no subsequent pages.
-
-            '
-      required:
-      - authenticator_configs
-      - total_size
   parameters:
-    authenticator_config_id:
-      name: authenticator_config_id
-      in: path
-      description: A unique identifier for an authenticator configuration.
-      required: true
-      schema:
-        type: string
-        example: 73731b7f-eb76-4143-9b4b-81a720385f5a
-    filter:
-      name: filter
-      in: query
-      description: 'Filter to constrain the response. The response will only include resources matching this filter. Filters follow the SCIM grammar from [RFC-7644 Section 3.4.2.2](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.2).
-
-        '
-      schema:
-        type: string
-    tenant_id:
-      name: tenant_id
-      in: path
-      description: A unique identifier for a tenant.
-      required: true
-      schema:
-        type: string
-        example: 000176d94fd7b4d1
     page_token:
       name: page_token
       in: query
@@ -815,6 +791,14 @@ components:
         '
       schema:
         type: string
+    authenticator_config_id:
+      name: authenticator_config_id
+      in: path
+      description: A unique identifier for an authenticator configuration.
+      required: true
+      schema:
+        type: string
+        example: 73731b7f-eb76-4143-9b4b-81a720385f5a
     realm_id:
       name: realm_id
       in: path
@@ -833,6 +817,22 @@ components:
         type: integer
         format: uint32
         minimum: 0
+    filter:
+      name: filter
+      in: query
+      description: 'Filter to constrain the response. The response will only include resources matching this filter. Filters follow the SCIM grammar from [RFC-7644 Section 3.4.2.2](https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.2).
+
+        '
+      schema:
+        type: string
+    tenant_id:
+      name: tenant_id
+      in: path
+      description: A unique identifier for a tenant.
+      required: true
+      schema:
+        type: string
+        example: 000176d94fd7b4d1
   securitySchemes:
     BearerAuth:
       type: http

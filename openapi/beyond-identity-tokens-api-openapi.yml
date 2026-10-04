@@ -263,20 +263,6 @@ paths:
                   $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
 components:
   schemas:
-    ErrorDetail:
-      title: Error Detail
-      description: 'Additional details for errors designed to support client applications.
-
-        '
-      type: object
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          type: string
-          description: Type of the error detail.
-      required:
-      - type
     Error:
       type: object
       properties:
@@ -297,14 +283,21 @@ components:
       required:
       - code
       - message
+    ErrorDetail:
+      title: Error Detail
+      description: 'Additional details for errors designed to support client applications.
+
+        '
+      type: object
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          type: string
+          description: Type of the error detail.
+      required:
+      - type
   parameters:
-    principal_type:
-      name: principal_type
-      in: query
-      description: "Type of the principal. Allowable values are:\n  - `application`\n  - `identity`\n"
-      required: false
-      schema:
-        type: string
     application_id:
       name: application_id
       in: path
@@ -313,14 +306,6 @@ components:
       schema:
         type: string
         example: 38833c36-6f47-4992-9329-ea0a00915137
-    tenant_id:
-      name: tenant_id
-      in: path
-      description: A unique identifier for a tenant.
-      required: true
-      schema:
-        type: string
-        example: 000176d94fd7b4d1
     principal_id:
       name: principal_id
       in: query
@@ -343,6 +328,21 @@ components:
       required: true
       schema:
         type: string
+    principal_type:
+      name: principal_type
+      in: query
+      description: "Type of the principal. Allowable values are:\n  - `application`\n  - `identity`\n"
+      required: false
+      schema:
+        type: string
+    tenant_id:
+      name: tenant_id
+      in: path
+      description: A unique identifier for a tenant.
+      required: true
+      schema:
+        type: string
+        example: 000176d94fd7b4d1
   securitySchemes:
     BearerAuth:
       type: http

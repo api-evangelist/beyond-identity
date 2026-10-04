@@ -367,20 +367,6 @@ paths:
                   $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
 components:
   schemas:
-    ErrorDetail:
-      title: Error Detail
-      description: 'Additional details for errors designed to support client applications.
-
-        '
-      type: object
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          type: string
-          description: Type of the error detail.
-      required:
-      - type
     Error:
       type: object
       properties:
@@ -401,6 +387,20 @@ components:
       required:
       - code
       - message
+    ErrorDetail:
+      title: Error Detail
+      description: 'Additional details for errors designed to support client applications.
+
+        '
+      type: object
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          type: string
+          description: Type of the error detail.
+      required:
+      - type
     Theme:
       title: Theme
       description: 'A theme is a collection of configurable assets that unifies the end user login experience with your brand and products. It is primarily used to change the styling of the credential binding email.
@@ -474,14 +474,6 @@ components:
           description: Hexadecimal color code to use for button text.
           example: '#FFFFFF'
   parameters:
-    theme_id:
-      name: theme_id
-      in: path
-      description: A unique identifier for a theme.
-      required: true
-      schema:
-        type: string
-        example: 88ef08fb-c3f9-44e2-b174-fbb239e1dc47
     tenant_id:
       name: tenant_id
       in: path
@@ -498,6 +490,14 @@ components:
       schema:
         type: string
         example: 19a95130480dfa79
+    theme_id:
+      name: theme_id
+      in: path
+      description: A unique identifier for a theme.
+      required: true
+      schema:
+        type: string
+        example: 88ef08fb-c3f9-44e2-b174-fbb239e1dc47
   securitySchemes:
     BearerAuth:
       type: http

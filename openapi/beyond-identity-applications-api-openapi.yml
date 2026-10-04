@@ -489,291 +489,6 @@ paths:
                   $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
 components:
   schemas:
-    SsoConfigSamlPartialUpdate:
-      type: object
-      required:
-      - type
-      properties:
-        type:
-          $ref: '#/components/schemas/SsoConfigType'
-        acs_url:
-          description: 'Location where the SAML Response is sent via HTTP-POST. Often referred
-
-            to as the SAML Assertion Consumer Service (ACS) URL.
-
-            '
-          type: string
-        override_recipient_and_destination:
-          description: 'When this is true, the `recipient_url` and the `destination_url` are
-
-            used for SAML Response.
-
-
-            When this is false, both the `recipient_url` and the `destination_url`
-
-            are omitted and the acs_url is used instead.
-
-            '
-          type: boolean
-        recipient_url:
-          description: 'If `override_recipient_and_destination` is set to true, this field is
-
-            utilized for the SAML Response. If it is false, this field is unused.
-
-
-            The location where the application can present the SAML assertion. This
-
-            is usually the Single Sign-On (SSO) URL.
-
-            '
-          type: string
-        destination_url:
-          description: 'If `override_recipient_and_destination` is set to true, this field is
-
-            utilized for the SAML Response. If it is false, this field is unused.
-
-
-            The location to send the SAML Response, as defined in the SAML
-
-            assertion.
-
-            '
-          type: string
-        audience_url:
-          description: 'The intended audience of the SAML assertion. Often referred to as the
-
-            service provider Entity ID.
-
-            '
-          type: string
-        default_relay_state:
-          description: 'Identifies a specific application resource in an IDP initiated Single
-
-            Sign-On scenario. In most instances this is blank.
-
-            '
-          type: string
-        name_format:
-          description: The format of the SAML NameID.
-          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/name_format'
-        authentication_context:
-          description: The context for SAML authentication.
-          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/authentication_context'
-        subject_user_name_attribute:
-          description: The attribute to use for the subject's username.
-          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/subject_user_name_attribute'
-        sign_envelope:
-          description: 'Determines whether the SAML authentication response message is digitally
-
-            signed by the IdP or not. A digital signature is required to ensure that
-
-            only your IdP generated the response message.
-
-            '
-          type: boolean
-        sign_assertions:
-          description: All of the assertions are signed by the IdP.
-          type: boolean
-        signature_algorithm:
-          description: The algorithm used for signing the SAML assertions.
-          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/signature_algorithm'
-        digest_algorithm:
-          description: The algorithm used for the digest in SAML assertions.
-          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/digest_algorithm'
-        encrypt_assertions:
-          description: 'This is the flag that determines if the SAML assertion is encrypted.
-
-            If this flag is set to `true`, there MUST be a SAML encryption certificate
-
-            uploaded.
-
-
-            Determines whether the SAML assertion is encrypted or not. Encryption
-
-            ensures that nobody but the sender and receiver can understand the
-
-            assertion.
-
-            '
-          type: boolean
-        assertion_validity_duration_seconds:
-          description: 'The amount of time assertions are valid for in seconds.
-
-            '
-          type: integer
-          format: int32
-        assertion_encryption_algorithm:
-          description: The algorithm used to encrypt the SAML assertion.
-          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/assertion_encryption_algorithm'
-        assertion_key_transport_algorithm:
-          description: The algorithm used for key transport in SAML assertions.
-          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/assertion_key_transport_algorithm'
-        assertion_encryption_public_key:
-          description: 'The public key used to encrypt the SAML assertion. This is required
-
-            if `encrypt_assertions` is true.
-
-            '
-          type: string
-        sp_signature_certificates:
-          description: 'The PEM encoded X509 key certificate of the Service Provider
-
-            used to verify SAML AuthnRequests.
-
-            '
-          type: array
-          items:
-            description: 'The PEM encoded X509 key certificate of the Service Provider used to verify SAML AuthnRequests.
-
-              '
-            type: array
-            items:
-              type: object
-              required:
-              - sp_public_signing_key
-              properties:
-                sp_public_signing_key:
-                  type: string
-            example:
-            - '-----BEGIN CERTIFICATE-----
-
-
-              MIIDdzCCAl+gAwIBAgIEbF2LTTANBgkqhkiG9w0BAQsFADBoMQswCQYDVQQGEwJV
-
-              UzELMAkGA1UECBMCQ0ExFTATBgNVBAcTDFNhbiBGcmFuY2lzY28xEjAQBgNVBAoT
-
-              CU9rdGEsIEluYy4xHzAdBgNVBAMTFm9rdGEuZXhhbXBsZS5jb20gQ0EgUm9vdDAe
-
-              Fw0yMDA2MTkwMDAwMDBaFw0yMTA2MTkyMzU5NTlaMG0xCzAJBgNVBAYTAlVTMQsw
-
-              CQYDVQQIEwJDQTEVMBMGA1UEBxMMU2FuIEZyYW5jaXNjbzESMBAGA1UEChMJb2t0
-
-              Pbg6vGfJnxYYibTwLlXhgxl0tT+NMQFZ5GQslLh2sB3AWBzjZtFzFS7lDi0n4Fz5
-
-              y9x6U1hUS54fScJmSVSTT9v/qAD0ccjvlPj3M6PENq2X7TwrOqSTgx5TPOpA5Myl
-
-              MtwPbU3wn/pA5Cp9kWvlYbBfTS4Hx14FQyg3GAAkMrzrhKhpIfhz6iH0H8kDxFId
-
-              6KjXy4TvoUM/tH7c6v2HS6D4TD7TfYOv/8A7E1Lj6WKwjtghTAh3Rb5tbyxRBcw
-
-              gg==
-
-              -----END CERTIFICATE-----
-
-              '
-        enable_single_log_out:
-          description: Enable single logout.
-          type: boolean
-        single_log_out_url:
-          description: 'The location where the logout response will be sent.
-
-            Only enabled if `enable_single_log_out` is true.
-
-            '
-          type: string
-        single_log_out_issuer_url:
-          description: 'The issuer ID for the service provider. When handling a Single Log Out.
-
-
-            Only enabled if `enable_single_log_out` is true.
-
-            '
-          type: string
-        single_log_out_binding:
-          description: The binding used for single logout messages.
-          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/single_log_out_binding'
-        single_logout_sign_request_and_response:
-          description: 'If we should expect the LogoutRequest to be signed and if we
-
-            should sign the LogoutResponse.
-
-            '
-          type: boolean
-        validate_signed_requests:
-          description: 'Select this to validate all SAML requests using the Signature
-
-            Certificate. The payload from the SAML request is validated, and Okta
-
-            dynamically reads any single sign-on (SSO) URLs from the request. This
-
-            checkbox appears after you upload a Signature Certificate.
-
-
-            When Signed Requests is enabled, the SAML Request must include a
-
-            NameIDPolicy.
-
-            '
-          type: boolean
-        other_sso_urls:
-          description: 'For use with SP-initiated sign-in flows. Enter the ACS URLs for any
-
-            other requestable SSO nodes used by your app integration. This option
-
-            enables applications to choose where to send the SAML Response. Specify
-
-            a URL and an index that uniquely identifies each ACS URL endpoint.
-
-
-            Some SAML AuthnRequest messages don''t specify an index or URL. In these
-
-            cases, the SAML Response is sent to the ACS specified in the Single sign
-
-            on URL field.
-
-
-            When you enable Signed Requests, Okta deletes any previously defined
-
-            static SSO URLs and reads the SSO URLs from the signed SAML request
-
-            instead. You can''t have both static SSO URLs and dynamic SSO URLs.
-
-
-            This can only be set if validate_signed_requests is set to false.
-
-            '
-          type: object
-          required:
-          - index
-          - url
-          properties:
-            index:
-              description: The index that this URL may be referenced by.
-              type: integer
-              format: int16
-            url:
-              description: 'This is a URL that may be used to replace the ACS URL.
-
-                '
-              type: string
-        additional_user_attributes:
-          description: Any additional attributes to attach to the SAML assertion.
-          type: array
-          items:
-            description: 'The value of the SAML attribute. It will correspond to a directory attribute of the user.
-
-              '
-            type: string
-            enum:
-            - email
-            - user_name
-            - external_id
-            - display_name
-            - custom_static_string
-            example: email
-        icon:
-          description: The URL or data URI of the icon representing the SSO configuration.
-          type: string
-        is_tile_visible:
-          description: Indicates if the SSO configuration tile is visible to the user.
-          type: boolean
-        inbound_scim:
-          default: null
-          type: object
-        use_short_url:
-          default: false
-          type: boolean
-          description: Changes the EntityID in the SAML response to a shorter version. This is to support applications with URL restrictions.
     GrantType:
       type: array
       items:
@@ -783,6 +498,14 @@ components:
         - client_credentials
         example: authorization_code
       description: "Grant types supported by this application's `token` endpoint. Allowable values\nare:\n- `authorization_code`: The authorization code grant type defined\n  in OAuth 2.0, Section 4.1. Namely, the client may authorize to the\n  `token` endpoint with a grant code which it obtains via the `authorize`\n  endpoint.\n- `client_credentials`: The client credentials grant type defined\n  in OAuth 2.0, Section 4.4. Namely, the client may authorize to the\n  `token` endpoint with a client credentials tuple of `client_id` and\n  `client_secret`.\n"
+    PkceConfig:
+      type: string
+      enum:
+      - disabled
+      - plain
+      - s256
+      description: "PKCE code challenge methods supported for applications, as defined by\n[RFC-7636](https://datatracker.ietf.org/doc/html/rfc7636). Allowable values are:\n  - `disabled` : PKCE is disabled for this application. This is the default state if\n    the `pkce` field is left blank. Please note that public OIDC and OAuth2 configured\n    applications MUST enable PKCE support. Confidential clients can leave PKCE disabled\n    if they choose.\n  - `plain` : PKCE is enabled for this application. The server will correlate the `code_challenge` and\n    `code_verifier` between the `authorize` and `token` requests. In this configuration, those fields are\n    required to be identical. This is the lower security option for PKCE support and should only be used\n    by legacy clients, or clients that don't support `s256`.\n  - `s256` : PKCE is enabled for this application, and the server will correlate the `code_challenge` and\n    `code_verifier` between the `authorize` and `token` requests. In this configuration, those fields are\n    required to equate as follows: `code_challenge` = `base64url(sha256(ascii(code_verifier)))`. This is\n    the higher security option and should always be preferred if it is supported by the client.\n"
+      example: s256
     SsoConfigPayload:
       oneOf:
       - $ref: '#/components/schemas/SsoConfigBookmark'
@@ -1197,35 +920,6 @@ components:
       - $ref: '#/components/schemas/SsoConfigOktaBiIdp'
       - $ref: '#/components/schemas/SsoConfigRealityCheck'
       - $ref: '#/components/schemas/SsoConfigWsFed'
-    TokenEndpointAuthMethod:
-      description: "Indicator of the requested authentication method for the token endpoint.\nAllowable values are: - `client_secret_post`: The client uses the HTTP POST\nparameters\n   as defined in OAuth 2.0, Section 2.3.1. Namely, `client_id`\n   and `client_secret` are sent in the body of the POST request.\n- `client_secret_basic`: The client uses HTTP Basic as defined in\n   OAuth 2.0, Section 2.3.1. Namely, `client_id` and `client_secret`\n   are sent in the Basic Authorization header.\n- `none`: The `client_secret` is not part of the request body and there is no\nauthorization header.\n   This endpoint authentication method is only allowed if the application has\n`confidentiality` set to `confidential`.\n\nDeprecation Notice: This field is deprecated. The API will ignore the value\nof this field in requests. In responses, confidential applications will\nalways have `client_secret_basic` and public applications will always have\n`none`. On authentication, confidential applications may use both\n`client_secret_post` and `client_secret_basic`. Public applications may only\nuse `none`. **This field is scheduled for removal on August 1, 2023**\n"
-      type: string
-      deprecated: true
-      enum:
-      - client_secret_basic
-      - client_secret_post
-      - none
-      example: client_secret_basic
-    Error:
-      type: object
-      properties:
-        code:
-          type: string
-          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
-
-            '
-        message:
-          type: string
-          description: 'Human-readable message describing the error.
-
-            '
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-      required:
-      - code
-      - message
     Application:
       title: Application
       type: object
@@ -1393,6 +1087,361 @@ components:
               token_format:
                 $ref: '#/components/schemas/Application/properties/protocol_config/oneOf/0/properties/token_format'
           - $ref: '#/components/schemas/SsoConfigPayload/oneOf/4'
+    SsoConfigSamlPartialUpdate:
+      type: object
+      required:
+      - type
+      properties:
+        type:
+          $ref: '#/components/schemas/SsoConfigType'
+        acs_url:
+          description: 'Location where the SAML Response is sent via HTTP-POST. Often referred
+
+            to as the SAML Assertion Consumer Service (ACS) URL.
+
+            '
+          type: string
+        override_recipient_and_destination:
+          description: 'When this is true, the `recipient_url` and the `destination_url` are
+
+            used for SAML Response.
+
+
+            When this is false, both the `recipient_url` and the `destination_url`
+
+            are omitted and the acs_url is used instead.
+
+            '
+          type: boolean
+        recipient_url:
+          description: 'If `override_recipient_and_destination` is set to true, this field is
+
+            utilized for the SAML Response. If it is false, this field is unused.
+
+
+            The location where the application can present the SAML assertion. This
+
+            is usually the Single Sign-On (SSO) URL.
+
+            '
+          type: string
+        destination_url:
+          description: 'If `override_recipient_and_destination` is set to true, this field is
+
+            utilized for the SAML Response. If it is false, this field is unused.
+
+
+            The location to send the SAML Response, as defined in the SAML
+
+            assertion.
+
+            '
+          type: string
+        audience_url:
+          description: 'The intended audience of the SAML assertion. Often referred to as the
+
+            service provider Entity ID.
+
+            '
+          type: string
+        default_relay_state:
+          description: 'Identifies a specific application resource in an IDP initiated Single
+
+            Sign-On scenario. In most instances this is blank.
+
+            '
+          type: string
+        name_format:
+          description: The format of the SAML NameID.
+          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/name_format'
+        authentication_context:
+          description: The context for SAML authentication.
+          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/authentication_context'
+        subject_user_name_attribute:
+          description: The attribute to use for the subject's username.
+          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/subject_user_name_attribute'
+        sign_envelope:
+          description: 'Determines whether the SAML authentication response message is digitally
+
+            signed by the IdP or not. A digital signature is required to ensure that
+
+            only your IdP generated the response message.
+
+            '
+          type: boolean
+        sign_assertions:
+          description: All of the assertions are signed by the IdP.
+          type: boolean
+        signature_algorithm:
+          description: The algorithm used for signing the SAML assertions.
+          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/signature_algorithm'
+        digest_algorithm:
+          description: The algorithm used for the digest in SAML assertions.
+          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/digest_algorithm'
+        encrypt_assertions:
+          description: 'This is the flag that determines if the SAML assertion is encrypted.
+
+            If this flag is set to `true`, there MUST be a SAML encryption certificate
+
+            uploaded.
+
+
+            Determines whether the SAML assertion is encrypted or not. Encryption
+
+            ensures that nobody but the sender and receiver can understand the
+
+            assertion.
+
+            '
+          type: boolean
+        assertion_validity_duration_seconds:
+          description: 'The amount of time assertions are valid for in seconds.
+
+            '
+          type: integer
+          format: int32
+        assertion_encryption_algorithm:
+          description: The algorithm used to encrypt the SAML assertion.
+          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/assertion_encryption_algorithm'
+        assertion_key_transport_algorithm:
+          description: The algorithm used for key transport in SAML assertions.
+          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/assertion_key_transport_algorithm'
+        assertion_encryption_public_key:
+          description: 'The public key used to encrypt the SAML assertion. This is required
+
+            if `encrypt_assertions` is true.
+
+            '
+          type: string
+        sp_signature_certificates:
+          description: 'The PEM encoded X509 key certificate of the Service Provider
+
+            used to verify SAML AuthnRequests.
+
+            '
+          type: array
+          items:
+            description: 'The PEM encoded X509 key certificate of the Service Provider used to verify SAML AuthnRequests.
+
+              '
+            type: array
+            items:
+              type: object
+              required:
+              - sp_public_signing_key
+              properties:
+                sp_public_signing_key:
+                  type: string
+            example:
+            - '-----BEGIN CERTIFICATE-----
+
+
+              MIIDdzCCAl+gAwIBAgIEbF2LTTANBgkqhkiG9w0BAQsFADBoMQswCQYDVQQGEwJV
+
+              UzELMAkGA1UECBMCQ0ExFTATBgNVBAcTDFNhbiBGcmFuY2lzY28xEjAQBgNVBAoT
+
+              CU9rdGEsIEluYy4xHzAdBgNVBAMTFm9rdGEuZXhhbXBsZS5jb20gQ0EgUm9vdDAe
+
+              Fw0yMDA2MTkwMDAwMDBaFw0yMTA2MTkyMzU5NTlaMG0xCzAJBgNVBAYTAlVTMQsw
+
+              CQYDVQQIEwJDQTEVMBMGA1UEBxMMU2FuIEZyYW5jaXNjbzESMBAGA1UEChMJb2t0
+
+              Pbg6vGfJnxYYibTwLlXhgxl0tT+NMQFZ5GQslLh2sB3AWBzjZtFzFS7lDi0n4Fz5
+
+              y9x6U1hUS54fScJmSVSTT9v/qAD0ccjvlPj3M6PENq2X7TwrOqSTgx5TPOpA5Myl
+
+              MtwPbU3wn/pA5Cp9kWvlYbBfTS4Hx14FQyg3GAAkMrzrhKhpIfhz6iH0H8kDxFId
+
+              6KjXy4TvoUM/tH7c6v2HS6D4TD7TfYOv/8A7E1Lj6WKwjtghTAh3Rb5tbyxRBcw
+
+              gg==
+
+              -----END CERTIFICATE-----
+
+              '
+        enable_single_log_out:
+          description: Enable single logout.
+          type: boolean
+        single_log_out_url:
+          description: 'The location where the logout response will be sent.
+
+            Only enabled if `enable_single_log_out` is true.
+
+            '
+          type: string
+        single_log_out_issuer_url:
+          description: 'The issuer ID for the service provider. When handling a Single Log Out.
+
+
+            Only enabled if `enable_single_log_out` is true.
+
+            '
+          type: string
+        single_log_out_binding:
+          description: The binding used for single logout messages.
+          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/single_log_out_binding'
+        single_logout_sign_request_and_response:
+          description: 'If we should expect the LogoutRequest to be signed and if we
+
+            should sign the LogoutResponse.
+
+            '
+          type: boolean
+        validate_signed_requests:
+          description: 'Select this to validate all SAML requests using the Signature
+
+            Certificate. The payload from the SAML request is validated, and Okta
+
+            dynamically reads any single sign-on (SSO) URLs from the request. This
+
+            checkbox appears after you upload a Signature Certificate.
+
+
+            When Signed Requests is enabled, the SAML Request must include a
+
+            NameIDPolicy.
+
+            '
+          type: boolean
+        other_sso_urls:
+          description: 'For use with SP-initiated sign-in flows. Enter the ACS URLs for any
+
+            other requestable SSO nodes used by your app integration. This option
+
+            enables applications to choose where to send the SAML Response. Specify
+
+            a URL and an index that uniquely identifies each ACS URL endpoint.
+
+
+            Some SAML AuthnRequest messages don''t specify an index or URL. In these
+
+            cases, the SAML Response is sent to the ACS specified in the Single sign
+
+            on URL field.
+
+
+            When you enable Signed Requests, Okta deletes any previously defined
+
+            static SSO URLs and reads the SSO URLs from the signed SAML request
+
+            instead. You can''t have both static SSO URLs and dynamic SSO URLs.
+
+
+            This can only be set if validate_signed_requests is set to false.
+
+            '
+          type: object
+          required:
+          - index
+          - url
+          properties:
+            index:
+              description: The index that this URL may be referenced by.
+              type: integer
+              format: int16
+            url:
+              description: 'This is a URL that may be used to replace the ACS URL.
+
+                '
+              type: string
+        additional_user_attributes:
+          description: Any additional attributes to attach to the SAML assertion.
+          type: array
+          items:
+            description: 'The value of the SAML attribute. It will correspond to a directory attribute of the user.
+
+              '
+            type: string
+            enum:
+            - email
+            - user_name
+            - external_id
+            - display_name
+            - custom_static_string
+            example: email
+        icon:
+          description: The URL or data URI of the icon representing the SSO configuration.
+          type: string
+        is_tile_visible:
+          description: Indicates if the SSO configuration tile is visible to the user.
+          type: boolean
+        inbound_scim:
+          default: null
+          type: object
+        use_short_url:
+          default: false
+          type: boolean
+          description: Changes the EntityID in the SAML response to a shorter version. This is to support applications with URL restrictions.
+    TokenEndpointAuthMethod:
+      description: "Indicator of the requested authentication method for the token endpoint.\nAllowable values are: - `client_secret_post`: The client uses the HTTP POST\nparameters\n   as defined in OAuth 2.0, Section 2.3.1. Namely, `client_id`\n   and `client_secret` are sent in the body of the POST request.\n- `client_secret_basic`: The client uses HTTP Basic as defined in\n   OAuth 2.0, Section 2.3.1. Namely, `client_id` and `client_secret`\n   are sent in the Basic Authorization header.\n- `none`: The `client_secret` is not part of the request body and there is no\nauthorization header.\n   This endpoint authentication method is only allowed if the application has\n`confidentiality` set to `confidential`.\n\nDeprecation Notice: This field is deprecated. The API will ignore the value\nof this field in requests. In responses, confidential applications will\nalways have `client_secret_basic` and public applications will always have\n`none`. On authentication, confidential applications may use both\n`client_secret_post` and `client_secret_basic`. Public applications may only\nuse `none`. **This field is scheduled for removal on August 1, 2023**\n"
+      type: string
+      deprecated: true
+      enum:
+      - client_secret_basic
+      - client_secret_post
+      - none
+      example: client_secret_basic
+    TokenConfiguration:
+      description: Properties of a token issued for an application.
+      type: object
+      required:
+      - expires_after
+      properties:
+        expires_after:
+          type: integer
+          format: uint32
+          description: 'Time after minting, in seconds, for which the token will be considered valid.
+
+            '
+          minimum: 0
+          example: 86400
+        token_signing_algorithm:
+          type: string
+          enum:
+          - RS256
+          description: 'Signing algorithm to use for an application token. The only allowable value at present is `RS256`.
+
+            '
+          default: RS256
+          example: RS256
+        subject_field:
+          type: string
+          enum:
+          - id
+          - email
+          - username
+          description: 'Property of a principal which is used to fill the subject of a token issued for this application.
+
+            '
+          default: id
+          example: id
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
+
+            '
+        message:
+          type: string
+          description: 'Human-readable message describing the error.
+
+            '
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      required:
+      - code
+      - message
+    Confidentiality:
+      description: "The confidentiality of the client, as prescribed by OAuth 2.0 and\nOIDC. Confidentiality is based on a client's ability to authenticate\nsecurely with the authorization server (i.e., ability to\nmaintain the confidentiality of their client credentials). Allowable\nvalues are:\n- `confidential`: Clients capable of maintaining the confidentiality\n  of their credentials (e.g., client implemented on a secure server with\n  restricted access to the client credentials), or capable of secure\n  client authentication using other means.\n- `public`: Clients incapable of maintaining the confidentiality of their\n  credentials (e.g., clients executing on the device used by the\n  resource owner, such as an installed native application or a web\n  browser-based application), and incapable of secure client\n  authentication via any other means.\n"
+      type: string
+      enum:
+      - confidential
+      - public
+      example: confidential
     ListApplicationsResponse:
       title: List Applications Response
       description: Response for ListApplications.
@@ -1435,55 +1484,6 @@ components:
           description: Type of the error detail.
       required:
       - type
-    Confidentiality:
-      description: "The confidentiality of the client, as prescribed by OAuth 2.0 and\nOIDC. Confidentiality is based on a client's ability to authenticate\nsecurely with the authorization server (i.e., ability to\nmaintain the confidentiality of their client credentials). Allowable\nvalues are:\n- `confidential`: Clients capable of maintaining the confidentiality\n  of their credentials (e.g., client implemented on a secure server with\n  restricted access to the client credentials), or capable of secure\n  client authentication using other means.\n- `public`: Clients incapable of maintaining the confidentiality of their\n  credentials (e.g., clients executing on the device used by the\n  resource owner, such as an installed native application or a web\n  browser-based application), and incapable of secure client\n  authentication via any other means.\n"
-      type: string
-      enum:
-      - confidential
-      - public
-      example: confidential
-    PkceConfig:
-      type: string
-      enum:
-      - disabled
-      - plain
-      - s256
-      description: "PKCE code challenge methods supported for applications, as defined by\n[RFC-7636](https://datatracker.ietf.org/doc/html/rfc7636). Allowable values are:\n  - `disabled` : PKCE is disabled for this application. This is the default state if\n    the `pkce` field is left blank. Please note that public OIDC and OAuth2 configured\n    applications MUST enable PKCE support. Confidential clients can leave PKCE disabled\n    if they choose.\n  - `plain` : PKCE is enabled for this application. The server will correlate the `code_challenge` and\n    `code_verifier` between the `authorize` and `token` requests. In this configuration, those fields are\n    required to be identical. This is the lower security option for PKCE support and should only be used\n    by legacy clients, or clients that don't support `s256`.\n  - `s256` : PKCE is enabled for this application, and the server will correlate the `code_challenge` and\n    `code_verifier` between the `authorize` and `token` requests. In this configuration, those fields are\n    required to equate as follows: `code_challenge` = `base64url(sha256(ascii(code_verifier)))`. This is\n    the higher security option and should always be preferred if it is supported by the client.\n"
-      example: s256
-    TokenConfiguration:
-      description: Properties of a token issued for an application.
-      type: object
-      required:
-      - expires_after
-      properties:
-        expires_after:
-          type: integer
-          format: uint32
-          description: 'Time after minting, in seconds, for which the token will be considered valid.
-
-            '
-          minimum: 0
-          example: 86400
-        token_signing_algorithm:
-          type: string
-          enum:
-          - RS256
-          description: 'Signing algorithm to use for an application token. The only allowable value at present is `RS256`.
-
-            '
-          default: RS256
-          example: RS256
-        subject_field:
-          type: string
-          enum:
-          - id
-          - email
-          - username
-          description: 'Property of a principal which is used to fill the subject of a token issued for this application.
-
-            '
-          default: id
-          example: id
   parameters:
     realm_id:
       name: realm_id
@@ -1493,14 +1493,6 @@ components:
       schema:
         type: string
         example: 19a95130480dfa79
-    application_id:
-      name: application_id
-      in: path
-      description: A unique identifier for an application.
-      required: true
-      schema:
-        type: string
-        example: 38833c36-6f47-4992-9329-ea0a00915137
     tenant_id:
       name: tenant_id
       in: path
@@ -1509,14 +1501,6 @@ components:
       schema:
         type: string
         example: 000176d94fd7b4d1
-    page_token:
-      name: page_token
-      in: query
-      description: 'Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.
-
-        '
-      schema:
-        type: string
     page_size:
       name: page_size
       in: query
@@ -1527,6 +1511,22 @@ components:
         type: integer
         format: uint32
         minimum: 0
+    page_token:
+      name: page_token
+      in: query
+      description: 'Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.
+
+        '
+      schema:
+        type: string
+    application_id:
+      name: application_id
+      in: path
+      description: A unique identifier for an application.
+      required: true
+      schema:
+        type: string
+        example: 38833c36-6f47-4992-9329-ea0a00915137
   securitySchemes:
     BearerAuth:
       type: http

@@ -163,6 +163,26 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
+
+            '
+        message:
+          type: string
+          description: 'Human-readable message describing the error.
+
+            '
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      required:
+      - code
+      - message
     FlowTypeConfiguration:
       title: FlowTypeConfiguration
       description: Configuration for a specific flow type
@@ -177,110 +197,6 @@ components:
       required:
       - enabled
       - valid
-    ErrorDetail:
-      title: Error Detail
-      description: 'Additional details for errors designed to support client applications.
-
-        '
-      type: object
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          type: string
-          description: Type of the error detail.
-      required:
-      - type
-    PlatformFlowTypeConfig:
-      title: PlatformFlowTypeConfig
-      description: Platform-specific flow type configurations
-      type: object
-      properties:
-        android:
-          $ref: '#/components/schemas/FlowTypeSet'
-        macos:
-          $ref: '#/components/schemas/FlowTypeSet'
-        ios:
-          $ref: '#/components/schemas/FlowTypeSet'
-        windows:
-          $ref: '#/components/schemas/FlowTypeSet'
-        web:
-          $ref: '#/components/schemas/FlowTypeSet'
-        linux:
-          $ref: '#/components/schemas/FlowTypeSet'
-        chromeos:
-          $ref: '#/components/schemas/FlowTypeSet'
-        chromeosweb:
-          $ref: '#/components/schemas/FlowTypeSet'
-      required:
-      - android
-      - macos
-      - ios
-      - windows
-      - web
-      - linux
-      - chromeos
-      - chromeosweb
-    FlowTypeConfig:
-      title: FlowTypeConfig
-      description: Flow type configuration for a tenant
-      type: object
-      properties:
-        id:
-          type: string
-          description: 'ID of the flow type configuration. This is automatically generated on creation. This field is immutable and output-only.
-
-            '
-          minLength: 1
-          readOnly: true
-        tenant_id:
-          type: string
-          description: ID of the tenant this configuration belongs to
-          readOnly: true
-        realm_id:
-          type: string
-          description: ID of the realm this configuration belongs to
-          readOnly: true
-        create_time:
-          type: string
-          format: date-time
-          description: Timestamp when the flow type configuration was created
-          readOnly: true
-        update_time:
-          type: string
-          format: date-time
-          description: Timestamp when the flow type configuration was last updated
-          readOnly: true
-        platform_config:
-          $ref: '#/components/schemas/PlatformFlowTypeConfig'
-      required:
-      - id
-      - tenant_id
-      - realm_id
-      - create_time
-      - update_time
-      - platform_config
-    UpdatePlatformFlowTypeConfig:
-      title: UpdatePlatformFlowTypeConfig
-      description: Platform-specific flow type configurations for updates
-      type: object
-      properties:
-        android:
-          $ref: '#/components/schemas/UpdateFlowTypeSet'
-        macos:
-          $ref: '#/components/schemas/UpdateFlowTypeSet'
-        ios:
-          $ref: '#/components/schemas/UpdateFlowTypeSet'
-        windows:
-          $ref: '#/components/schemas/UpdateFlowTypeSet'
-        web:
-          $ref: '#/components/schemas/UpdateFlowTypeSet'
-        linux:
-          $ref: '#/components/schemas/UpdateFlowTypeSet'
-        chromeos:
-          $ref: '#/components/schemas/UpdateFlowTypeSet'
-        chromeosweb:
-          $ref: '#/components/schemas/UpdateFlowTypeSet'
     FlowTypeSet:
       title: FlowTypeSet
       description: Set of flow type configurations for a platform
@@ -326,26 +242,38 @@ components:
       - safari_extension
       - layered_auth_qr_code
       - secure_localhost
-    Error:
+    UpdatePlatformFlowTypeConfig:
+      title: UpdatePlatformFlowTypeConfig
+      description: Platform-specific flow type configurations for updates
       type: object
       properties:
-        code:
-          type: string
-          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
-
-            '
-        message:
-          type: string
-          description: 'Human-readable message describing the error.
-
-            '
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-      required:
-      - code
-      - message
+        android:
+          $ref: '#/components/schemas/UpdateFlowTypeSet'
+        macos:
+          $ref: '#/components/schemas/UpdateFlowTypeSet'
+        ios:
+          $ref: '#/components/schemas/UpdateFlowTypeSet'
+        windows:
+          $ref: '#/components/schemas/UpdateFlowTypeSet'
+        web:
+          $ref: '#/components/schemas/UpdateFlowTypeSet'
+        linux:
+          $ref: '#/components/schemas/UpdateFlowTypeSet'
+        chromeos:
+          $ref: '#/components/schemas/UpdateFlowTypeSet'
+        chromeosweb:
+          $ref: '#/components/schemas/UpdateFlowTypeSet'
+    UpdateFlowTypeConfiguration:
+      title: UpdateFlowTypeConfiguration
+      description: Configuration for a specific flow type (update version)
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Whether the customer allows this flow type to be used.
+        valid:
+          type: boolean
+          description: Whether the flow type is valid and expected on a given platform
     UpdateFlowTypeSet:
       title: UpdateFlowTypeSet
       description: Set of flow type configurations for a platform (update version)
@@ -377,26 +305,90 @@ components:
           $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
         secure_localhost:
           $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
-    UpdateFlowTypeConfiguration:
-      title: UpdateFlowTypeConfiguration
-      description: Configuration for a specific flow type (update version)
+    FlowTypeConfig:
+      title: FlowTypeConfig
+      description: Flow type configuration for a tenant
       type: object
       properties:
-        enabled:
-          type: boolean
-          description: Whether the customer allows this flow type to be used.
-        valid:
-          type: boolean
-          description: Whether the flow type is valid and expected on a given platform
+        id:
+          type: string
+          description: 'ID of the flow type configuration. This is automatically generated on creation. This field is immutable and output-only.
+
+            '
+          minLength: 1
+          readOnly: true
+        tenant_id:
+          type: string
+          description: ID of the tenant this configuration belongs to
+          readOnly: true
+        realm_id:
+          type: string
+          description: ID of the realm this configuration belongs to
+          readOnly: true
+        create_time:
+          type: string
+          format: date-time
+          description: Timestamp when the flow type configuration was created
+          readOnly: true
+        update_time:
+          type: string
+          format: date-time
+          description: Timestamp when the flow type configuration was last updated
+          readOnly: true
+        platform_config:
+          $ref: '#/components/schemas/PlatformFlowTypeConfig'
+      required:
+      - id
+      - tenant_id
+      - realm_id
+      - create_time
+      - update_time
+      - platform_config
+    ErrorDetail:
+      title: Error Detail
+      description: 'Additional details for errors designed to support client applications.
+
+        '
+      type: object
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          type: string
+          description: Type of the error detail.
+      required:
+      - type
+    PlatformFlowTypeConfig:
+      title: PlatformFlowTypeConfig
+      description: Platform-specific flow type configurations
+      type: object
+      properties:
+        android:
+          $ref: '#/components/schemas/FlowTypeSet'
+        macos:
+          $ref: '#/components/schemas/FlowTypeSet'
+        ios:
+          $ref: '#/components/schemas/FlowTypeSet'
+        windows:
+          $ref: '#/components/schemas/FlowTypeSet'
+        web:
+          $ref: '#/components/schemas/FlowTypeSet'
+        linux:
+          $ref: '#/components/schemas/FlowTypeSet'
+        chromeos:
+          $ref: '#/components/schemas/FlowTypeSet'
+        chromeosweb:
+          $ref: '#/components/schemas/FlowTypeSet'
+      required:
+      - android
+      - macos
+      - ios
+      - windows
+      - web
+      - linux
+      - chromeos
+      - chromeosweb
   parameters:
-    tenant_id:
-      name: tenant_id
-      in: path
-      description: A unique identifier for a tenant.
-      required: true
-      schema:
-        type: string
-        example: 000176d94fd7b4d1
     realm_id:
       name: realm_id
       in: path
@@ -405,6 +397,14 @@ components:
       schema:
         type: string
         example: 19a95130480dfa79
+    tenant_id:
+      name: tenant_id
+      in: path
+      description: A unique identifier for a tenant.
+      required: true
+      schema:
+        type: string
+        example: 000176d94fd7b4d1
   securitySchemes:
     BearerAuth:
       type: http
