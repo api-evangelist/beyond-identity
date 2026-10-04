@@ -442,6 +442,9 @@ apis:
   - type: Examples
     url: examples/beyond-identity-credential-binding-job-example.json
 common:
+- type: CapabilityMap
+  url: capabilities/beyond-identity-capability-edges.yml
+  name: Beyond Identity Business Capability Map
 - type: PostmanWorkspace
   url: https://www.postman.com/kinlaneapi/beyond-identity/overview
 - type: AgenticAccess

@@ -1,0 +1,115 @@
+slug: beyond-identity
+provider: Beyond Identity
+generated_by: planning/capability-mapping/scripts/classify_capabilities.py
+model: claude-opus-5
+frame:
+- Software & Technology
+min_confidence: 0.7
+capability_model:
+  source: https://github.com/vincentmakes/turbo-ea-capabilities
+  license: CC-BY-4.0
+  attribution: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
+    CC BY 4.0
+  notice: NOTICE
+edge_count: 10
+edges:
+- tag: Credentials
+  spec_file: beyond-identity-credentials-api-openapi.yml
+  capability_id: BC-620.20
+  capability_id_l1: BC-620
+  capability_name: Identity & Access Management
+  confidence: 0.88
+  evidence: ListCredentials List Credentials for an Identity; RevokeCredential Revoke a Credential
+  reason: Lifecycle of authentication credentials bound to user identities, including revocation — Identity
+    & Access Management.
+- tag: Identities
+  spec_file: beyond-identity-identities-api-openapi.yml
+  capability_id: BC-620.20
+  capability_id_l1: BC-620
+  capability_name: Identity & Access Management
+  confidence: 0.88
+  evidence: CreateIdentity Create a New Identity; ListIdentityRoles List Role Memberships for an Identity
+  reason: Full lifecycle of user identities plus group and role memberships in a zero-trust authentication
+    platform — joiners-movers-leavers style IAM, not customer data management.
+- tag: Groups
+  spec_file: beyond-identity-groups-api-openapi.yml
+  capability_id: BC-620.20
+  capability_id_l1: BC-620
+  capability_name: Identity & Access Management
+  confidence: 0.85
+  evidence: AddGroupMembers Add Members to a Group; ListGroupRoles List Role Memberships for a Group
+  reason: 'Group membership and role assignment on an identity platform — access entitlement administration,
+    i.e. Identity & Access Management. Not HR org structure: members are identities with roles, not employees.'
+- tag: Roles
+  spec_file: beyond-identity-roles-api-openapi.yml
+  capability_id: BC-620.20
+  capability_id_l1: BC-620
+  capability_name: Identity & Access Management
+  confidence: 0.85
+  evidence: POST .../roles/{role_id}:addMembers  AddRoleMembers  Assign Members to a Role; POST .../roles/{role_id}:addScopes  AddRoleScopes  Assign
+    Scopes to a Role
+  reason: Creation of roles, assignment of member identities/groups and OAuth scopes to roles is role-based
+    access control — squarely Identity & Access Management.
+- tag: SCIM
+  spec_file: beyond-identity-scim-api-openapi.yml
+  capability_id: BC-620.20
+  capability_id_l1: BC-620
+  capability_name: Identity & Access Management
+  confidence: 0.85
+  evidence: POST /v1/tenants/{tenant_id}/realms/{realm_id}/scim/v2/Users  SCIMCreateUser  Create a New
+    User; SCIMCreateGroup  Create a New Group
+  reason: SCIM user and group provisioning/deprovisioning endpoints are joiner-mover-leaver account lifecycle
+    automation, i.e. identity and access management. Not HR records management — the schemas are SCIMUser/SCIMGroup,
+    not employee records.
+- tag: Identity Provider
+  spec_file: beyond-identity-identity-provider-api-openapi.yml
+  capability_id: BC-620.20
+  capability_id_l1: BC-620
+  capability_name: Identity & Access Management
+  confidence: 0.82
+  evidence: POST /v1/tenants/{tenant_id}/realms/{realm_id}/identity-providers  createIdentityProvider  Creates
+    a new identity provider; schemas IdentityProviderProtocolConfigOidcIdp, PkceConfig
+  reason: Operations register and maintain external OIDC identity providers for a realm — configuration
+    of identity federation, i.e. identity and access management. Mapped to the cross-industry IAM capability
+    rather than a SaaS-tenant sub-capability because the surface is the vendor's core IAM product configuration.
+- tag: SSO Configs
+  spec_file: beyond-identity-sso-configs-api-openapi.yml
+  capability_id: BC-620.20
+  capability_id_l1: BC-620
+  capability_name: Identity & Access Management
+  confidence: 0.82
+  evidence: POST /v1/tenants/{tenant_id}/realms/{realm_id}/sso-configs  CreateSsoConfig  Create a new
+    SSO Config; AddIdentitiesToSsoConfig  Associate Identities with an SSO Config
+  reason: Single sign-on configurations (SAML, WS-Fed, generic OIDC, Entra ID) with identity and group
+    assignment — federation and access assignment, i.e. IAM.
+- tag: Authenticator Configurations
+  spec_file: beyond-identity-authenticator-configurations-api-openapi.yml
+  capability_id: BC-620.20
+  capability_id_l1: BC-620
+  capability_name: Identity & Access Management
+  confidence: 0.8
+  evidence: 'CreateAuthenticatorConfig Create a New Authenticator Configuration; schema: AuthenticatorConfig'
+  reason: Configuration of passwordless authenticators used to authenticate users — authentication/access
+    control mechanism management within Identity & Access Management.
+- tag: Credential Binding Jobs
+  spec_file: beyond-identity-credential-binding-jobs-api-openapi.yml
+  capability_id: BC-620.20
+  capability_id_l1: BC-620
+  capability_name: Identity & Access Management
+  confidence: 0.8
+  evidence: CreateCredentialBindingJob Create a New Credential Binding Job; SetCredentialBindingJobRevoked
+    Revocation of an active credential binding job
+  reason: Issuance and revocation of device-bound credentials for identities — credential provisioning
+    and deprovisioning, squarely Identity & Access Management. The 'Jobs'/'batch' framing is a delivery
+    mechanism, not the capability.
+- tag: Applications
+  spec_file: beyond-identity-applications-api-openapi.yml
+  capability_id: BC-620.20
+  capability_id_l1: BC-620
+  capability_name: Identity & Access Management
+  confidence: 0.75
+  evidence: 'CreateApplication Create a New Application; schemas: SsoConfigSamlPartialUpdate, GrantType,
+    TokenEndpointAuthMethod, PkceConfig, TokenConfiguration'
+  reason: '''Applications'' here are OIDC/SAML relying-party registrations with grant types, PKCE and
+    token config — federation/SSO configuration on an identity platform, i.e. Identity & Access Management.
+    Some chance this is better read as OAuth client/credential management for developers.'
