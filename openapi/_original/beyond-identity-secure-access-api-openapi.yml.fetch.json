@@ -1,0 +1,12 @@
+{
+ "url": "https://developer.beyondidentity.com/api/v1/openapi.yaml",
+ "requested_url": "https://developer.beyondidentity.com/api/v1/openapi.yaml",
+ "status": 200,
+ "content_type": "text/yaml; charset=utf-8",
+ "bytes": 653928,
+ "sha256": "d72f6efd21e00ce5ee2cc9eeb9a362525bf4dadde63ac900e7831accc77eef0c",
+ "fetched_at": "2026-10-04",
+ "fetched_by": "APIEvangelist-Harvest/1.0 (+https://apievangelist.com)",
+ "match": "byte-identical",
+ "note": "Re-fetched from the provider by verify-openapi-sources.py; the archived file is byte-identical to what the provider serves."
+}
