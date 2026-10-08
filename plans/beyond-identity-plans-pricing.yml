@@ -114,3 +114,28 @@ addons:
   - name: RealityCheck
     description: Deepfake defense for identity verification
     url: https://www.beyondidentity.com/pricing
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - free
+  units: []
+  plans:
+  - name: Authentication Essentials
+    access: paid
+    model: free
+    model_how: derived
+    units: []
+    periods: []
+  - name: Zero Trust Identity and Device
+    access: paid
+    model: free
+    model_how: derived
+    units: []
+    periods: []
+  - name: Secure Access Complete
+    access: enterprise
+    model: free
+    model_how: derived
+    units: []
+    periods: []
