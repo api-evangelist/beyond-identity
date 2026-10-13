@@ -1,0 +1,21 @@
+generated: '2026-10-13'
+method: searched
+checked:
+- https://aws.amazon.com/marketplace/
+marketplace_apps: []
+edges:
+- partner_name: AWS Marketplace
+  partner: amazon-web-services
+  partner_match: aggregator
+  type: marketplace
+  marketplace: aws-marketplace
+  channel: distribution
+  relationship: platform-app
+  direction: provider-built
+  evidence: https://aws.amazon.com/marketplace/seller-profile?id=3504413d-8c43-4c90-ae89-6d4a2f8b2539
+  listing_count: 1
+  apps:
+  - Secure Access
+  seller_name: Beyond Identity
+  detected_by: sweep-cloud-marketplaces.py
+  detected: '2026-10-13'
