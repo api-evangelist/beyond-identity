@@ -163,40 +163,6 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
-    Error:
-      type: object
-      properties:
-        code:
-          type: string
-          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
-
-            '
-        message:
-          type: string
-          description: 'Human-readable message describing the error.
-
-            '
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-      required:
-      - code
-      - message
-    FlowTypeConfiguration:
-      title: FlowTypeConfiguration
-      description: Configuration for a specific flow type
-      type: object
-      properties:
-        enabled:
-          type: boolean
-          description: Whether the this flow type is allowed to be used.
-        valid:
-          type: boolean
-          description: Whether the flow type is valid and expected on a given platform
-      required:
-      - enabled
-      - valid
     FlowTypeSet:
       title: FlowTypeSet
       description: Set of flow type configurations for a platform
@@ -242,69 +208,6 @@ components:
       - safari_extension
       - layered_auth_qr_code
       - secure_localhost
-    UpdatePlatformFlowTypeConfig:
-      title: UpdatePlatformFlowTypeConfig
-      description: Platform-specific flow type configurations for updates
-      type: object
-      properties:
-        android:
-          $ref: '#/components/schemas/UpdateFlowTypeSet'
-        macos:
-          $ref: '#/components/schemas/UpdateFlowTypeSet'
-        ios:
-          $ref: '#/components/schemas/UpdateFlowTypeSet'
-        windows:
-          $ref: '#/components/schemas/UpdateFlowTypeSet'
-        web:
-          $ref: '#/components/schemas/UpdateFlowTypeSet'
-        linux:
-          $ref: '#/components/schemas/UpdateFlowTypeSet'
-        chromeos:
-          $ref: '#/components/schemas/UpdateFlowTypeSet'
-        chromeosweb:
-          $ref: '#/components/schemas/UpdateFlowTypeSet'
-    UpdateFlowTypeConfiguration:
-      title: UpdateFlowTypeConfiguration
-      description: Configuration for a specific flow type (update version)
-      type: object
-      properties:
-        enabled:
-          type: boolean
-          description: Whether the customer allows this flow type to be used.
-        valid:
-          type: boolean
-          description: Whether the flow type is valid and expected on a given platform
-    UpdateFlowTypeSet:
-      title: UpdateFlowTypeSet
-      description: Set of flow type configurations for a platform (update version)
-      type: object
-      properties:
-        unknown:
-          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
-        scheme:
-          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
-        embedded:
-          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
-        copy:
-          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
-        roaming_auth:
-          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
-        android_autofill:
-          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
-        android_accessibility:
-          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
-        pipe:
-          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
-        localhost:
-          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
-        universal_link:
-          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
-        safari_extension:
-          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
-        layered_auth_qr_code:
-          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
-        secure_localhost:
-          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
     FlowTypeConfig:
       title: FlowTypeConfig
       description: Flow type configuration for a tenant
@@ -344,20 +247,6 @@ components:
       - create_time
       - update_time
       - platform_config
-    ErrorDetail:
-      title: Error Detail
-      description: 'Additional details for errors designed to support client applications.
-
-        '
-      type: object
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          type: string
-          description: Type of the error detail.
-      required:
-      - type
     PlatformFlowTypeConfig:
       title: PlatformFlowTypeConfig
       description: Platform-specific flow type configurations
@@ -388,6 +277,117 @@ components:
       - linux
       - chromeos
       - chromeosweb
+    UpdateFlowTypeConfiguration:
+      title: UpdateFlowTypeConfiguration
+      description: Configuration for a specific flow type (update version)
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Whether the customer allows this flow type to be used.
+        valid:
+          type: boolean
+          description: Whether the flow type is valid and expected on a given platform
+    ErrorDetail:
+      title: Error Detail
+      description: 'Additional details for errors designed to support client applications.
+
+        '
+      type: object
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          type: string
+          description: Type of the error detail.
+      required:
+      - type
+    UpdatePlatformFlowTypeConfig:
+      title: UpdatePlatformFlowTypeConfig
+      description: Platform-specific flow type configurations for updates
+      type: object
+      properties:
+        android:
+          $ref: '#/components/schemas/UpdateFlowTypeSet'
+        macos:
+          $ref: '#/components/schemas/UpdateFlowTypeSet'
+        ios:
+          $ref: '#/components/schemas/UpdateFlowTypeSet'
+        windows:
+          $ref: '#/components/schemas/UpdateFlowTypeSet'
+        web:
+          $ref: '#/components/schemas/UpdateFlowTypeSet'
+        linux:
+          $ref: '#/components/schemas/UpdateFlowTypeSet'
+        chromeos:
+          $ref: '#/components/schemas/UpdateFlowTypeSet'
+        chromeosweb:
+          $ref: '#/components/schemas/UpdateFlowTypeSet'
+    UpdateFlowTypeSet:
+      title: UpdateFlowTypeSet
+      description: Set of flow type configurations for a platform (update version)
+      type: object
+      properties:
+        unknown:
+          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
+        scheme:
+          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
+        embedded:
+          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
+        copy:
+          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
+        roaming_auth:
+          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
+        android_autofill:
+          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
+        android_accessibility:
+          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
+        pipe:
+          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
+        localhost:
+          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
+        universal_link:
+          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
+        safari_extension:
+          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
+        layered_auth_qr_code:
+          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
+        secure_localhost:
+          $ref: '#/components/schemas/UpdateFlowTypeConfiguration'
+    FlowTypeConfiguration:
+      title: FlowTypeConfiguration
+      description: Configuration for a specific flow type
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Whether the this flow type is allowed to be used.
+        valid:
+          type: boolean
+          description: Whether the flow type is valid and expected on a given platform
+      required:
+      - enabled
+      - valid
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: 'Human-readable HTTP status code name, stylized as lower snake case (e.g. bad_request).
+
+            '
+        message:
+          type: string
+          description: 'Human-readable message describing the error.
+
+            '
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      required:
+      - code
+      - message
   parameters:
     realm_id:
       name: realm_id

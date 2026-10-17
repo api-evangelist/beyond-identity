@@ -2047,14 +2047,36 @@ paths:
               $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D~1realms~1%7Brealm_id%7D~1sso-configs/get/responses/200/headers/x-correlation-id'
 components:
   schemas:
-    SsoConfigGenericOidc:
+    SsoConfigEntraIdExternalAuthMethod:
       type: object
       required:
       - type
       - redirect_uris
-      - scopes
-      - confidentiality
-      - pkce
+      - discover_endpoint
+      properties:
+        type:
+          $ref: '#/components/schemas/SsoConfigType'
+        redirect_uris:
+          default: null
+          type: array
+          items:
+            type: string
+        inbound_scim:
+          default: null
+          type: object
+        discover_endpoint:
+          description: 'Describes the type of discovery endpoint for the entra_id_external_auth_methods sso config.
+
+            '
+          type: string
+          enum:
+          - global_azure
+          - azure_us_government
+          - microsoft_azure_vianet
+    SsoConfigGenericOidcPartialUpdate:
+      type: object
+      required:
+      - type
       properties:
         type:
           $ref: '#/components/schemas/SsoConfigType'
@@ -2090,14 +2112,18 @@ components:
         inbound_scim:
           default: null
           type: object
-    SsoConfigEnvelope:
-      description: Represents an SSO config as a request body.
+    ApplicationSsoResponse:
       type: object
-      required:
-      - sso_config
       properties:
-        sso_config:
-          $ref: '#/components/schemas/SsoConfig'
+        sso_config_id:
+          type: string
+          description: 'This is the id of the SSO Config object that is associated with the
+
+            provided application id. If this is missing it means that the
+
+            application isn''t associated with an SSO config.
+
+            '
     SsoConfigPayload:
       oneOf:
       - $ref: '#/components/schemas/SsoConfigBookmark'
@@ -2512,347 +2538,6 @@ components:
       - $ref: '#/components/schemas/SsoConfigOktaBiIdp'
       - $ref: '#/components/schemas/SsoConfigRealityCheck'
       - $ref: '#/components/schemas/SsoConfigWsFed'
-    SsoConfigBookmarkPartialUpdate:
-      type: object
-      required:
-      - type
-      properties:
-        type:
-          $ref: '#/components/schemas/SsoConfigType'
-        login_link:
-          type: string
-        icon:
-          type: string
-        is_tile_visible:
-          type: boolean
-    PkceConfig:
-      type: string
-      enum:
-      - disabled
-      - plain
-      - s256
-      description: "PKCE code challenge methods supported for applications, as defined by\n[RFC-7636](https://datatracker.ietf.org/doc/html/rfc7636). Allowable values are:\n  - `disabled` : PKCE is disabled for this application. This is the default state if\n    the `pkce` field is left blank. Please note that public OIDC and OAuth2 configured\n    applications MUST enable PKCE support. Confidential clients can leave PKCE disabled\n    if they choose.\n  - `plain` : PKCE is enabled for this application. The server will correlate the `code_challenge` and\n    `code_verifier` between the `authorize` and `token` requests. In this configuration, those fields are\n    required to be identical. This is the lower security option for PKCE support and should only be used\n    by legacy clients, or clients that don't support `s256`.\n  - `s256` : PKCE is enabled for this application, and the server will correlate the `code_challenge` and\n    `code_verifier` between the `authorize` and `token` requests. In this configuration, those fields are\n    required to equate as follows: `code_challenge` = `base64url(sha256(ascii(code_verifier)))`. This is\n    the higher security option and should always be preferred if it is supported by the client.\n"
-      example: s256
-    Identity:
-      title: Identity
-      type: object
-      description: 'An identity is a unique identifier that may be used by an end-user to gain access governed by Beyond Identity.
-
-        '
-      properties:
-        id:
-          type: string
-          description: 'A unique identifier for the identity. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the realm.
-
-            '
-          readOnly: true
-          example: e372db224c06e850
-        realm_id:
-          type: string
-          description: 'A unique identifier for the identity''s realm. This is automatically set on creation. This field is immutable and read-only.
-
-            '
-          readOnly: true
-          example: 8f5bec58229e6f29
-        tenant_id:
-          type: string
-          description: 'A unique identifier for the identity''s tenant. This is automatically set on creation. This field is immutable and read-only.
-
-            '
-          readOnly: true
-          example: 0001f1f460b1ace6
-        display_name:
-          type: string
-          minLength: 1
-          maxLength: 64
-          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
-          description: 'A human-readable name for the identity. This name is used for display purposes.
-
-            '
-          example: Test Display
-        create_time:
-          type: string
-          format: date-time
-          description: 'A time value given in ISO8601 combined date and time format that represents when the identity was created. This is automatically generated on creation. This field is read-only.
-
-            '
-          readOnly: true
-          example: '2022-04-12T05:53:07.119Z'
-        update_time:
-          type: string
-          format: date-time
-          description: 'A time value given in ISO8601 combined date and time format that represents when the identity was last updated. This is automatically updated when the identity is updated. This field is read-only.
-
-            '
-          readOnly: true
-          example: '2022-06-16T14:31:03.770Z'
-        status:
-          type: string
-          description: 'Indicator for the identity''s administrative status.  If ''active'', the identity is able to generate passkeys and login.  If ''suspended'', the identity is unable to generate passkeys or login.
-
-            '
-          example: active
-        traits:
-          description: 'A collection of properties to describe an identity. All traits contain a `type` key which describes the specific traits schema.
-
-            '
-          oneOf:
-          - $ref: '#/components/schemas/Traits_v0'
-          discriminator:
-            propertyName: type
-            mapping:
-              traits_v0: '#/components/schemas/Traits_v0'
-        enrollment_status:
-          type: string
-          enum:
-          - ENROLLED
-          - PENDING
-          - INVITE_FAILED
-          - UNENROLLED
-          description: 'Indicator for the identity''s enrollment status.
-
-
-            If ''ENROLLED'', the identity has 1 or more active passkeys.
-
-            If ''PENDING'', the identity has no active passkeys and 1 or more pending enrollments.
-
-            If ''INVITE_FAILED'', the identity has no active passkeys, no pending enrollments, and 1 or more failed enrollments.
-
-            If ''UNENROLLED'', the identity is not enrolled in the organization.
-
-
-            May be undefined. This field is output-only.
-
-            '
-          example: ENROLLED
-          readOnly: true
-    SsoConfigBookmark:
-      type: object
-      required:
-      - type
-      - login_link
-      properties:
-        type:
-          $ref: '#/components/schemas/SsoConfigType'
-        login_link:
-          type: string
-        icon:
-          type: string
-        is_tile_visible:
-          type: boolean
-    SsoGroupWithMemberCount:
-      title: Group with count of members
-      type: object
-      description: 'A group is a logical collection of identities. Groups are commonly used as a predicate in a policy rule.
-
-        '
-      properties:
-        id:
-          type: string
-          description: 'A unique identifier for a group. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the realm.
-
-            '
-          readOnly: true
-          example: 81490afab171aef0
-        realm_id:
-          type: string
-          description: 'A unique identifier for the group''s realm. This is automatically set on creation. This field is immutable and read-only.
-
-            '
-          readOnly: true
-          example: 7df92e4a38ba0993
-        tenant_id:
-          type: string
-          description: 'A unique identifier for the group''s tenant. This is automatically set on creation. This field is immutable and read-only.
-
-            '
-          readOnly: true
-          example: 0001b42d80372976
-        display_name:
-          type: string
-          minLength: 1
-          maxLength: 64
-          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
-          description: 'A human-readable name for the group. This name is used for display purposes.
-
-            '
-          example: Realm Administrators
-        description:
-          type: string
-          maxLength: 300
-          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
-          description: 'A free-form text field to describe a group.
-
-            '
-          example: A group of realm administrators.
-        create_time:
-          type: string
-          format: date-time
-          description: 'A time value given in ISO8601 combined date and time format that represents when the group was created. This is automatically generated on creation. This field is read-only.
-
-            '
-          readOnly: true
-          example: '2022-03-14T03:42:52.905Z'
-        update_time:
-          type: string
-          format: date-time
-          description: 'A time value given in ISO8601 combined date and time format that represents when the group was last updated. This is automatically updated when the group is updated. This field is read-only.
-
-            '
-          readOnly: true
-          example: '2022-06-14T05:55:23.823Z'
-        member_count:
-          type: integer
-          format: uint32
-          description: 'Total number of members of this group.
-
-            '
-          example: 1000
-    SsoConfigType:
-      description: 'Describes the type of sso config.
-
-        '
-      type: string
-      enum:
-      - bookmark
-      - entra_id_external_auth_methods
-      - generic_oidc
-      - generic_oidc_idp
-      - generic_saml
-      - okta_idp
-      - okta_sso_bi_idp
-      - scim
-      - ws_fed
-    SsoConfigOidcIdp:
-      type: object
-      required:
-      - type
-      - client_id
-      - identifying_claim_name
-      - identity_attribute
-      - authorization_endpoint
-      - token_endpoint
-      - jwks_endpoint
-      properties:
-        type:
-          $ref: '#/components/schemas/SsoConfigType'
-        client_id:
-          description: The client ID for the idp application.
-          type: string
-        identifying_claim_name:
-          type: string
-        identity_attribute:
-          $ref: '#/components/schemas/SubjectField'
-        authorization_endpoint:
-          type:
-          - string
-          - 'null'
-        token_endpoint:
-          type: string
-        jwks_endpoint:
-          type: string
-    SsoConfigPartialUpdatePayload:
-      oneOf:
-      - $ref: '#/components/schemas/SsoConfigBookmarkPartialUpdate'
-      - $ref: '#/components/schemas/SsoConfigEntraIdAuthMethodPartial'
-      - $ref: '#/components/schemas/SsoConfigGenericOidcPartialUpdate'
-      - $ref: '#/components/schemas/SsoConfigGenericOidcIdpPartialUpdate'
-      - $ref: '#/components/schemas/SsoConfigSamlPartialUpdate'
-      - type: object
-        required:
-        - type
-        properties:
-          type:
-            $ref: '#/components/schemas/SsoConfigType'
-          client_id:
-            description: The client ID for the idp application.
-            type: string
-          client_secret:
-            description: The client secret to authenticate as the idp application.
-            type:
-            - string
-            - 'null'
-          pkce:
-            default: null
-            allOf:
-            - $ref: '#/components/schemas/PkceConfig'
-          id_token_scopes:
-            default: null
-            type: array
-            items:
-              type: string
-          identifying_claim_name:
-            type: string
-          identity_attribute:
-            $ref: '#/components/schemas/SubjectField'
-          okta_domain:
-            type: string
-          inbound_scim:
-            default: null
-            type: object
-      - $ref: '#/components/schemas/SsoConfigOktaBiIdpPartialUpdate'
-      - $ref: '#/components/schemas/SsoConfigRealityCheckPartialUpdate'
-      - $ref: '#/components/schemas/SsoConfigWsFedPartialUpdate'
-    ApplicationSsoResponse:
-      type: object
-      properties:
-        sso_config_id:
-          type: string
-          description: 'This is the id of the SSO Config object that is associated with the
-
-            provided application id. If this is missing it means that the
-
-            application isn''t associated with an SSO config.
-
-            '
-    SsoConfigPartialUpdate:
-      description: Represents an sso config as an update request body.
-      type: object
-      required:
-      - sso_config
-      properties:
-        sso_config:
-          $ref: '#/components/schemas/SsoConfigPartialUpdatePayload'
-    SsoConfigEntraIdExternalAuthMethod:
-      type: object
-      required:
-      - type
-      - redirect_uris
-      - discover_endpoint
-      properties:
-        type:
-          $ref: '#/components/schemas/SsoConfigType'
-        redirect_uris:
-          default: null
-          type: array
-          items:
-            type: string
-        inbound_scim:
-          default: null
-          type: object
-        discover_endpoint:
-          description: 'Describes the type of discovery endpoint for the entra_id_external_auth_methods sso config.
-
-            '
-          type: string
-          enum:
-          - global_azure
-          - azure_us_government
-          - microsoft_azure_vianet
-    SsoConfigAddIdentities:
-      title: Associate Identities with SSO Config
-      description: Request for AddIdentitiesToSsoConfig.
-      type: object
-      properties:
-        identity_ids:
-          description: IDs of the identities to be added to the sso config.
-          type: array
-          items:
-            type: string
-          minItems: 1
-          maxItems: 1000
-      required:
-      - identity_ids
     SsoConfigSamlPartialUpdate:
       type: object
       required:
@@ -3138,6 +2823,14 @@ components:
           default: false
           type: boolean
           description: Changes the EntityID in the SAML response to a shorter version. This is to support applications with URL restrictions.
+    PkceConfig:
+      type: string
+      enum:
+      - disabled
+      - plain
+      - s256
+      description: "PKCE code challenge methods supported for applications, as defined by\n[RFC-7636](https://datatracker.ietf.org/doc/html/rfc7636). Allowable values are:\n  - `disabled` : PKCE is disabled for this application. This is the default state if\n    the `pkce` field is left blank. Please note that public OIDC and OAuth2 configured\n    applications MUST enable PKCE support. Confidential clients can leave PKCE disabled\n    if they choose.\n  - `plain` : PKCE is enabled for this application. The server will correlate the `code_challenge` and\n    `code_verifier` between the `authorize` and `token` requests. In this configuration, those fields are\n    required to be identical. This is the lower security option for PKCE support and should only be used\n    by legacy clients, or clients that don't support `s256`.\n  - `s256` : PKCE is enabled for this application, and the server will correlate the `code_challenge` and\n    `code_verifier` between the `authorize` and `token` requests. In this configuration, those fields are\n    required to equate as follows: `code_challenge` = `base64url(sha256(ascii(code_verifier)))`. This is\n    the higher security option and should always be preferred if it is supported by the client.\n"
+      example: s256
     SsoConfigRealityCheck:
       type: object
       required:
@@ -3149,155 +2842,104 @@ components:
         company_identifier:
           default: null
           type: string
-    IdentityProviderTestResponse:
-      description: Represents an SSO config test response body.
-      type: object
-      required:
-      - identity_provider_id
-      - display_name
-      - is_success
-      - status_code
-      properties:
-        identity_provider_id:
-          type: string
-        display_name:
-          type: string
-        is_success:
-          type: boolean
-        status_code:
-          type: string
-        error_context:
-          type: string
-    SsoConfigWsFed:
+    SubjectField:
+      description: 'Defines which field should be used to populate the subject field of an id token.
+
+        - `id` - The user ID is used.
+
+        - `email` - The user email is used.
+
+        - `username` - The username is used.
+
+        '
+      type: string
+      enum:
+      - id
+      - email
+      - username
+      - external_id
+    SsoConfigPartialUpdatePayload:
+      oneOf:
+      - $ref: '#/components/schemas/SsoConfigBookmarkPartialUpdate'
+      - $ref: '#/components/schemas/SsoConfigEntraIdAuthMethodPartial'
+      - $ref: '#/components/schemas/SsoConfigGenericOidcPartialUpdate'
+      - $ref: '#/components/schemas/SsoConfigGenericOidcIdpPartialUpdate'
+      - $ref: '#/components/schemas/SsoConfigSamlPartialUpdate'
+      - type: object
+        required:
+        - type
+        properties:
+          type:
+            $ref: '#/components/schemas/SsoConfigType'
+          client_id:
+            description: The client ID for the idp application.
+            type: string
+          client_secret:
+            description: The client secret to authenticate as the idp application.
+            type:
+            - string
+            - 'null'
+          pkce:
+            default: null
+            allOf:
+            - $ref: '#/components/schemas/PkceConfig'
+          id_token_scopes:
+            default: null
+            type: array
+            items:
+              type: string
+          identifying_claim_name:
+            type: string
+          identity_attribute:
+            $ref: '#/components/schemas/SubjectField'
+          okta_domain:
+            type: string
+          inbound_scim:
+            default: null
+            type: object
+      - $ref: '#/components/schemas/SsoConfigOktaBiIdpPartialUpdate'
+      - $ref: '#/components/schemas/SsoConfigRealityCheckPartialUpdate'
+      - $ref: '#/components/schemas/SsoConfigWsFedPartialUpdate'
+    SsoConfigGenericOidc:
       type: object
       required:
       - type
-      - acs_url
-      - audience_url
-      - expiration_time_seconds
-      - digest_algorithm
-      - signature_algorithm
-      - name_format
-      - subject_user_name_attribute
-      - authentication_context
-      - additional_user_attributes
+      - redirect_uris
+      - scopes
+      - confidentiality
+      - pkce
       properties:
         type:
-          description: The type of the SSO configuration.
           $ref: '#/components/schemas/SsoConfigType'
-        acs_url:
-          description: 'This is where to redirect to. This is also known as the SP SSO url.
-
-            '
-          type: string
-        audience_url:
-          description: The Recipient/Audience of the RSTR.
-          type: string
-        expiration_time_seconds:
-          description: The amount of time in seconds that the RSTR should be valid for.
-          type: integer
-          format: int32
-        digest_algorithm:
-          description: The algorithm used to create a digest inside of the token within the RSTR.
-          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/digest_algorithm'
-        signature_algorithm:
-          description: The algorithm used to create a signature inside of the token within the RSTR.
-          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/signature_algorithm'
-        name_format:
-          description: The format that should be used to identify the user that is logging into the system.
-          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/name_format'
-        subject_user_name_attribute:
-          description: 'The attribute on the identity that''s used to uniquely identify the user.
-
-            This is also the source for the user name inside of the RSTR.
-
-            '
-          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/subject_user_name_attribute'
-        authentication_context:
-          description: 'The SAML Authentication Context Class for the assertion''s authentication statement.
-
-            Default value is "X509".
-
-            '
-          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/authentication_context'
-        additional_user_attributes:
-          description: Any additional attributes to attach to the assertion.
+        redirect_uris:
+          default: null
           type: array
           items:
-            description: 'This structure describes additional attributes that can be
-
-              attached to SAML assertion inside of WS-Fed token.
-
-              '
-            type: object
-            required:
-            - name
-            - name_format
-            - value
-            properties:
-              name:
-                description: The SAML attribute name.
-                type: string
-              name_format:
-                description: The format that the attribute has.
-                $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/name_format'
-              value:
-                description: The value to attach to the SAML value.
-                $ref: '#/components/schemas/SsoConfigSamlPartialUpdate/properties/additional_user_attributes/items'
-              namespace:
-                type: string
-                description: 'This is an XML namespace that is applied the attribute and all of
-
-                  its children.
-
-                  '
+            type: string
+        scopes:
+          default: null
+          type: array
+          items:
+            type: string
+        trusted_origins:
+          default: null
+          type: array
+          items:
+            type: string
+        login_link:
+          type: string
         icon:
-          description: The URL or data URI of the icon representing the SSO configuration.
           type: string
         is_tile_visible:
-          description: Indicates if the SSO configuration tile is visible to the user.
           type: boolean
-        inbound_scim:
+        confidentiality:
           default: null
-          type: object
-    TokenEndpointAuthMethod:
-      description: "Indicator of the requested authentication method for the token endpoint.\nAllowable values are: - `client_secret_post`: The client uses the HTTP POST\nparameters\n   as defined in OAuth 2.0, Section 2.3.1. Namely, `client_id`\n   and `client_secret` are sent in the body of the POST request.\n- `client_secret_basic`: The client uses HTTP Basic as defined in\n   OAuth 2.0, Section 2.3.1. Namely, `client_id` and `client_secret`\n   are sent in the Basic Authorization header.\n- `none`: The `client_secret` is not part of the request body and there is no\nauthorization header.\n   This endpoint authentication method is only allowed if the application has\n`confidentiality` set to `confidential`.\n\nDeprecation Notice: This field is deprecated. The API will ignore the value\nof this field in requests. In responses, confidential applications will\nalways have `client_secret_basic` and public applications will always have\n`none`. On authentication, confidential applications may use both\n`client_secret_post` and `client_secret_basic`. Public applications may only\nuse `none`. **This field is scheduled for removal on August 1, 2023**\n"
-      type: string
-      deprecated: true
-      enum:
-      - client_secret_basic
-      - client_secret_post
-      - none
-      example: client_secret_basic
-    SsoConfigOktaBiIdpPartialUpdate:
-      type: object
-      required:
-      - type
-      properties:
-        type:
-          $ref: '#/components/schemas/SsoConfigType'
+          allOf:
+          - $ref: '#/components/schemas/Confidentiality'
         pkce:
           default: null
           allOf:
           - $ref: '#/components/schemas/PkceConfig'
-        okta_registration:
-          description: Represents a list of Resource Servers as a response body.
-          type: object
-          properties:
-            domain:
-              description: The domain Url inside of Okta.
-              type: string
-            okta_token:
-              description: An okta token used for accessing the okta API.
-              type: string
-            attribute_name:
-              description: 'The name of the attribute within okta that we are going to set to
-
-                true.'
-              type: string
-            is_enabled:
-              description: If the integration is enabled.
-              type: boolean
         inbound_scim:
           default: null
           type: object
@@ -3315,129 +2957,22 @@ components:
           maxItems: 1000
       required:
       - group_ids
-    SsoConfigWsFedPartialUpdate:
+    SsoConfigOidcIdp:
       type: object
       required:
       - type
-      properties:
-        type:
-          $ref: '#/components/schemas/SsoConfigType'
-        acs_url:
-          description: 'This is where to redirect too. This is also known as the SP SSO url.
-
-            '
-          type: string
-        audience_url:
-          description: The Recipient/Audience of the RSTR.
-          type: string
-        expiration_time_seconds:
-          description: The amount of time in seconds that the RSTR should be valid for.
-          type: integer
-          format: int32
-        digest_algorithm:
-          description: The algorithm used to create a digest inside of the token within the RSTR.
-          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/digest_algorithm'
-        signature_algorithm:
-          description: The algorithm used to create a signature inside of the token within the RSTR.
-          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/signature_algorithm'
-        name_format:
-          description: The format that should be used to identify the user that is logging into the system.
-          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/name_format'
-        subject_user_name_attribute:
-          description: 'The attribute on the identity that''s used to uniquely identify the user.
-
-            This is also the source for the user name inside of the RSTR.
-
-            '
-          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/subject_user_name_attribute'
-        authentication_context:
-          description: 'The SAML Authentication Context Class for the assertion''s authentication statement.
-
-            Default value is "X509".
-
-            '
-          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/authentication_context'
-        additional_user_attributes:
-          description: Any additional attributes to attach to the assertion.
-          type: array
-          items:
-            $ref: '#/components/schemas/SsoConfigWsFed/properties/additional_user_attributes/items'
-        icon:
-          description: The URL or data URI of the icon representing the SSO configuration.
-          type: string
-        is_tile_visible:
-          description: Indicates if the SSO configuration tile is visible to the user.
-          type: boolean
-        inbound_scim:
-          default: null
-          type: object
-    SsoConfigEntraIdAuthMethodPartial:
-      type: object
-      required:
-      - type
-      properties:
-        type:
-          $ref: '#/components/schemas/SsoConfigType'
-        redirect_uris:
-          default: null
-          type: array
-          items:
-            type: string
-        inbound_scim:
-          default: null
-          type: object
-        discover_endpoint:
-          default: null
-          $ref: '#/components/schemas/SsoConfigEntraIdExternalAuthMethod/properties/discover_endpoint'
-    SsoConfig:
-      description: Represents an SSO config as a request body.
-      type: object
-      required:
-      - display_name
-      - payload
-      properties:
-        is_migrated:
-          description: Indicates that the SSO Config was added by a script such as fast migrate
-          type: boolean
-        display_name:
-          description: A human-readable name for the application. This name is used for display purposes.
-          type: string
-        payload:
-          $ref: '#/components/schemas/SsoConfigPayload'
-    SsoConfigRealityCheckPartialUpdate:
-      type: object
-      required:
-      - type
-      properties:
-        type:
-          $ref: '#/components/schemas/SsoConfigType'
-        company_identifier:
-          default: null
-          type: string
-    SsoConfigGenericOidcIdpPartialUpdate:
-      type: object
-      required:
-      - type
+      - client_id
+      - identifying_claim_name
+      - identity_attribute
+      - authorization_endpoint
+      - token_endpoint
+      - jwks_endpoint
       properties:
         type:
           $ref: '#/components/schemas/SsoConfigType'
         client_id:
           description: The client ID for the idp application.
           type: string
-        client_secret:
-          description: The client secret to authenticate as the idp application.
-          type:
-          - string
-          - 'null'
-        pkce:
-          default: null
-          allOf:
-          - $ref: '#/components/schemas/PkceConfig'
-        id_token_scopes:
-          default: null
-          type: array
-          items:
-            type: string
         identifying_claim_name:
           type: string
         identity_attribute:
@@ -3484,6 +3019,299 @@ components:
         inbound_scim:
           default: null
           type: object
+    IdentityProviderTestResponse:
+      description: Represents an SSO config test response body.
+      type: object
+      required:
+      - identity_provider_id
+      - display_name
+      - is_success
+      - status_code
+      properties:
+        identity_provider_id:
+          type: string
+        display_name:
+          type: string
+        is_success:
+          type: boolean
+        status_code:
+          type: string
+        error_context:
+          type: string
+    SsoGroupWithMemberCount:
+      title: Group with count of members
+      type: object
+      description: 'A group is a logical collection of identities. Groups are commonly used as a predicate in a policy rule.
+
+        '
+      properties:
+        id:
+          type: string
+          description: 'A unique identifier for a group. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the realm.
+
+            '
+          readOnly: true
+          example: 81490afab171aef0
+        realm_id:
+          type: string
+          description: 'A unique identifier for the group''s realm. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 7df92e4a38ba0993
+        tenant_id:
+          type: string
+          description: 'A unique identifier for the group''s tenant. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 0001b42d80372976
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
+          description: 'A human-readable name for the group. This name is used for display purposes.
+
+            '
+          example: Realm Administrators
+        description:
+          type: string
+          maxLength: 300
+          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
+          description: 'A free-form text field to describe a group.
+
+            '
+          example: A group of realm administrators.
+        create_time:
+          type: string
+          format: date-time
+          description: 'A time value given in ISO8601 combined date and time format that represents when the group was created. This is automatically generated on creation. This field is read-only.
+
+            '
+          readOnly: true
+          example: '2022-03-14T03:42:52.905Z'
+        update_time:
+          type: string
+          format: date-time
+          description: 'A time value given in ISO8601 combined date and time format that represents when the group was last updated. This is automatically updated when the group is updated. This field is read-only.
+
+            '
+          readOnly: true
+          example: '2022-06-14T05:55:23.823Z'
+        member_count:
+          type: integer
+          format: uint32
+          description: 'Total number of members of this group.
+
+            '
+          example: 1000
+    SsoConfigType:
+      description: 'Describes the type of sso config.
+
+        '
+      type: string
+      enum:
+      - bookmark
+      - entra_id_external_auth_methods
+      - generic_oidc
+      - generic_oidc_idp
+      - generic_saml
+      - okta_idp
+      - okta_sso_bi_idp
+      - scim
+      - ws_fed
+    Confidentiality:
+      description: "The confidentiality of the client, as prescribed by OAuth 2.0 and\nOIDC. Confidentiality is based on a client's ability to authenticate\nsecurely with the authorization server (i.e., ability to\nmaintain the confidentiality of their client credentials). Allowable\nvalues are:\n- `confidential`: Clients capable of maintaining the confidentiality\n  of their credentials (e.g., client implemented on a secure server with\n  restricted access to the client credentials), or capable of secure\n  client authentication using other means.\n- `public`: Clients incapable of maintaining the confidentiality of their\n  credentials (e.g., clients executing on the device used by the\n  resource owner, such as an installed native application or a web\n  browser-based application), and incapable of secure client\n  authentication via any other means.\n"
+      type: string
+      enum:
+      - confidential
+      - public
+      example: confidential
+    Identity:
+      title: Identity
+      type: object
+      description: 'An identity is a unique identifier that may be used by an end-user to gain access governed by Beyond Identity.
+
+        '
+      properties:
+        id:
+          type: string
+          description: 'A unique identifier for the identity. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the realm.
+
+            '
+          readOnly: true
+          example: e372db224c06e850
+        realm_id:
+          type: string
+          description: 'A unique identifier for the identity''s realm. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 8f5bec58229e6f29
+        tenant_id:
+          type: string
+          description: 'A unique identifier for the identity''s tenant. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 0001f1f460b1ace6
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
+          description: 'A human-readable name for the identity. This name is used for display purposes.
+
+            '
+          example: Test Display
+        create_time:
+          type: string
+          format: date-time
+          description: 'A time value given in ISO8601 combined date and time format that represents when the identity was created. This is automatically generated on creation. This field is read-only.
+
+            '
+          readOnly: true
+          example: '2022-04-12T05:53:07.119Z'
+        update_time:
+          type: string
+          format: date-time
+          description: 'A time value given in ISO8601 combined date and time format that represents when the identity was last updated. This is automatically updated when the identity is updated. This field is read-only.
+
+            '
+          readOnly: true
+          example: '2022-06-16T14:31:03.770Z'
+        status:
+          type: string
+          description: 'Indicator for the identity''s administrative status.  If ''active'', the identity is able to generate passkeys and login.  If ''suspended'', the identity is unable to generate passkeys or login.
+
+            '
+          example: active
+        traits:
+          description: 'A collection of properties to describe an identity. All traits contain a `type` key which describes the specific traits schema.
+
+            '
+          oneOf:
+          - $ref: '#/components/schemas/Traits_v0'
+          discriminator:
+            propertyName: type
+            mapping:
+              traits_v0: '#/components/schemas/Traits_v0'
+        enrollment_status:
+          type: string
+          enum:
+          - ENROLLED
+          - PENDING
+          - INVITE_FAILED
+          - UNENROLLED
+          description: 'Indicator for the identity''s enrollment status.
+
+
+            If ''ENROLLED'', the identity has 1 or more active passkeys.
+
+            If ''PENDING'', the identity has no active passkeys and 1 or more pending enrollments.
+
+            If ''INVITE_FAILED'', the identity has no active passkeys, no pending enrollments, and 1 or more failed enrollments.
+
+            If ''UNENROLLED'', the identity is not enrolled in the organization.
+
+
+            May be undefined. This field is output-only.
+
+            '
+          example: ENROLLED
+          readOnly: true
+    SsoConfigRealityCheckPartialUpdate:
+      type: object
+      required:
+      - type
+      properties:
+        type:
+          $ref: '#/components/schemas/SsoConfigType'
+        company_identifier:
+          default: null
+          type: string
+    SsoConfigAddIdentities:
+      title: Associate Identities with SSO Config
+      description: Request for AddIdentitiesToSsoConfig.
+      type: object
+      properties:
+        identity_ids:
+          description: IDs of the identities to be added to the sso config.
+          type: array
+          items:
+            type: string
+          minItems: 1
+          maxItems: 1000
+      required:
+      - identity_ids
+    SsoConfigEntraIdAuthMethodPartial:
+      type: object
+      required:
+      - type
+      properties:
+        type:
+          $ref: '#/components/schemas/SsoConfigType'
+        redirect_uris:
+          default: null
+          type: array
+          items:
+            type: string
+        inbound_scim:
+          default: null
+          type: object
+        discover_endpoint:
+          default: null
+          $ref: '#/components/schemas/SsoConfigEntraIdExternalAuthMethod/properties/discover_endpoint'
+    SsoConfigGenericOidcIdpPartialUpdate:
+      type: object
+      required:
+      - type
+      properties:
+        type:
+          $ref: '#/components/schemas/SsoConfigType'
+        client_id:
+          description: The client ID for the idp application.
+          type: string
+        client_secret:
+          description: The client secret to authenticate as the idp application.
+          type:
+          - string
+          - 'null'
+        pkce:
+          default: null
+          allOf:
+          - $ref: '#/components/schemas/PkceConfig'
+        id_token_scopes:
+          default: null
+          type: array
+          items:
+            type: string
+        identifying_claim_name:
+          type: string
+        identity_attribute:
+          $ref: '#/components/schemas/SubjectField'
+        authorization_endpoint:
+          type:
+          - string
+          - 'null'
+        token_endpoint:
+          type: string
+        jwks_endpoint:
+          type: string
+    SsoConfigBookmarkPartialUpdate:
+      type: object
+      required:
+      - type
+      properties:
+        type:
+          $ref: '#/components/schemas/SsoConfigType'
+        login_link:
+          type: string
+        icon:
+          type: string
+        is_tile_visible:
+          type: boolean
     Traits_v0:
       title: Traits_v0
       description: Set of traits associated with an identity.
@@ -3663,42 +3491,35 @@ components:
             '
       required:
       - type
-    SsoConfigGenericOidcPartialUpdate:
+    SsoConfigOktaBiIdpPartialUpdate:
       type: object
       required:
       - type
       properties:
         type:
           $ref: '#/components/schemas/SsoConfigType'
-        redirect_uris:
-          default: null
-          type: array
-          items:
-            type: string
-        scopes:
-          default: null
-          type: array
-          items:
-            type: string
-        trusted_origins:
-          default: null
-          type: array
-          items:
-            type: string
-        login_link:
-          type: string
-        icon:
-          type: string
-        is_tile_visible:
-          type: boolean
-        confidentiality:
-          default: null
-          allOf:
-          - $ref: '#/components/schemas/Confidentiality'
         pkce:
           default: null
           allOf:
           - $ref: '#/components/schemas/PkceConfig'
+        okta_registration:
+          description: Represents a list of Resource Servers as a response body.
+          type: object
+          properties:
+            domain:
+              description: The domain Url inside of Okta.
+              type: string
+            okta_token:
+              description: An okta token used for accessing the okta API.
+              type: string
+            attribute_name:
+              description: 'The name of the attribute within okta that we are going to set to
+
+                true.'
+              type: string
+            is_enabled:
+              description: If the integration is enabled.
+              type: boolean
         inbound_scim:
           default: null
           type: object
@@ -3722,29 +3543,37 @@ components:
       required:
       - code
       - message
-    Confidentiality:
-      description: "The confidentiality of the client, as prescribed by OAuth 2.0 and\nOIDC. Confidentiality is based on a client's ability to authenticate\nsecurely with the authorization server (i.e., ability to\nmaintain the confidentiality of their client credentials). Allowable\nvalues are:\n- `confidential`: Clients capable of maintaining the confidentiality\n  of their credentials (e.g., client implemented on a secure server with\n  restricted access to the client credentials), or capable of secure\n  client authentication using other means.\n- `public`: Clients incapable of maintaining the confidentiality of their\n  credentials (e.g., clients executing on the device used by the\n  resource owner, such as an installed native application or a web\n  browser-based application), and incapable of secure client\n  authentication via any other means.\n"
-      type: string
-      enum:
-      - confidential
-      - public
-      example: confidential
-    SubjectField:
-      description: 'Defines which field should be used to populate the subject field of an id token.
-
-        - `id` - The user ID is used.
-
-        - `email` - The user email is used.
-
-        - `username` - The username is used.
-
-        '
-      type: string
-      enum:
-      - id
-      - email
-      - username
-      - external_id
+    SsoConfigListGroups:
+      title: List Groups associated with an SSO config.
+      description: List Groups associated with an SSO config.
+      type: object
+      properties:
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/SsoGroupWithMemberCount'
+    SsoConfigBookmark:
+      type: object
+      required:
+      - type
+      - login_link
+      properties:
+        type:
+          $ref: '#/components/schemas/SsoConfigType'
+        login_link:
+          type: string
+        icon:
+          type: string
+        is_tile_visible:
+          type: boolean
+    SsoConfigPartialUpdate:
+      description: Represents an sso config as an update request body.
+      type: object
+      required:
+      - sso_config
+      properties:
+        sso_config:
+          $ref: '#/components/schemas/SsoConfigPartialUpdatePayload'
     ErrorDetail:
       title: Error Detail
       description: 'Additional details for errors designed to support client applications.
@@ -3759,31 +3588,195 @@ components:
           description: Type of the error detail.
       required:
       - type
-    SsoConfigListGroups:
-      title: List Groups associated with an SSO config.
-      description: List Groups associated with an SSO config.
+    SsoConfigWsFedPartialUpdate:
       type: object
+      required:
+      - type
       properties:
-        groups:
+        type:
+          $ref: '#/components/schemas/SsoConfigType'
+        acs_url:
+          description: 'This is where to redirect too. This is also known as the SP SSO url.
+
+            '
+          type: string
+        audience_url:
+          description: The Recipient/Audience of the RSTR.
+          type: string
+        expiration_time_seconds:
+          description: The amount of time in seconds that the RSTR should be valid for.
+          type: integer
+          format: int32
+        digest_algorithm:
+          description: The algorithm used to create a digest inside of the token within the RSTR.
+          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/digest_algorithm'
+        signature_algorithm:
+          description: The algorithm used to create a signature inside of the token within the RSTR.
+          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/signature_algorithm'
+        name_format:
+          description: The format that should be used to identify the user that is logging into the system.
+          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/name_format'
+        subject_user_name_attribute:
+          description: 'The attribute on the identity that''s used to uniquely identify the user.
+
+            This is also the source for the user name inside of the RSTR.
+
+            '
+          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/subject_user_name_attribute'
+        authentication_context:
+          description: 'The SAML Authentication Context Class for the assertion''s authentication statement.
+
+            Default value is "X509".
+
+            '
+          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/authentication_context'
+        additional_user_attributes:
+          description: Any additional attributes to attach to the assertion.
           type: array
           items:
-            $ref: '#/components/schemas/SsoGroupWithMemberCount'
+            $ref: '#/components/schemas/SsoConfigWsFed/properties/additional_user_attributes/items'
+        icon:
+          description: The URL or data URI of the icon representing the SSO configuration.
+          type: string
+        is_tile_visible:
+          description: Indicates if the SSO configuration tile is visible to the user.
+          type: boolean
+        inbound_scim:
+          default: null
+          type: object
+    SsoConfig:
+      description: Represents an SSO config as a request body.
+      type: object
+      required:
+      - display_name
+      - payload
+      properties:
+        is_migrated:
+          description: Indicates that the SSO Config was added by a script such as fast migrate
+          type: boolean
+        display_name:
+          description: A human-readable name for the application. This name is used for display purposes.
+          type: string
+        payload:
+          $ref: '#/components/schemas/SsoConfigPayload'
+    SsoConfigEnvelope:
+      description: Represents an SSO config as a request body.
+      type: object
+      required:
+      - sso_config
+      properties:
+        sso_config:
+          $ref: '#/components/schemas/SsoConfig'
+    SsoConfigWsFed:
+      type: object
+      required:
+      - type
+      - acs_url
+      - audience_url
+      - expiration_time_seconds
+      - digest_algorithm
+      - signature_algorithm
+      - name_format
+      - subject_user_name_attribute
+      - authentication_context
+      - additional_user_attributes
+      properties:
+        type:
+          description: The type of the SSO configuration.
+          $ref: '#/components/schemas/SsoConfigType'
+        acs_url:
+          description: 'This is where to redirect to. This is also known as the SP SSO url.
+
+            '
+          type: string
+        audience_url:
+          description: The Recipient/Audience of the RSTR.
+          type: string
+        expiration_time_seconds:
+          description: The amount of time in seconds that the RSTR should be valid for.
+          type: integer
+          format: int32
+        digest_algorithm:
+          description: The algorithm used to create a digest inside of the token within the RSTR.
+          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/digest_algorithm'
+        signature_algorithm:
+          description: The algorithm used to create a signature inside of the token within the RSTR.
+          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/signature_algorithm'
+        name_format:
+          description: The format that should be used to identify the user that is logging into the system.
+          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/name_format'
+        subject_user_name_attribute:
+          description: 'The attribute on the identity that''s used to uniquely identify the user.
+
+            This is also the source for the user name inside of the RSTR.
+
+            '
+          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/subject_user_name_attribute'
+        authentication_context:
+          description: 'The SAML Authentication Context Class for the assertion''s authentication statement.
+
+            Default value is "X509".
+
+            '
+          $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/authentication_context'
+        additional_user_attributes:
+          description: Any additional attributes to attach to the assertion.
+          type: array
+          items:
+            description: 'This structure describes additional attributes that can be
+
+              attached to SAML assertion inside of WS-Fed token.
+
+              '
+            type: object
+            required:
+            - name
+            - name_format
+            - value
+            properties:
+              name:
+                description: The SAML attribute name.
+                type: string
+              name_format:
+                description: The format that the attribute has.
+                $ref: '#/components/schemas/SsoConfigPayload/oneOf/4/properties/name_format'
+              value:
+                description: The value to attach to the SAML value.
+                $ref: '#/components/schemas/SsoConfigSamlPartialUpdate/properties/additional_user_attributes/items'
+              namespace:
+                type: string
+                description: 'This is an XML namespace that is applied the attribute and all of
+
+                  its children.
+
+                  '
+        icon:
+          description: The URL or data URI of the icon representing the SSO configuration.
+          type: string
+        is_tile_visible:
+          description: Indicates if the SSO configuration tile is visible to the user.
+          type: boolean
+        inbound_scim:
+          default: null
+          type: object
+    TokenEndpointAuthMethod:
+      description: "Indicator of the requested authentication method for the token endpoint.\nAllowable values are: - `client_secret_post`: The client uses the HTTP POST\nparameters\n   as defined in OAuth 2.0, Section 2.3.1. Namely, `client_id`\n   and `client_secret` are sent in the body of the POST request.\n- `client_secret_basic`: The client uses HTTP Basic as defined in\n   OAuth 2.0, Section 2.3.1. Namely, `client_id` and `client_secret`\n   are sent in the Basic Authorization header.\n- `none`: The `client_secret` is not part of the request body and there is no\nauthorization header.\n   This endpoint authentication method is only allowed if the application has\n`confidentiality` set to `confidential`.\n\nDeprecation Notice: This field is deprecated. The API will ignore the value\nof this field in requests. In responses, confidential applications will\nalways have `client_secret_basic` and public applications will always have\n`none`. On authentication, confidential applications may use both\n`client_secret_post` and `client_secret_basic`. Public applications may only\nuse `none`. **This field is scheduled for removal on August 1, 2023**\n"
+      type: string
+      deprecated: true
+      enum:
+      - client_secret_basic
+      - client_secret_post
+      - none
+      example: client_secret_basic
   parameters:
-    correlation_id:
-      name: x-correlation_id
-      description: Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.
-      in: header
-      required: true
-      schema:
-        type: string
-    identity_id:
-      name: identity_id
+    application_id:
+      name: application_id
       in: path
-      description: A unique identifier for an identity.
+      description: A unique identifier for an application.
       required: true
       schema:
         type: string
-        example: e372db224c06e850
+        example: 38833c36-6f47-4992-9329-ea0a00915137
     page_size:
       name: page_size
       in: query
@@ -3794,22 +3787,14 @@ components:
         type: integer
         format: uint32
         minimum: 0
-    page_token:
-      name: page_token
-      in: query
-      description: 'Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.
-
-        '
-      schema:
-        type: string
-    application_id:
-      name: application_id
+    identity_id:
+      name: identity_id
       in: path
-      description: A unique identifier for an application.
+      description: A unique identifier for an identity.
       required: true
       schema:
         type: string
-        example: 38833c36-6f47-4992-9329-ea0a00915137
+        example: e372db224c06e850
     group_id:
       name: group_id
       in: path
@@ -3818,6 +3803,21 @@ components:
       schema:
         type: string
         example: 81490afab171aef0
+    correlation_id:
+      name: x-correlation_id
+      description: Correlation ID. If supplied with the request, the response must contain the same value. If not supplied with the request, it is generated by the server and returned in the response.
+      in: header
+      required: true
+      schema:
+        type: string
+    page_token:
+      name: page_token
+      in: query
+      description: 'Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.
+
+        '
+      schema:
+        type: string
   securitySchemes:
     BearerAuth:
       type: http

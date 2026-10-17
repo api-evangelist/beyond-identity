@@ -1103,204 +1103,149 @@ paths:
                 Internal Error:
                   $ref: '#/paths/~1v1~1tenants~1%7Btenant_id%7D/get/responses/500/content/application~1json/examples/Internal%20Error'
 components:
-  parameters:
-    realm_id:
-      name: realm_id
-      in: path
-      description: A unique identifier for a realm.
-      required: true
-      schema:
-        type: string
-        example: 19a95130480dfa79
-    skip:
-      name: skip
-      in: query
-      description: 'Number of items to skip. This is the zero-based index of the first result.
-
-        '
-      schema:
-        type: integer
-        format: uint32
-        minimum: 0
-        default: 0
-    tenant_id:
-      name: tenant_id
-      in: path
-      description: A unique identifier for a tenant.
-      required: true
-      schema:
-        type: string
-        example: 000176d94fd7b4d1
-    page_size:
-      name: page_size
-      in: query
-      description: 'Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.
-
-        '
-      schema:
-        type: integer
-        format: uint32
-        minimum: 0
-    page_token:
-      name: page_token
-      in: query
-      description: 'Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.
-
-        '
-      schema:
-        type: string
-    role_id:
-      name: role_id
-      in: path
-      description: A unique identifier for a role.
-      required: true
-      schema:
-        type: string
-        example: fb785d40cbe4fc0d
-    identities_skip:
-      name: identities_skip
-      in: query
-      description: 'Number of identities to skip for ListRoleMembers. This is the zero-based index of the first identity result.
-
-        '
-      schema:
-        type: integer
-        format: uint32
-        minimum: 0
-        default: 0
-    groups_page_size:
-      name: groups_page_size
-      in: query
-      description: 'Number of groups returned per page for ListRoleMembers. The response will include at most this many groups but may include fewer. If this value is omitted, the response will return the default number of groups allowed by ListRoleMembers.
-
-        '
-      schema:
-        type: integer
-        format: uint32
-        minimum: 0
-    groups_skip:
-      name: groups_skip
-      in: query
-      description: 'Number of groups to skip for ListRoleMembers. This is the zero-based index of the first group result.
-
-        '
-      schema:
-        type: integer
-        format: uint32
-        minimum: 0
-        default: 0
-    resource_server_id:
-      name: resource_server_id
-      in: path
-      description: A unique identifier for a resource server.
-      required: true
-      schema:
-        type: string
-        example: 84db69f5-48a8-4c11-8cda-1bae3a73f07e
-    identities_page_size:
-      name: identities_page_size
-      in: query
-      description: 'Number of identities returned per page for ListRoleMembers. The response will include at most this many identities but may include fewer. If this value is omitted, the response will return the default number of identities allowed by ListRoleMembers.
-
-        '
-      schema:
-        type: integer
-        format: uint32
-        minimum: 0
   schemas:
-    Identity:
-      title: Identity
+    Role:
+      title: Role
       type: object
-      description: 'An identity is a unique identifier that may be used by an end-user to gain access governed by Beyond Identity.
+      description: 'A role is a logical collection of scopes. Roles are commonly used to limit
+
+        access control.
+
+
+        The scopes belonging to a role are limited to its associated resource server.
+
+        However, note that the resource server may change independently of the role.
+
+        If scopes are added to or removed from a resource server, its associated
+
+        roles must be manually updated using the AddRoleScopes or DeleteRoleScopes
+
+        methods.
 
         '
       properties:
         id:
           type: string
-          description: 'A unique identifier for the identity. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the realm.
+          description: 'A unique identifier for a role. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the realm.
 
             '
           readOnly: true
-          example: e372db224c06e850
+          example: fb785d40cbe4fc0d
+        resource_server_id:
+          type: string
+          description: 'A unique identifier for the role''s resource server. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 7b5a4325-00e0-4379-bd7b-3e5e7e30b09e
         realm_id:
           type: string
-          description: 'A unique identifier for the identity''s realm. This is automatically set on creation. This field is immutable and read-only.
+          description: 'A unique identifier for the role''s realm. This is automatically set on creation. This field is immutable and read-only.
 
             '
           readOnly: true
-          example: 8f5bec58229e6f29
+          example: bb26e0e8ecdef843
         tenant_id:
           type: string
-          description: 'A unique identifier for the identity''s tenant. This is automatically set on creation. This field is immutable and read-only.
+          description: 'A unique identifier for the role''s tenant. This is automatically set on creation. This field is immutable and read-only.
 
             '
           readOnly: true
-          example: 0001f1f460b1ace6
+          example: 00010036778ce59f
         display_name:
           type: string
           minLength: 1
           maxLength: 64
           pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
-          description: 'A human-readable name for the identity. This name is used for display purposes.
+          description: 'A human-readable name for the role. This name is used for display purposes.
 
             '
-          example: Test Display
+          example: Help Desk
+        description:
+          type: string
+          maxLength: 300
+          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
+          description: 'A free-form text field to describe a role.
+
+            '
+          example: Customer support personnel.
         create_time:
           type: string
           format: date-time
-          description: 'A time value given in ISO8601 combined date and time format that represents when the identity was created. This is automatically generated on creation. This field is read-only.
+          description: 'A time value given in ISO8601 combined date and time format that represents when the role was created. This is automatically generated on creation. This field is read-only.
 
             '
           readOnly: true
-          example: '2022-04-12T05:53:07.119Z'
+          example: '2023-02-14T18:18:58.332247Z'
         update_time:
           type: string
           format: date-time
-          description: 'A time value given in ISO8601 combined date and time format that represents when the identity was last updated. This is automatically updated when the identity is updated. This field is read-only.
+          description: 'A time value given in ISO8601 combined date and time format that represents when the role was last updated. This is automatically updated when the group is updated. This field is read-only.
 
             '
           readOnly: true
-          example: '2022-06-16T14:31:03.770Z'
-        status:
+          example: '2023-02-14T18:18:58.332247Z'
+    Group:
+      title: Group
+      type: object
+      description: 'A group is a logical collection of identities. Groups are commonly used as a predicate in a policy rule.
+
+        '
+      properties:
+        id:
           type: string
-          description: 'Indicator for the identity''s administrative status.  If ''active'', the identity is able to generate passkeys and login.  If ''suspended'', the identity is unable to generate passkeys or login.
+          description: 'A unique identifier for a group. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the realm.
 
             '
-          example: active
-        traits:
-          description: 'A collection of properties to describe an identity. All traits contain a `type` key which describes the specific traits schema.
-
-            '
-          oneOf:
-          - $ref: '#/components/schemas/Traits_v0'
-          discriminator:
-            propertyName: type
-            mapping:
-              traits_v0: '#/components/schemas/Traits_v0'
-        enrollment_status:
-          type: string
-          enum:
-          - ENROLLED
-          - PENDING
-          - INVITE_FAILED
-          - UNENROLLED
-          description: 'Indicator for the identity''s enrollment status.
-
-
-            If ''ENROLLED'', the identity has 1 or more active passkeys.
-
-            If ''PENDING'', the identity has no active passkeys and 1 or more pending enrollments.
-
-            If ''INVITE_FAILED'', the identity has no active passkeys, no pending enrollments, and 1 or more failed enrollments.
-
-            If ''UNENROLLED'', the identity is not enrolled in the organization.
-
-
-            May be undefined. This field is output-only.
-
-            '
-          example: ENROLLED
           readOnly: true
+          example: 81490afab171aef0
+        realm_id:
+          type: string
+          description: 'A unique identifier for the group''s realm. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 7df92e4a38ba0993
+        tenant_id:
+          type: string
+          description: 'A unique identifier for the group''s tenant. This is automatically set on creation. This field is immutable and read-only.
+
+            '
+          readOnly: true
+          example: 0001b42d80372976
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
+          description: 'A human-readable name for the group. This name is used for display purposes.
+
+            '
+          example: Realm Administrators
+        description:
+          type: string
+          maxLength: 300
+          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
+          description: 'A free-form text field to describe a group.
+
+            '
+          example: A group of realm administrators.
+        create_time:
+          type: string
+          format: date-time
+          description: 'A time value given in ISO8601 combined date and time format that represents when the group was created. This is automatically generated on creation. This field is read-only.
+
+            '
+          readOnly: true
+          example: '2022-03-14T03:42:52.905657Z'
+        update_time:
+          type: string
+          format: date-time
+          description: 'A time value given in ISO8601 combined date and time format that represents when the group was last updated. This is automatically updated when the group is updated. This field is read-only.
+
+            '
+          readOnly: true
+          example: '2022-06-14T05:55:23.823187Z'
     ListRoleMembersResponse:
       title: List Role Members Response
       description: Response for ListRoleMembers.
@@ -1367,32 +1312,6 @@ components:
             '
       required:
       - roles
-      - total_size
-    ListRoleScopesResponse:
-      title: List Role Scopes Response
-      description: Response for ListRoleScopes.
-      type: object
-      properties:
-        scopes:
-          type: array
-          items:
-            type: string
-          maxItems: 200
-          description: An unordered array of scopes corresponding to the request.
-        total_size:
-          type: integer
-          format: uint32
-          description: 'Total number of results returned by the operation. This value may be larger than the number of resources returned, such as when returning a single page where multiple pages are available.
-
-            '
-          example: 1000
-        next_page_token:
-          type: string
-          description: 'Token used to fetch the next set of results. If this field is omitted, there are no subsequent pages.
-
-            '
-      required:
-      - scopes
       - total_size
     Traits_v0:
       title: Traits_v0
@@ -1607,148 +1526,229 @@ components:
           description: Type of the error detail.
       required:
       - type
-    Group:
-      title: Group
+    ListRoleScopesResponse:
+      title: List Role Scopes Response
+      description: Response for ListRoleScopes.
       type: object
-      description: 'A group is a logical collection of identities. Groups are commonly used as a predicate in a policy rule.
+      properties:
+        scopes:
+          type: array
+          items:
+            type: string
+          maxItems: 200
+          description: An unordered array of scopes corresponding to the request.
+        total_size:
+          type: integer
+          format: uint32
+          description: 'Total number of results returned by the operation. This value may be larger than the number of resources returned, such as when returning a single page where multiple pages are available.
+
+            '
+          example: 1000
+        next_page_token:
+          type: string
+          description: 'Token used to fetch the next set of results. If this field is omitted, there are no subsequent pages.
+
+            '
+      required:
+      - scopes
+      - total_size
+    Identity:
+      title: Identity
+      type: object
+      description: 'An identity is a unique identifier that may be used by an end-user to gain access governed by Beyond Identity.
 
         '
       properties:
         id:
           type: string
-          description: 'A unique identifier for a group. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the realm.
+          description: 'A unique identifier for the identity. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the realm.
 
             '
           readOnly: true
-          example: 81490afab171aef0
+          example: e372db224c06e850
         realm_id:
           type: string
-          description: 'A unique identifier for the group''s realm. This is automatically set on creation. This field is immutable and read-only.
+          description: 'A unique identifier for the identity''s realm. This is automatically set on creation. This field is immutable and read-only.
 
             '
           readOnly: true
-          example: 7df92e4a38ba0993
+          example: 8f5bec58229e6f29
         tenant_id:
           type: string
-          description: 'A unique identifier for the group''s tenant. This is automatically set on creation. This field is immutable and read-only.
+          description: 'A unique identifier for the identity''s tenant. This is automatically set on creation. This field is immutable and read-only.
 
             '
           readOnly: true
-          example: 0001b42d80372976
+          example: 0001f1f460b1ace6
         display_name:
           type: string
           minLength: 1
           maxLength: 64
           pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
-          description: 'A human-readable name for the group. This name is used for display purposes.
+          description: 'A human-readable name for the identity. This name is used for display purposes.
 
             '
-          example: Realm Administrators
-        description:
-          type: string
-          maxLength: 300
-          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
-          description: 'A free-form text field to describe a group.
-
-            '
-          example: A group of realm administrators.
+          example: Test Display
         create_time:
           type: string
           format: date-time
-          description: 'A time value given in ISO8601 combined date and time format that represents when the group was created. This is automatically generated on creation. This field is read-only.
+          description: 'A time value given in ISO8601 combined date and time format that represents when the identity was created. This is automatically generated on creation. This field is read-only.
 
             '
           readOnly: true
-          example: '2022-03-14T03:42:52.905657Z'
+          example: '2022-04-12T05:53:07.119Z'
         update_time:
           type: string
           format: date-time
-          description: 'A time value given in ISO8601 combined date and time format that represents when the group was last updated. This is automatically updated when the group is updated. This field is read-only.
+          description: 'A time value given in ISO8601 combined date and time format that represents when the identity was last updated. This is automatically updated when the identity is updated. This field is read-only.
 
             '
           readOnly: true
-          example: '2022-06-14T05:55:23.823187Z'
-    Role:
-      title: Role
-      type: object
-      description: 'A role is a logical collection of scopes. Roles are commonly used to limit
+          example: '2022-06-16T14:31:03.770Z'
+        status:
+          type: string
+          description: 'Indicator for the identity''s administrative status.  If ''active'', the identity is able to generate passkeys and login.  If ''suspended'', the identity is unable to generate passkeys or login.
 
-        access control.
+            '
+          example: active
+        traits:
+          description: 'A collection of properties to describe an identity. All traits contain a `type` key which describes the specific traits schema.
+
+            '
+          oneOf:
+          - $ref: '#/components/schemas/Traits_v0'
+          discriminator:
+            propertyName: type
+            mapping:
+              traits_v0: '#/components/schemas/Traits_v0'
+        enrollment_status:
+          type: string
+          enum:
+          - ENROLLED
+          - PENDING
+          - INVITE_FAILED
+          - UNENROLLED
+          description: 'Indicator for the identity''s enrollment status.
 
 
-        The scopes belonging to a role are limited to its associated resource server.
+            If ''ENROLLED'', the identity has 1 or more active passkeys.
 
-        However, note that the resource server may change independently of the role.
+            If ''PENDING'', the identity has no active passkeys and 1 or more pending enrollments.
 
-        If scopes are added to or removed from a resource server, its associated
+            If ''INVITE_FAILED'', the identity has no active passkeys, no pending enrollments, and 1 or more failed enrollments.
 
-        roles must be manually updated using the AddRoleScopes or DeleteRoleScopes
+            If ''UNENROLLED'', the identity is not enrolled in the organization.
 
-        methods.
+
+            May be undefined. This field is output-only.
+
+            '
+          example: ENROLLED
+          readOnly: true
+  parameters:
+    page_size:
+      name: page_size
+      in: query
+      description: 'Number of items returned per page. The response will include at most this many results but may include fewer. If this value is omitted, the response will return the default number of results allowed by the method.
 
         '
-      properties:
-        id:
-          type: string
-          description: 'A unique identifier for a role. This is automatically generated on creation. This field is immutable and read-only. This field is unique within the realm.
+      schema:
+        type: integer
+        format: uint32
+        minimum: 0
+    identities_page_size:
+      name: identities_page_size
+      in: query
+      description: 'Number of identities returned per page for ListRoleMembers. The response will include at most this many identities but may include fewer. If this value is omitted, the response will return the default number of identities allowed by ListRoleMembers.
 
-            '
-          readOnly: true
-          example: fb785d40cbe4fc0d
-        resource_server_id:
-          type: string
-          description: 'A unique identifier for the role''s resource server. This is automatically set on creation. This field is immutable and read-only.
+        '
+      schema:
+        type: integer
+        format: uint32
+        minimum: 0
+    role_id:
+      name: role_id
+      in: path
+      description: A unique identifier for a role.
+      required: true
+      schema:
+        type: string
+        example: fb785d40cbe4fc0d
+    groups_page_size:
+      name: groups_page_size
+      in: query
+      description: 'Number of groups returned per page for ListRoleMembers. The response will include at most this many groups but may include fewer. If this value is omitted, the response will return the default number of groups allowed by ListRoleMembers.
 
-            '
-          readOnly: true
-          example: 7b5a4325-00e0-4379-bd7b-3e5e7e30b09e
-        realm_id:
-          type: string
-          description: 'A unique identifier for the role''s realm. This is automatically set on creation. This field is immutable and read-only.
+        '
+      schema:
+        type: integer
+        format: uint32
+        minimum: 0
+    tenant_id:
+      name: tenant_id
+      in: path
+      description: A unique identifier for a tenant.
+      required: true
+      schema:
+        type: string
+        example: 000176d94fd7b4d1
+    skip:
+      name: skip
+      in: query
+      description: 'Number of items to skip. This is the zero-based index of the first result.
 
-            '
-          readOnly: true
-          example: bb26e0e8ecdef843
-        tenant_id:
-          type: string
-          description: 'A unique identifier for the role''s tenant. This is automatically set on creation. This field is immutable and read-only.
+        '
+      schema:
+        type: integer
+        format: uint32
+        minimum: 0
+        default: 0
+    identities_skip:
+      name: identities_skip
+      in: query
+      description: 'Number of identities to skip for ListRoleMembers. This is the zero-based index of the first identity result.
 
-            '
-          readOnly: true
-          example: 00010036778ce59f
-        display_name:
-          type: string
-          minLength: 1
-          maxLength: 64
-          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
-          description: 'A human-readable name for the role. This name is used for display purposes.
+        '
+      schema:
+        type: integer
+        format: uint32
+        minimum: 0
+        default: 0
+    realm_id:
+      name: realm_id
+      in: path
+      description: A unique identifier for a realm.
+      required: true
+      schema:
+        type: string
+        example: 19a95130480dfa79
+    page_token:
+      name: page_token
+      in: query
+      description: 'Token to retrieve the subsequent page of the previous request. All other parameters to the list endpoint should match the original request that provided this token unless otherwise specified.
 
-            '
-          example: Help Desk
-        description:
-          type: string
-          maxLength: 300
-          pattern: ^[^{}[\]<>;:?\\/|*^%$#=~`!]*$
-          description: 'A free-form text field to describe a role.
+        '
+      schema:
+        type: string
+    groups_skip:
+      name: groups_skip
+      in: query
+      description: 'Number of groups to skip for ListRoleMembers. This is the zero-based index of the first group result.
 
-            '
-          example: Customer support personnel.
-        create_time:
-          type: string
-          format: date-time
-          description: 'A time value given in ISO8601 combined date and time format that represents when the role was created. This is automatically generated on creation. This field is read-only.
-
-            '
-          readOnly: true
-          example: '2023-02-14T18:18:58.332247Z'
-        update_time:
-          type: string
-          format: date-time
-          description: 'A time value given in ISO8601 combined date and time format that represents when the role was last updated. This is automatically updated when the group is updated. This field is read-only.
-
-            '
-          readOnly: true
-          example: '2023-02-14T18:18:58.332247Z'
+        '
+      schema:
+        type: integer
+        format: uint32
+        minimum: 0
+        default: 0
+    resource_server_id:
+      name: resource_server_id
+      in: path
+      description: A unique identifier for a resource server.
+      required: true
+      schema:
+        type: string
+        example: 84db69f5-48a8-4c11-8cda-1bae3a73f07e
   securitySchemes:
     BearerAuth:
       type: http
